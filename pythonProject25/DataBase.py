@@ -7,7 +7,6 @@ from yahoo_oauth import OAuth2
 from TeamAnalyzer import TeamAnalyzer
 from YahooLeague import YahooLeague
 import requests
-import json
 from datetime import datetime
 
 
