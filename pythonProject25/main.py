@@ -8,16 +8,16 @@ from nba_api.stats.static import players
 from DataBase import *
 from AdvancedTools import AdvancedTools
 from Tools import *
-from src.nba_api.stats.endpoints import PlayerFantasyProfileBarGraph
+from nba_api.stats.endpoints import PlayerFantasyProfileBarGraph
 
 if __name__ == '__main__':
     ### class YahooLeague
-    uri = YahooLeague('41083')
+    # uri = YahooLeague('41083')
     # print(uri.team_key())## current user team key
-    #print(uri.is_injuerd('D\'Angelo Russell'))
-    #print(uri.is_injuerd('Kevin Durant'))
-    #print(uri.get_matchup(3))
-
+    # #print(uri.is_injuerd('D\'Angelo Russell'))
+    # print(uri.is_injuerd('Kevin Durant'))
+    # print(uri.get_matchup(3))
+    #
     # uri_roster = uri.get_team('428.l.41083.t.3')
     # # nice_uri_roster = ''
     # print("=== MY Tean ===")
@@ -123,6 +123,6 @@ if __name__ == '__main__':
 
 
     ## class Advanced tools
-    # at = AdvancedTools()
-    # # print(at.projected_matchup())
-    # print(at.combine_match())
+    at = AdvancedTools()
+    # print(at.projected_matchup())
+    print(at.combine_match())
