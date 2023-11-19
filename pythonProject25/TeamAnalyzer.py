@@ -1,4 +1,4 @@
-from PlayerAnalyzer import PlayerAnalyzer
+from Players.playerAnalyzer import PlayerAnalyzer
 import pandas as pd
 from YahooLeague import YahooLeague
 

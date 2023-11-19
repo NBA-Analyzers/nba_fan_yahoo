@@ -1,16 +1,67 @@
-import pandas as pd
-from YahooLeague import YahooLeague
-from PlayerAnalyzer import PlayerAnalyzer
-from TeamAnalyzer import TeamAnalyzer
-from LeagueAnalyzer import LeagueAnalyzer
-from nba_api.stats.endpoints import playercareerstats
-from nba_api.stats.static import players
 from DataBase import *
 from AdvancedTools import AdvancedTools
-from Tools import *
-from nba_api.stats.endpoints import PlayerFantasyProfileBarGraph
+from Players.playerAccessor import *
+from Players.player import Player
 
 if __name__ == '__main__':
+    player = Player({'full_name': 'Chris Paul', 'id': 101108})
+    # print(player.full_name,player.id)
+    # print(get_all_players(True))
+    # print(career_stats(player))
+    # print(current_season_stats(player))
+    # print(last_season_stats(player))
+    # print(adj_fantasy('2023-24',player))
+    # print(pg_adj_fantasy('2023-24',player))
+    # print(pg_adj_fantasy('2023-24', player,True))
+    # print(get_player_nba_team(player))
+    #print(get_players_new_stats(player))
+    print(update_players_db())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     ### class YahooLeague
     # uri = YahooLeague('41083')
     # print(uri.team_key())## current user team key
@@ -25,7 +76,7 @@ if __name__ == '__main__':
     # for r in uri_roster:
     #     nice_uri_roster += f"{r['name']}\n"
     # print(nice_uri_roster)
-    #print(uri.teams_league())
+    # print(uri.teams_league())
     # print(len(uri))
     # print(uri.league_name())
     # print(uri.league_teams_id())
@@ -103,26 +154,25 @@ if __name__ == '__main__':
 
     ###class DataBase
 
-    #sync_players_to_database()
+    # sync_players_to_database()
     # sync_teams_to_database()
-    #sync_team_player_to_database()
+    # sync_team_player_to_database()
     ### its important by this order
-    #update_players_db()
-    #update_team_player_db()
-    #update_league_teams_db()
+    # update_players_db()
+    # update_team_player_db()
+    # update_league_teams_db()
 
     # print(schedule_db())
     ##class Tools
 
     # print(search_player_in_leagues("Malik Monk"))
     # print(sub_player_effect('Gary Trent Jr.', 'Royce O\'neale', 'Uri\'s Unmatched Team'))
-    #print(matchup_analyzer(3, '41083'))
-    #print(league_teams_stats('41083'))
-    #print(league_ranking())
-    #print(matchup_week())
-
+    # print(matchup_analyzer(3, '41083'))
+    # print(league_teams_stats('41083'))
+    # print(league_ranking())
+    # print(matchup_week())
 
     ## class Advanced tools
-    at = AdvancedTools()
+    # at = AdvancedTools()
     # print(at.projected_matchup())
-    print(at.combine_match())
+    # print(at.combine_match())

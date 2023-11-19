@@ -1,7 +1,9 @@
-import pandas as pd
 from nba_api.stats.static import players
 import pyodbc
-from PlayerAnalyzer import PlayerAnalyzer
+
+from Players.player import Player
+from Players.playerAccessor import PlayerAccesor
+from Players.playerAnalyzer import PlayerAnalyzer
 import yahoo_fantasy_api as yfa
 from yahoo_oauth import OAuth2
 from TeamAnalyzer import TeamAnalyzer
@@ -10,89 +12,6 @@ import requests
 from datetime import datetime
 
 
-### insert all the players in the nba into the table players
-def sync_players_to_database():
-    # Define your SQL INSERT statement
-
-    insert_query_players = f"INSERT INTO nba_players (id, last_name, first_name, full_name,nba_team_name," \
-                           f"{DataBase.fantasy_cat}) " \
-                           f"VALUES (?,?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
-
-    # Get the list of players
-    player_data = players.get_players()
-
-    # Iterate over the player data and insert each player into the database
-    for player in player_data:
-        if player['is_active'] is True:
-            nba_player = PlayerAnalyzer(player['full_name'])
-            try:
-                curr_player_stats = nba_player.pg_adj_fantasy('2023-24')
-                last_player_stats = nba_player.pg_adj_fantasy('2022-23')
-                data = (
-                    player['id'], player['last_name'], player['first_name'], player['full_name'],
-                    nba_player.get_player_nba_team(),
-                    curr_player_stats['FGM'].iloc[0].round(3), curr_player_stats['FGA'].iloc[0].round(3),
-                    curr_player_stats['FG_PCT'].iloc[0].round(3), curr_player_stats['FTM'].iloc[0].round(3),
-                    curr_player_stats['FTA'].iloc[0].round(3), curr_player_stats['FT_PCT'].iloc[0].round(3),
-                    curr_player_stats['FG3M'].iloc[0].round(3), curr_player_stats['PTS'].iloc[0].round(3),
-                    curr_player_stats['REB'].iloc[0].round(3), curr_player_stats['AST'].iloc[0].round(3),
-                    curr_player_stats['STL'].iloc[0].round(3), curr_player_stats['BLK'].iloc[0].round(3),
-                    curr_player_stats['TOV'].iloc[0].round(3), last_player_stats['FGM'].iloc[0].round(3),
-                    last_player_stats['FGA'].iloc[0].round(3), last_player_stats['FG_PCT'].iloc[0].round(3),
-                    last_player_stats['FTM'].iloc[0].round(3), last_player_stats['FTA'].iloc[0].round(3),
-                    last_player_stats['FT_PCT'].iloc[0].round(3), last_player_stats['FG3M'].iloc[0].round(3),
-                    last_player_stats['PTS'].iloc[0].round(3), last_player_stats['REB'].iloc[0].round(3),
-                    last_player_stats['AST'].iloc[0].round(3), last_player_stats['STL'].iloc[0].round(3),
-                    last_player_stats['BLK'].iloc[0].round(3), last_player_stats['TOV'].iloc[0].round(3))
-                DataBase.cursor.execute(insert_query_players, data)
-                print(data)
-            except IndexError:
-                try:
-                    data = (
-                        player['id'], player['last_name'], player['first_name'], player['full_name'],
-                        nba_player.get_player_nba_team(),
-                        curr_player_stats['FGM'].iloc[0].round(3), curr_player_stats['FGA'].iloc[0].round(3),
-                        curr_player_stats['FG_PCT'].iloc[0].round(3), curr_player_stats['FTM'].iloc[0].round(3),
-                        curr_player_stats['FTA'].iloc[0].round(3), curr_player_stats['FT_PCT'].iloc[0].round(3),
-                        curr_player_stats['FG3M'].iloc[0].round(3), curr_player_stats['PTS'].iloc[0].round(3),
-                        curr_player_stats['REB'].iloc[0].round(3), curr_player_stats['AST'].iloc[0].round(3),
-                        curr_player_stats['STL'].iloc[0].round(3), curr_player_stats['BLK'].iloc[0].round(3),
-                        curr_player_stats['TOV'].iloc[0].round(3)
-                        , None, None, None, None,
-                        None, None, None, None, None, None, None, None, None)
-                    DataBase.cursor.execute(insert_query_players, data)
-                    print(data)
-                except IndexError:
-                    try:
-                        data = (
-                            player['id'], player['last_name'], player['first_name'], player['full_name'],
-                            None, None, None,
-                            None, None, None, None, None, None, None, None, None, None, None,
-                            last_player_stats['FGM'].iloc[0].round(3),
-                            last_player_stats['FGA'].iloc[0].round(3), last_player_stats['FG_PCT'].iloc[0].round(3),
-                            last_player_stats['FTM'].iloc[0].round(3), last_player_stats['FTA'].iloc[0].round(3),
-                            last_player_stats['FT_PCT'].iloc[0].round(3), last_player_stats['FG3M'].iloc[0].round(3),
-                            last_player_stats['PTS'].iloc[0].round(3), last_player_stats['REB'].iloc[0].round(3),
-                            last_player_stats['AST'].iloc[0].round(3), last_player_stats['STL'].iloc[0].round(3),
-                            last_player_stats['BLK'].iloc[0].round(3), last_player_stats['TOV'].iloc[0].round(3))
-                        DataBase.cursor.execute(insert_query_players, data)
-                        print(data)
-                    except IndexError:
-                        data = (
-                            player['id'], player['last_name'], player['first_name'], player['full_name'],
-                            None, None,
-                            None,
-                            None, None, None, None, None, None, None, None, None, None, None, None, None,
-                            None, None, None, None, None, None, None, None, None, None, None)
-                        DataBase.cursor.execute(insert_query_players, data)
-                        print(data)
-
-    # Commit the changes to the database
-    DataBase.connection.commit()
-
-    # Close the cursor and connection
-    DataBase.cursor.close()
-    DataBase.connection.close()
 
 
 ### insert all the teams from al the leagues I am in, into the table yahoo_league_teams
@@ -195,41 +114,6 @@ def sync_team_player_to_database(commit_count=0, player_count=0):
                         commit_count = 0
                 if commit_count > 0:
                     DataBase.connection.commit()
-    DataBase.cursor.close()
-    DataBase.connection.close()
-
-
-### updates the player current stats
-def update_players_db():
-    update_query_players = f"UPDATE nba_players SET nba_team_name=?,current_FGM=?,current_FGA=?,current_FG_PCT=?," \
-                           f"current_FTM=?,current_FTA=?,current_FT_PCT=?,current_FG3M=?," \
-                           "current_PTS=?,current_REB=?,current_AST=?,current_STL=?,current_BLK=?,current_TOV = ? " \
-                           "WHERE id = ? "
-    affected_rows = 0
-    player_data = players.get_players()
-    for player in player_data:
-        if player['is_active'] is True:
-            nba_player = PlayerAnalyzer(player['full_name'])
-            try:
-                curr_player_stats = nba_player.pg_adj_fantasy('2023-24')
-                data = (nba_player.get_player_nba_team(), curr_player_stats['FGM'].iloc[0].round(3),
-                        curr_player_stats['FGA'].iloc[0].round(3),
-                        curr_player_stats['FG_PCT'].iloc[0].round(3), curr_player_stats['FTM'].iloc[0].round(3),
-                        curr_player_stats['FTA'].iloc[0].round(3), curr_player_stats['FT_PCT'].iloc[0].round(3),
-                        curr_player_stats['FG3M'].iloc[0].round(3), curr_player_stats['PTS'].iloc[0].round(3),
-                        curr_player_stats['REB'].iloc[0].round(3), curr_player_stats['AST'].iloc[0].round(3),
-                        curr_player_stats['STL'].iloc[0].round(3), curr_player_stats['BLK'].iloc[0].round(3),
-                        curr_player_stats['TOV'].iloc[0].round(3), player['id'])
-                affected_rows = DataBase.cursor.execute(update_query_players, data).rowcount
-                print(player,data)
-            except IndexError:
-                pass
-    # print how much rows were updated
-    print(affected_rows)
-    # Commit the changes to the database
-    DataBase.connection.commit()
-
-    # Close the cursor and connection
     DataBase.cursor.close()
     DataBase.connection.close()
 
