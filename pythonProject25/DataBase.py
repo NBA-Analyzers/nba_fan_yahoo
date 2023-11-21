@@ -1,72 +1,16 @@
 from nba_api.stats.static import players
 import pyodbc
 
-from Players.player import Player
-from Players.playerAccessor import PlayerAccesor
 from Players.playerAnalyzer import PlayerAnalyzer
 import yahoo_fantasy_api as yfa
 from yahoo_oauth import OAuth2
-from TeamAnalyzer import TeamAnalyzer
+from Teams.teamAnalyzer import TeamAnalyzer
 from YahooLeague import YahooLeague
 import requests
 from datetime import datetime
 
 
 
-
-### insert all the teams from al the leagues I am in, into the table yahoo_league_teams
-def sync_teams_to_database(commit_count=0):
-    # insert from scratch
-
-    insert_query_league = f"INSERT INTO league_teams (league_id,team_key,team_name,{DataBase.fantasy_cat}) VALUES (?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
-
-
-    ## just to get to the 31 team
-    count = 0
-    for league_id in DataBase.yahoo_game.league_ids():
-        if league_id[0:3] == "428":
-            cur_league = DataBase.yahoo_game.to_league(league_id)
-            cur_teams = cur_league.teams()
-
-            for team_key in cur_teams:
-                count += 1
-
-                end_of_league_id = league_id.split(".l.")[1]
-                team_id = cur_teams[team_key]['team_id']
-                cur_team_stats = TeamAnalyzer(end_of_league_id, team_id).pg_player_stats('2023-24')
-                last_team_stats = TeamAnalyzer(end_of_league_id, team_id).pg_player_stats('2022-23')
-
-                data = (league_id, team_key, cur_teams[team_key]['name'], cur_team_stats['FGM'].iloc[0].round(3),
-                        cur_team_stats['FGA'].iloc[0].round(3),
-                        cur_team_stats['FG_PCT'].iloc[0].round(3), cur_team_stats['FTM'].iloc[0].round(3),
-                        cur_team_stats['FTA'].iloc[0].round(3), cur_team_stats['FT_PCT'].iloc[0].round(3),
-                        cur_team_stats['FG3M'].iloc[0].round(3), cur_team_stats['PTS'].iloc[0].round(3),
-                        cur_team_stats['REB'].iloc[0].round(3), cur_team_stats['AST'].iloc[0].round(3),
-                        cur_team_stats['STL'].iloc[0].round(3), cur_team_stats['BLK'].iloc[0].round(3),
-                        cur_team_stats['TOV'].iloc[0].round(3), last_team_stats['FGM'].iloc[0].round(3),
-                        last_team_stats['FGA'].iloc[0].round(3), last_team_stats['FG_PCT'].iloc[0].round(3),
-                        last_team_stats['FTM'].iloc[0].round(3), last_team_stats['FTA'].iloc[0].round(3),
-                        last_team_stats['FT_PCT'].iloc[0].round(3), last_team_stats['FG3M'].iloc[0].round(3),
-                        last_team_stats['PTS'].iloc[0].round(3),
-                        last_team_stats['REB'].iloc[0].round(3), last_team_stats['AST'].iloc[0].round(3),
-                        last_team_stats['STL'].iloc[0].round(3),
-                        last_team_stats['BLK'].iloc[0].round(3), last_team_stats['TOV'].iloc[0].round(3))
-                print(cur_teams[team_key]['name'])
-                DataBase.cursor.execute(insert_query_league, data)
-                # DataBase.cursor.execute(update_query_teams, data)
-                commit_count += 1
-
-                if commit_count >= 10:
-                    DataBase.connection.commit()
-                    commit_count = 0
-    if commit_count > 0:
-        DataBase.connection.commit()
-
-    DataBase.connection.commit()
-
-    # Close the cursor and connection
-    DataBase.cursor.close()
-    DataBase.connection.close()
 
 
 ### insrert all the leagus I am in into table leagues
@@ -114,57 +58,6 @@ def sync_team_player_to_database(commit_count=0, player_count=0):
                         commit_count = 0
                 if commit_count > 0:
                     DataBase.connection.commit()
-    DataBase.cursor.close()
-    DataBase.connection.close()
-
-
-def update_league_teams_db(commit_count=0):
-    update_query_teams = f"UPDATE league_teams " \
-                         f"SET current_FGM=?,current_FGA=?,current_FG_PCT=?,current_FTM=?,current_FTA=?,current_FT_PCT=?" \
-                         f",current_FG3M=?,current_PTS=?,current_REB=?,current_AST=?,current_STL=?,current_BLK=?" \
-                         f",current_TOV = ?,last_FGM=?,last_FGA=?,last_FG_PCT=?,last_FTM=?,last_FTA=?,last_FT_PCT=?," \
-                         f"last_FG3M=?,last_PTS=?,last_REB=?,last_AST=?,last_STL=?,last_BLK=?,last_TOV = ? " \
-                         f"WHERE league_id = ? AND team_key = ? "
-    affected_rows = 0
-    for league_id in DataBase.yahoo_game.league_ids():
-        if league_id[0:3] == "428":
-            cur_league = DataBase.yahoo_game.to_league(league_id)
-            cur_teams = cur_league.teams()
-
-            for team_key in cur_teams:
-                end_of_league_id = league_id.split(".l.")[1]
-                team_id = cur_teams[team_key]['team_id']
-                cur_team_stats = TeamAnalyzer(end_of_league_id, team_id).pg_player_stats('2023-24')
-                last_team_stats = TeamAnalyzer(end_of_league_id, team_id).pg_player_stats('2022-23')
-
-                data = (
-                    cur_team_stats['FGM'].iloc[0].round(3), cur_team_stats['FGA'].iloc[0].round(3),
-                    cur_team_stats['FG_PCT'].iloc[0].round(3), cur_team_stats['FTM'].iloc[0].round(3),
-                    cur_team_stats['FTA'].iloc[0].round(3), cur_team_stats['FT_PCT'].iloc[0].round(3),
-                    cur_team_stats['FG3M'].iloc[0].round(3), cur_team_stats['PTS'].iloc[0].round(3),
-                    cur_team_stats['REB'].iloc[0].round(3), cur_team_stats['AST'].iloc[0].round(3),
-                    cur_team_stats['STL'].iloc[0].round(3), cur_team_stats['BLK'].iloc[0].round(3),
-                    cur_team_stats['TOV'].iloc[0].round(3), last_team_stats['FGM'].iloc[0].round(3),
-                    last_team_stats['FGA'].iloc[0].round(3), last_team_stats['FG_PCT'].iloc[0].round(3),
-                    last_team_stats['FTM'].iloc[0].round(3), last_team_stats['FTA'].iloc[0].round(3),
-                    last_team_stats['FT_PCT'].iloc[0].round(3), last_team_stats['FG3M'].iloc[0].round(3),
-                    last_team_stats['PTS'].iloc[0].round(3),
-                    last_team_stats['REB'].iloc[0].round(3), last_team_stats['AST'].iloc[0].round(3),
-                    last_team_stats['STL'].iloc[0].round(3),
-                    last_team_stats['BLK'].iloc[0].round(3), last_team_stats['TOV'].iloc[0].round(3), league_id,
-                    team_key
-                )
-                print(cur_teams[team_key]['name'])
-                affected_rows = DataBase.cursor.execute(update_query_teams, data).rowcount
-                commit_count += 1
-                if commit_count >= 10:
-                    DataBase.connection.commit()
-                    commit_count = 0
-
-    if commit_count > 0:
-        DataBase.connection.commit()
-    print(affected_rows)
-    # Close the cursor and connection
     DataBase.cursor.close()
     DataBase.connection.close()
 

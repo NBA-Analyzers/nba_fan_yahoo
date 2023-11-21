@@ -13,7 +13,7 @@ class YahooLeague:
         # get game object
         self.gm = yfa.Game(sc, 'nba')
         self.cur_lg = cur_lg
-        self.lg = self.gm.to_league('428.l.' + self.cur_lg)
+        self.lg = self.gm.to_league(self.cur_lg)
         self.teames_in_league = self.lg.teams()
         ## get team roster by team_key
         self.get_team_roster_by_team_key = "select player_name from dbo.team_player where team_key =?"
@@ -26,7 +26,7 @@ class YahooLeague:
         self.cursor = connection.cursor()
 
     def teams_league(self):
-        self.cursor.execute(self.teams_by_league, ('428.l.'+self.cur_lg,))
+        self.cursor.execute(self.teams_by_league, (self.cur_lg,))
         all_teams = self.cursor.fetchall()
         final_teams = ''
         for i in all_teams:
@@ -41,7 +41,7 @@ class YahooLeague:
         return lg_name['name']
 
     def league_teams_id(self):
-        self.cursor.execute(self.teams_by_league, ('428.l.' + self.cur_lg,))
+        self.cursor.execute(self.teams_by_league, (self.cur_lg,))
         all_teams = self.cursor.fetchall()
         final_teams = ''
         for i in all_teams:

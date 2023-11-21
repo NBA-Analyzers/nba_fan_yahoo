@@ -2,9 +2,12 @@ from DataBase import *
 from AdvancedTools import AdvancedTools
 from Players.playerAccessor import *
 from Players.player import Player
+from Players.playerAnalyzer import *
+from Teams.teamAccessor import *
 
 if __name__ == '__main__':
-    player = Player({'full_name': 'Chris Paul', 'id': 101108})
+    ### class Playerr
+    #player = Player({'full_name': 'Chris Paul', 'first_name': 'Chris', 'last_name': 'Paul', 'id': 101108})
     # print(player.full_name,player.id)
     # print(get_all_players(True))
     # print(career_stats(player))
@@ -12,38 +15,20 @@ if __name__ == '__main__':
     # print(last_season_stats(player))
     # print(adj_fantasy('2023-24',player))
     # print(pg_adj_fantasy('2023-24',player))
-    # print(pg_adj_fantasy('2023-24', player,True))
+    # print(pg_adj_fantasy('2022-23',player,True))
     # print(get_player_nba_team(player))
-    #print(get_players_new_stats(player))
-    print(update_players_db())
+    # print(get_players_new_stats(player))
+    # print(update_players_db())
+   # print(search_player_in_leagues(player))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    ### class Team
+    #team = Team('428.l.41083', {'team_key': '428.l.41083.t.6', 'name': 'Uri\'s Unmatched Team'})
+    #print(pg_avg_stats_team('2023-24', team))
+    # print(pg_player_stats('2023-24', team,True))
+    # print(pg_player_stats('2023-24', team))
+    #update_league_teams_db()
+    #sync_teams_to_database
 
 
 
@@ -63,8 +48,8 @@ if __name__ == '__main__':
 
 
     ### class YahooLeague
-    # uri = YahooLeague('41083')
-    # print(uri.team_key())## current user team key
+    uri = YahooLeague('41083')
+    print(uri.team_key())## current user team key
     # #print(uri.is_injuerd('D\'Angelo Russell'))
     # print(uri.is_injuerd('Kevin Durant'))
     # print(uri.get_matchup(3))

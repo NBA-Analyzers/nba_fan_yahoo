@@ -3,20 +3,6 @@ import pyodbc
 from YahooLeague import YahooLeague
 
 
-### function that check where a player you search for is playing and if he is free agent
-def search_player_in_leagues(player_name):
-    Tools.cursor.execute(Tools.search_sql, (player_name,))
-    teams_in_league = Tools.cursor.fetchall()
-    Tools.cursor.execute(Tools.leagues_sql)
-    leagues = Tools.cursor.fetchall()
-    list_of_leagues = []
-    for j in teams_in_league:
-        list_of_leagues.append(j[3])
-        if j is not None:
-            print(f"{player_name} is in {j[2]} team in {j[3]} league")
-    for i in leagues:
-        if i[0] not in list_of_leagues:
-            print(f"{player_name} is FA in {i[0]} league")
 
 
 ### function that check what happens to your team when you change one player in another

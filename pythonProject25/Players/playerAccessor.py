@@ -16,7 +16,8 @@ class PlayerAccesor(object):
                                 'Database=NBA_API;'
                                 'Trusted_Connection=yes;')
     cursor = connection.cursor()
-    data = "FGM,FGA,FG_PCT,FTM,FTA,FT_PCT,FG3,PTS,REB,AST,STL,BLK,TOV"
+
+    data = "FGM,FGA,FG_PCT,FTM,FTA,FT_PCT,FG3M,PTS,REB,AST,STL,BLK,TOV"
     current_fantasy_cat = "current_FGM,current_FGA,current_FG_PCT,current_FTM,current_FTA,current_FT_PCT,current_FG3M," \
                           "current_PTS,current_REB,current_AST,current_STL,current_BLK,current_TOV"
     last_season_fantasy_cat = "last_FGM,last_FGA,last_FG_PCT,last_FTM,last_FTA,last_FT_PCT,last_FG3M," \
@@ -256,6 +257,16 @@ def update_players_db():
     PlayerAccesor.cursor.close()
     PlayerAccesor.connection.close()
 
+
+### searches for player in all my leagues and return all his info and stats
+def search_player_in_leagues_from_db(player: Player):
+    ## search for player in each league in which team he is
+    search_sql = f"Select player_id,player_name,team_name,league_name" \
+                 f" From dbo.team_player  " \
+                 f"where player_name=?"
+    PlayerAccesor.cursor.execute(search_sql,(player.full_name,))
+    teams_of_player = PlayerAccesor.cursor.fetchall()
+    return teams_of_player
 # def is_rookie(player: Player):
 #     try:
 #         player_info = commonplayerinfo.CommonPlayerInfo(player_id=player.id)

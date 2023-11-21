@@ -1,8 +1,7 @@
 import pandas as pd
-import pyodbc
 
 from YahooLeague import YahooLeague
-from TeamAnalyzer import TeamAnalyzer
+from Teams.teamAnalyzer import TeamAnalyzer
 
 
 class LeagueAnalyzer:
