@@ -1,10 +1,5 @@
-import pyodbc
-from nba_api.stats.static import players, teams
-from nba_api.stats.endpoints import playercareerstats
-from nba_api.stats.endpoints import commonplayerinfo
-
-from Players.player import Player
 from Players.playerAccessor import *
+
 
 ## for only single player
 class PlayerAnalyzer:
@@ -41,7 +36,10 @@ def search_player_in_leagues(player: Player):
     for j in search_player_query:
         list_of_leagues.append(j[3])
         if j is not None:
-            print(f"{player.full_name} is in {j[2]} team in {j[3]} league")
+            print(f"{player.player_name} is in {j[2]} team in {j[3]} league")
     for i in leagues:
         if i[0] not in list_of_leagues:
-            print(f"{player.full_name} is FA in {i[0]} league")
+            print(f"{player.player_name} is FA in {i[0]} league")
+
+
+

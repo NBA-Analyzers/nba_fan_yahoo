@@ -6,53 +6,6 @@ from YahooLeague import YahooLeague
 
 
 ### function that check what happens to your team when you change one player in another
-def sub_player_effect(old_player, new_player, team_name):
-    Tools.cursor.execute(Tools.team_roster_sql, (team_name,))
-    team_roster_list = Tools.cursor.fetchall()[0:]
-
-    in_roster = False
-    for i in team_roster_list:
-        if old_player == i[0]:
-            in_roster = True
-    if not in_roster:
-        raise ValueError(f"{old_player} is not in {team_name}")
-    else:
-
-        Tools.cursor.execute(Tools.team_sql, (team_name,))
-        team_stat = Tools.cursor.fetchall()
-
-        Tools.cursor.execute(Tools.count_players_in_roster, (team_name,))
-        roster_len = Tools.cursor.fetchall()
-
-        Tools.cursor.execute(Tools.players_sql, (old_player, new_player,))
-        players_stat = Tools.cursor.fetchall()
-
-        if players_stat[0][0] == old_player:
-            old_player_stat = players_stat[0]
-            new_player_stat = players_stat[1]
-        else:
-            old_player_stat = players_stat[1]
-            new_player_stat = players_stat[0]
-
-        new_team_stats = []
-        for i in range(1, 14):
-            try:
-                new_team_stats.append(
-                    float(f"{(team_stat[0][i] * roster_len[0][0] + new_player_stat[i] - old_player_stat[i]) / 14:.3f}"))
-            except AttributeError:
-                continue
-        ## prints the differnce between the players and the team including them
-        df_players = pd.DataFrame([list(old_player_stat), list(new_player_stat)],
-                                  columns=['Name'] + Tools.fantasy_cat.split(','))
-        print(df_players)
-        df_team = pd.DataFrame([team_stat[0][1:], new_team_stats], columns=Tools.fantasy_cat.split(','))
-        print(df_team.rename(index={0: 'old team stats', 1: 'new team stats'}))
-        ## prints the change in each category
-        list_of_cat = Tools.fantasy_cat.split(',')
-        print('The change for your team in each category')
-        for j in range(0, 13):
-            print(f' change in {list_of_cat[j]} is {(new_team_stats[j] - team_stat[0][j + 1]):.3f} ')
-
 
 def matchup_analyzer(week_num, cur_league, season_stats='2023-24'):
     columns_name = Tools.current_fantasy_cat.split(',')
@@ -115,22 +68,6 @@ def matchup_analyzer(week_num, cur_league, season_stats='2023-24'):
     return final_df
 
 
-def league_teams_stats(cur_league_id='41083'):
-    apply_sql = Tools.league_stats
-    df = pd.read_sql_query(apply_sql, Tools.connection, params=['428.l.' + cur_league_id])
-    return df
-
-
-def league_ranking(cur_league_id='41083'):
-    df = league_teams_stats()
-    ranked_df = league_teams_stats()
-    for i in ranked_df.columns:
-        if i != 'league_id' and i != 'team_key' and i != 'team_name':
-            if i != 'current_TOV' and i != 'last_TOV':
-                ranked_df[i] = ranked_df[i].rank(ascending=False, ).astype(int)
-            else:
-                ranked_df[i] = ranked_df[i].rank(ascending=True, ).astype(int)
-    return ranked_df, df
 
 
 
@@ -148,8 +85,8 @@ class Tools:
                           "current_PTS,current_REB,current_AST,current_STL,current_BLK,current_TOV"
     last_season_fantasy_cat = "last_FGM,last_FGA,last_FG_PCT,last_FTM,last_FTA,last_FT_PCT,last_FG3M," \
                               "last_PTS,last_REB,last_AST,last_STL,last_BLK,last_TOV"
-    ## new player and old player name and stats
-    players_sql = f"Select full_name, {fantasy_cat} FROM dbo.nba_players p where full_name = ? or full_name = ?"
+
+
     ## count players in roster
     count_players_in_roster = "select count(*) FROM dbo.team_player where team_name = ?"
     ## get team name and stats

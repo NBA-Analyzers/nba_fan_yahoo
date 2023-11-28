@@ -9,16 +9,16 @@ class YahooLeague:
     def __init__(self, cur_lg):
         # connect to yahoo api
 
-        sc = OAuth2(None, None, from_file='oauth22.json')
+        self.sc = OAuth2(None, None, from_file='oauth22.json')
         # get game object
-        self.gm = yfa.Game(sc, 'nba')
+        self.gm = yfa.Game(self.sc, 'nba')
         self.cur_lg = cur_lg
         self.lg = self.gm.to_league(self.cur_lg)
         self.teames_in_league = self.lg.teams()
         ## get team roster by team_key
         self.get_team_roster_by_team_key = "select player_name from dbo.team_player where team_key =?"
-        self.teams_by_league = "select team_name from dbo.league_teams where league_id = ?"
-        self.teams_by_league = "select team_key from dbo.league_teams where league_id = ?"
+        self.teams_by_league = "select team_name from dbo.yahoo_league_teams where league_id = ?"
+        self.teams_by_league = "select team_key from dbo.yahoo_league_teams where league_id = ?"
         connection = pyodbc.connect('Driver={SQL Server};'
                                     'Server=PC-URI;'
                                     'Database=NBA_API;'
@@ -30,7 +30,7 @@ class YahooLeague:
         all_teams = self.cursor.fetchall()
         final_teams = ''
         for i in all_teams:
-            final_teams+=i[0]+'\n'
+            final_teams += i[0] + '\n'
         return final_teams
 
     def __len__(self):
@@ -54,10 +54,14 @@ class YahooLeague:
 
     # get the team roster you want
     # team key starts with 428.l.cur_lg.t. and then the number at the end of the url for each team. I'm 6, Yoavi 11.
-    def get_team(self, team_key):
+    def get_team(self, team_key, from_api=False):
+        if from_api:
+            cur_team = yfa.team.Team(self.sc, team_key)
+            team_roster = cur_team.roster()
 
-        self.cursor.execute(self.get_team_roster_by_team_key, (team_key,))
-        team_roster = self.cursor.fetchall()
+        else:
+            self.cursor.execute(self.get_team_roster_by_team_key, (team_key,))
+            team_roster = self.cursor.fetchall()
         return team_roster
 
     def get_teamkey(self, team_name):

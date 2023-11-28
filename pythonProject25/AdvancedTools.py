@@ -51,7 +51,7 @@ class AdvancedTools:
     #         # If the data is neither a dictionary nor a list, it's a leaf node
     #         print(f"Value: {data}")
     #
-    def analyze_matchup(self, cur_league='41083'):
+    def analyze_matchup(self, cur_league='428.l.41083'):
 
         bn = pd.DataFrame(self.df.fantasy_content.values.tolist()[1])['scoreboard']
 

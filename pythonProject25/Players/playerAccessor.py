@@ -1,80 +1,47 @@
-import sqlite3
-
-from nba_api.stats.endpoints import playercareerstats, commonplayerinfo
+from nba_api.stats.endpoints import playercareerstats
 from nba_api.stats.static import players, teams
 import pyodbc
 from Players.player import Player
 import pandas as pd
-from sqlalchemy import create_engine
+from DataBase import DataBase as db, find_current_year,find_last_year
 
 
 class PlayerAccesor(object):
-    MAX_PLAYERS = 10  # example
-    get_all_active_players = "select id,full_name,first_name,last_name from dbo.nba_players"
-    connection = pyodbc.connect('Driver={SQL Server};'
-                                'Server=PC-URI;'
-                                'Database=NBA_API;'
-                                'Trusted_Connection=yes;')
-    cursor = connection.cursor()
-
-    data = "FGM,FGA,FG_PCT,FTM,FTA,FT_PCT,FG3M,PTS,REB,AST,STL,BLK,TOV"
-    current_fantasy_cat = "current_FGM,current_FGA,current_FG_PCT,current_FTM,current_FTA,current_FT_PCT,current_FG3M," \
-                          "current_PTS,current_REB,current_AST,current_STL,current_BLK,current_TOV"
-    last_season_fantasy_cat = "last_FGM,last_FGA,last_FG_PCT,last_FTM,last_FTA,last_FT_PCT,last_FG3M," \
-                              "last_PTS,last_REB,last_AST,last_STL,last_BLK,last_TOV"
+    GET_ALL_ACTIVE_PLAYERS = "select player_id,player_name from dbo.players"
     ## gets stats of current season by id
-    current_stats_query = f"select {current_fantasy_cat} from dbo.nba_players where id=?"
+    CURRENT_STATS_QUERY = f"select {db.CURRENT_FANTASY_CAT} from dbo.players where player_id=?"
     ## get stats of last season per id
-    last_season_stats_query = f"select {last_season_fantasy_cat} from dbo.nba_players where id=?"
+    LAST_SEASON_STATS_QUERY = f"select {db.LAST_SEASON_FANTASY_CAT} from dbo.players where player_id=?"
     ## get nba_team_name by player name
-    get_nba_team_name = "select nba_team_name from dbo.nba_players where full_name=?"
-
-
-def get_players_new_stats(nba_player):
-    curr_player_stats = pg_adj_fantasy('2023-24', nba_player, True)
-    #return curr_player_stats
-    return (get_player_nba_team(nba_player), curr_player_stats['FGM'].iloc[0].round(3),
-            curr_player_stats['FGA'].iloc[0].round(3),
-            curr_player_stats['FG_PCT'].iloc[0].round(3), curr_player_stats['FTM'].iloc[0].round(3),
-            curr_player_stats['FTA'].iloc[0].round(3), curr_player_stats['FT_PCT'].iloc[0].round(3),
-            curr_player_stats['FG3M'].iloc[0].round(3), curr_player_stats['PTS'].iloc[0].round(3),
-            curr_player_stats['REB'].iloc[0].round(3), curr_player_stats['AST'].iloc[0].round(3),
-            curr_player_stats['STL'].iloc[0].round(3), curr_player_stats['BLK'].iloc[0].round(3),
-            curr_player_stats['TOV'].iloc[0].round(3), nba_player.id)
-
-
-def get_all_players(from_api=False):
-    if from_api:
-        player_data = players.get_players()
-    else:
-        PlayerAccesor.cursor.execute(PlayerAccesor.get_all_active_players)
-        player_data = PlayerAccesor.cursor.fetchall()
-    return player_data
+    GET_NBA_TEAM_NAME = "select nba_team_name from dbo.players where player_name=?"
+    THIRTEEN_NONE = [None] * 13
+    insert_query_players = f"INSERT INTO players (player_id, player_name,nba_team_name," \
+                           f"{db.CURRENT_FANTASY_CAT},{db.LAST_SEASON_FANTASY_CAT}) " \
+                           f"VALUES (?,?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
 
 
 ## career stats, can only be from api
 def career_stats(player: Player):
-    stats_by_career = playercareerstats.PlayerCareerStats(player_id=player.id)
+    stats_by_career = playercareerstats.PlayerCareerStats(player_id=player.player_id)
     return stats_by_career.get_data_frames()[0]
 
 
 ##current year stats, can be from api(career stats) or from db
 def current_season_stats(player: Player):
     stats_by_current_season = career_stats(player)[
-        career_stats(player)['SEASON_ID'] == '2023-24']
+        career_stats(player)['SEASON_ID'] == find_current_year()]
     return stats_by_current_season
 
 
 ##last year stats, can be from api(career stats) or from db
 def last_season_stats(player: Player):
-    stats_by_last_season = career_stats(player)[
-        career_stats(player)['SEASON_ID'] == '2022-23']
+    stats_by_last_season = career_stats(player)[career_stats(player)['SEASON_ID'] == find_last_year()]
     return stats_by_last_season
 
 
 ##only stats that belongs to the fantasy 9 categories
 def adj_fantasy(season_stats, player: Player):
-    if season_stats == '2023-24':
+    if season_stats == find_current_year():
         selected_columns_from_current_season = current_season_stats(player)[
             ['SEASON_ID', 'TEAM_ABBREVIATION', 'GP', 'FGM', 'FGA', 'FG_PCT', 'FTM', 'FTA', 'FT_PCT', 'FG3M',
              'PTS',
@@ -106,7 +73,7 @@ def adj_fantasy(season_stats, player: Player):
 
 
 ### The stats that in the database
-## currently when take from db, its return list, not df with columns. fix it later
+
 def pg_adj_fantasy(season_stats, player: Player, from_api=False):
     if from_api:
         pg_adj = adj_fantasy(season_stats, player)
@@ -118,13 +85,13 @@ def pg_adj_fantasy(season_stats, player: Player, from_api=False):
                 except TypeError:
                     continue
     else:
-        columns_name = PlayerAccesor.data.split(',')
+        columns_name = db.ALL_FANTASY_CAT.split(',')
 
-        if season_stats == '2023-24':
-            pg_adj = pd.read_sql_query(PlayerAccesor.current_stats_query, PlayerAccesor.connection, params=(player.id,))
+        if season_stats == find_current_year():
+            pg_adj = pd.read_sql_query(db.CURRENT_STATS_QUERY, PlayerAccesor.connection, params=(player.id,))
 
         else:
-            pg_adj = pd.read_sql_query(PlayerAccesor.last_season_stats_query, PlayerAccesor.connection,
+            pg_adj = pd.read_sql_query(db.LAST_SEASON_STATS_QUERY, PlayerAccesor.connection,
                                        params=(player.id,))
         pg_adj.columns = columns_name
     return pg_adj
@@ -138,112 +105,102 @@ def get_player_nba_team(player: Player, from_api=False):
         team_name = nba_team['nickname']
     else:
 
-        PlayerAccesor.cursor.execute(PlayerAccesor.get_nba_team_name, (player.full_name,))
-        team_name = PlayerAccesor.cursor.fetchall()[0][0]
+        db.cursor.execute(PlayerAccesor.GET_NBA_TEAM_NAME, (player.player_name,))
+        team_name = db.cursor.fetchall()[0][0]
 
     return team_name
+
+
+def get_all_players(from_api=False):
+    if from_api:
+        player_data = players.get_players()
+    else:
+        db.cursor.execute(PlayerAccesor.GET_ALL_ACTIVE_PLAYERS)
+        player_data = db.cursor.fetchall()
+    return player_data
+
+
+def get_players_new_stats(nba_player, season_stats):
+    curr_player_stats = pg_adj_fantasy(season_stats, nba_player, True)
+    try:
+        all_current_stats = [curr_player_stats[stat].iloc[0].round(3) for stat in db.FANTASY_CAT_STATS.split(',')]
+    except IndexError:
+        return None
+    # return curr_player_stats
+    return all_current_stats
+
+
+def get_player_id(player_name):
+    player_data = players.get_active_players()
+
+    # Iterate over the player data and insert each player into the database
+    for player in player_data:
+        if player['full_name'] == player_name:
+            return player['id']
 
 
 ### insert all the players in the nba into the table players
 def sync_players_to_database():
     # Define your SQL INSERT statement
 
-    insert_query_players = f"INSERT INTO nba_players (id, last_name, first_name, full_name,nba_team_name," \
-                           f"{PlayerAccesor.fantasy_cat}) " \
-                           f"VALUES (?,?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
-
     # Get the list of players
-    player_data = players.get_all_players(True)
+
+    player_data = players.get_active_players()
 
     # Iterate over the player data and insert each player into the database
     for player in player_data:
-        if player['is_active'] is True:
-            nba_player = Player(player)
-            try:
-                curr_player_stats = pg_adj_fantasy('2023-24',nba_player,True)
-                last_player_stats = pg_adj_fantasy('2022-23',nba_player,True)
-                data = (
-                    nba_player.id, nba_player.last_name, nba_player.first_name, nba_player.full_name,
-                    get_player_nba_team(nba_player,from_api=True),
-                    curr_player_stats['FGM'].iloc[0].round(3), curr_player_stats['FGA'].iloc[0].round(3),
-                    curr_player_stats['FG_PCT'].iloc[0].round(3), curr_player_stats['FTM'].iloc[0].round(3),
-                    curr_player_stats['FTA'].iloc[0].round(3), curr_player_stats['FT_PCT'].iloc[0].round(3),
-                    curr_player_stats['FG3M'].iloc[0].round(3), curr_player_stats['PTS'].iloc[0].round(3),
-                    curr_player_stats['REB'].iloc[0].round(3), curr_player_stats['AST'].iloc[0].round(3),
-                    curr_player_stats['STL'].iloc[0].round(3), curr_player_stats['BLK'].iloc[0].round(3),
-                    curr_player_stats['TOV'].iloc[0].round(3), last_player_stats['FGM'].iloc[0].round(3),
-                    last_player_stats['FGA'].iloc[0].round(3), last_player_stats['FG_PCT'].iloc[0].round(3),
-                    last_player_stats['FTM'].iloc[0].round(3), last_player_stats['FTA'].iloc[0].round(3),
-                    last_player_stats['FT_PCT'].iloc[0].round(3), last_player_stats['FG3M'].iloc[0].round(3),
-                    last_player_stats['PTS'].iloc[0].round(3), last_player_stats['REB'].iloc[0].round(3),
-                    last_player_stats['AST'].iloc[0].round(3), last_player_stats['STL'].iloc[0].round(3),
-                    last_player_stats['BLK'].iloc[0].round(3), last_player_stats['TOV'].iloc[0].round(3))
-                PlayerAccesor.cursor.execute(insert_query_players, data)
-                print(data)
-            except IndexError:
-                try:
-                    data = (
-                        player['id'], player['last_name'], player['first_name'], player['full_name'],
-                        get_player_nba_team(nba_player),
-                        curr_player_stats['FGM'].iloc[0].round(3), curr_player_stats['FGA'].iloc[0].round(3),
-                        curr_player_stats['FG_PCT'].iloc[0].round(3), curr_player_stats['FTM'].iloc[0].round(3),
-                        curr_player_stats['FTA'].iloc[0].round(3), curr_player_stats['FT_PCT'].iloc[0].round(3),
-                        curr_player_stats['FG3M'].iloc[0].round(3), curr_player_stats['PTS'].iloc[0].round(3),
-                        curr_player_stats['REB'].iloc[0].round(3), curr_player_stats['AST'].iloc[0].round(3),
-                        curr_player_stats['STL'].iloc[0].round(3), curr_player_stats['BLK'].iloc[0].round(3),
-                        curr_player_stats['TOV'].iloc[0].round(3)
-                        , None, None, None, None,
-                        None, None, None, None, None, None, None, None, None)
-                    PlayerAccesor.cursor.execute(insert_query_players, data)
-                    print(data)
-                except IndexError:
-                    try:
-                        data = (
-                            nba_player.id, nba_player.last_name, nba_player.first_name, nba_player.full_name,
-                            None, None, None,
-                            None, None, None, None, None, None, None, None, None, None, None,
-                            last_player_stats['FGM'].iloc[0].round(3),
-                            last_player_stats['FGA'].iloc[0].round(3), last_player_stats['FG_PCT'].iloc[0].round(3),
-                            last_player_stats['FTM'].iloc[0].round(3), last_player_stats['FTA'].iloc[0].round(3),
-                            last_player_stats['FT_PCT'].iloc[0].round(3), last_player_stats['FG3M'].iloc[0].round(3),
-                            last_player_stats['PTS'].iloc[0].round(3), last_player_stats['REB'].iloc[0].round(3),
-                            last_player_stats['AST'].iloc[0].round(3), last_player_stats['STL'].iloc[0].round(3),
-                            last_player_stats['BLK'].iloc[0].round(3), last_player_stats['TOV'].iloc[0].round(3))
-                        PlayerAccesor.cursor.execute(insert_query_players, data)
-                        print(data)
-                    except IndexError:
-                        data = (
-                            nba_player.id, nba_player.last_name, nba_player.first_name, nba_player.full_name,
-                            None, None,
-                            None,
-                            None, None, None, None, None, None, None, None, None, None, None, None, None,
-                            None, None, None, None, None, None, None, None, None, None, None)
-                        PlayerAccesor.cursor.execute(insert_query_players, data)
-                        print(data)
+        nba_player = Player(player['full_name'], player['id'])
+        all_current_stats = get_players_new_stats(nba_player, find_current_year())
+        all_last_stats = get_players_new_stats(nba_player, find_last_year())
+
+        if all_current_stats is not None and all_last_stats is not None:
+            data = (nba_player.player_id, nba_player.player_name,
+                    get_player_nba_team(nba_player, from_api=True),
+                    *all_current_stats, *all_last_stats)
+            db.cursor.execute(PlayerAccesor.insert_query_players, data)
+            print(data)
+
+        elif all_last_stats is not None and all_last_stats is None:
+            ### players didn't play last year
+            data = (
+                nba_player.player_id, nba_player.player_name,
+                get_player_nba_team(nba_player),
+                *all_current_stats, *PlayerAccesor.THIRTEEN_NONE)
+            db.cursor.execute(PlayerAccesor.insert_query_players, data)
+            print(data)
+        elif all_last_stats is None and all_last_stats is not None:
+            ### players that didn't play this year until now
+            data = (
+                nba_player.player_id, nba_player.player_name,
+                *PlayerAccesor.THIRTEEN_NONE, *all_last_stats)
+            db.cursor.execute(PlayerAccesor.insert_query_players, data)
+            print(data)
+        else:
+            data = (
+                nba_player.player_id, nba_player.player_name,
+                *PlayerAccesor.THIRTEEN_NONE, *PlayerAccesor.THIRTEEN_NONE)
+            db.cursor.execute(PlayerAccesor.insert_query_players, data)
+            print(data)
 
     # Commit the changes to the database
-    PlayerAccesor.connection.commit()
+    db.connection.commit()
 
     # Close the cursor and connection
-    PlayerAccesor.cursor.close()
-    PlayerAccesor.connection.close()
+    db.cursor.close()
+    db.connection.close()
 
 
 ### updates the player current stats
 def update_players_db():
-    update_query_players = f"UPDATE nba_players SET nba_team_name=?,current_FGM=?,current_FGA=?,current_FG_PCT=?," \
-                           f"current_FTM=?,current_FTA=?,current_FT_PCT=?,current_FG3M=?," \
-                           "current_PTS=?,current_REB=?,current_AST=?,current_STL=?,current_BLK=?,current_TOV = ? " \
-                           "WHERE id = ? "
+    update_query_players = f"UPDATE nba_players SET nba_team_name=?,{db.CURRENT_FANTASY_CAT} WHERE id = ? "
 
     affected_rows = 0
-    player_data = get_all_players(from_api=True)
-    player_data = [player for player in player_data if player['is_active']]
+    player_data = players.get_active_players()
     for player in player_data:
         try:
-            nba_player = Player(player)
-            data = get_players_new_stats(nba_player)
-            affected_rows = PlayerAccesor.cursor.execute(update_query_players, data).rowcount
+            nba_player = Player(player['full_name'], player['id'])
+            data = (get_players_new_stats(nba_player, find_current_year()), nba_player.player_id)
+            affected_rows = db.cursor.execute(update_query_players, data).rowcount
 
             print(player, data)
         except IndexError:
@@ -251,11 +208,11 @@ def update_players_db():
     # print how much rows were updated
     print(affected_rows)
     # Commit the changes to the database
-    PlayerAccesor.connection.commit()
+    db.connection.commit()
 
     # Close the cursor and connection
-    PlayerAccesor.cursor.close()
-    PlayerAccesor.connection.close()
+    db.cursor.close()
+    db.connection.close()
 
 
 ### searches for player in all my leagues and return all his info and stats
@@ -264,17 +221,6 @@ def search_player_in_leagues_from_db(player: Player):
     search_sql = f"Select player_id,player_name,team_name,league_name" \
                  f" From dbo.team_player  " \
                  f"where player_name=?"
-    PlayerAccesor.cursor.execute(search_sql,(player.full_name,))
-    teams_of_player = PlayerAccesor.cursor.fetchall()
+    db.cursor.execute(search_sql, (player.player_name,))
+    teams_of_player = db.cursor.fetchall()
     return teams_of_player
-# def is_rookie(player: Player):
-#     try:
-#         player_info = commonplayerinfo.CommonPlayerInfo(player_id=player.id)
-#         player_info = player_info.get_data_frames()[0]
-#     except ValueError:
-#         return True
-#     # Extract the rookie year
-#     rookie_year = player.draft_year
-#
-#     # Check if the player's rookie year is the same as the current season
-#     return rookie_year == '2023'
