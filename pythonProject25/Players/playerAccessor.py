@@ -3,7 +3,7 @@ from nba_api.stats.static import players, teams
 import pyodbc
 from Players.player import Player
 import pandas as pd
-from DataBase import DataBase as db, find_current_year,find_last_year
+from DataBase import DataBase as db, find_current_year, find_last_year
 
 
 class PlayerAccesor(object):
@@ -18,8 +18,11 @@ class PlayerAccesor(object):
     insert_query_players = f"INSERT INTO players (player_id, player_name,nba_team_name," \
                            f"{db.CURRENT_FANTASY_CAT},{db.LAST_SEASON_FANTASY_CAT}) " \
                            f"VALUES (?,?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
-
-
+    get_player_object_query = "select player_name,player_id from dbo.players where player_name = ?"
+def get_player_object(player_name):
+    db.cursor.execute(PlayerAccesor.get_player_object_query, (player_name,))
+    player_object = db.cursor.fetchall()
+    return player_object[0]
 ## career stats, can only be from api
 def career_stats(player: Player):
     stats_by_career = playercareerstats.PlayerCareerStats(player_id=player.player_id)
@@ -192,14 +195,17 @@ def sync_players_to_database():
 
 ### updates the player current stats
 def update_players_db():
-    update_query_players = f"UPDATE nba_players SET nba_team_name=?,{db.CURRENT_FANTASY_CAT} WHERE id = ? "
+    columns_list = db.CURRENT_FANTASY_CAT.split(',')
+    set_clause = ', '.join([f"{column} = ?" for column in columns_list])
+    update_query_players = f"UPDATE players SET nba_team_name=?,{set_clause} WHERE player_id = ? "
 
     affected_rows = 0
     player_data = players.get_active_players()
     for player in player_data:
         try:
             nba_player = Player(player['full_name'], player['id'])
-            data = (get_players_new_stats(nba_player, find_current_year()), nba_player.player_id)
+            data = (get_player_nba_team(nba_player, True), *get_players_new_stats(nba_player, find_current_year()),
+                    nba_player.player_id)
             affected_rows = db.cursor.execute(update_query_players, data).rowcount
 
             print(player, data)
@@ -224,3 +230,10 @@ def search_player_in_leagues_from_db(player: Player):
     db.cursor.execute(search_sql, (player.player_name,))
     teams_of_player = db.cursor.fetchall()
     return teams_of_player
+
+
+def get_list_of_players_stats(players):
+    query_template = f"SELECT {db.CURRENT_FANTASY_CAT} FROM dbo.players WHERE player_name IN ({', '.join('?' for _ in players)}) "
+    db.cursor.execute(query_template, *players)
+    PLAYERS_STATS_NEW_QUERY = db.cursor.fetchall()
+    return PLAYERS_STATS_NEW_QUERY

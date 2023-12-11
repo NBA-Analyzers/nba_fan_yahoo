@@ -26,12 +26,12 @@ class LeagueAccessor():
 
 ### insrert all the leagus I am in into table leagues
 def sync_leagues_to_database():
-    insert_query_game = "INSERT INTO leagues (league_key , league_name, num_teams) VALUES ( ?, ?, ?)"
+    insert_query_game = "INSERT INTO leagues (league_id , league_name) VALUES ( ?, ?)"
     for league_id in LeagueAccessor.yahoo_game.league_ids():
         if league_id[0:3] == "428":
-            league = League(LeagueAccessor.yahoo_game.to_league(league_id).settings())
-            data = (league.league_key, league.league_name,
-                    league.num_teams)
+            league_info = LeagueAccessor.yahoo_game.to_league(league_id).settings()
+            league = League(league_info['league_key'],league_info['name'])
+            data = (league.league_id, league.league_name)
             LeagueAccessor.cursor.execute(insert_query_game, data)
 
     # Commit the changes to the database

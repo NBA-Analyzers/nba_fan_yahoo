@@ -47,7 +47,7 @@ def find_last_year():
     if datetime.now().month < 7:
         current_year = datetime.now().year
         last_year = current_year - 1
-        formatted_years = f"{str(last_year-1)}-{str(last_year)[2:]}"
+        formatted_years = f"{str(last_year - 1)}-{str(last_year)[2:]}"
     else:
         current_year = datetime.now().year
         last_year = current_year - 1
@@ -63,6 +63,7 @@ class DataBase:
     cursor = connection.cursor()
     sc = OAuth2(None, None, from_file='oauth22.json')
     yahoo_game = yfa.Game(sc, 'nba')
+
     ALL_FANTASY_CAT = "current_FGM,current_FGA,current_FG_PCT,current_FTM,current_FTA,current_FT_PCT,current_FG3M," \
                       "current_PTS,current_REB,current_AST,current_STL," \
                       "current_BLK,current_TOV,last_FGM,last_FGA,last_FG_PCT,last_FTM,last_FTA,last_FT_PCT,last_FG3M," \
@@ -72,3 +73,5 @@ class DataBase:
     FANTASY_CAT_STATS = "FGM,FGA,FG_PCT,FTM,FTA,FT_PCT,FG3M,PTS,REB,AST,STL,BLK,TOV"
     LAST_SEASON_FANTASY_CAT = "last_FGM,last_FGA,last_FG_PCT,last_FTM,last_FTA,last_FT_PCT,last_FG3M," \
                               "last_PTS,last_REB,last_AST,last_STL,last_BLK,last_TOV"
+    STATS_FOR_MATCHUP = 'NAME,FGM/A,current_FG_PCT,FTM/A,current_FT_PCT,current_FG3,current_PTS,current_REB,' \
+                        'current_AST,current_STL,current_BLK, current_TOV '

@@ -1,107 +1,173 @@
+from datetime import datetime
+
+from Leagues.league import League
+from Leagues.leagueAnalyzer import analyze_matchup
 from Players.playerAnalyzer import PlayerAnalyzer
 import pandas as pd
 from YahooLeague import YahooLeague
 from DataBase import DataBase as db
+from Teams.teamAccessor import get_team_stats, team_size, pg_avg_stats_team, get_team_object, get_team_roster
+from Players.playerAccessor import get_list_of_players_stats, get_player_object, get_player_nba_team
+from Teams.team import Team
+from Players.player import Player
+
 
 class TeamAnalyzer:
     ## get team roster
-    team_roster_sql = "select player_name FROM dbo.team_player where team_name = ?"
+    TEAM_ROSTER_SQL = "select player_name FROM dbo.team_player where team_name = ?"
     ## get team name and stats
-    team_sql = f"Select team_name, {db.ALL_FANTASY_CAT} FROM dbo.league_teams where team_name = ? "
+    TEAM_SQL = f"Select team_name, {db.ALL_FANTASY_CAT} FROM dbo.league_teams where team_name = ? "
     ## count players in roster
-    count_players_in_roster = "select count(*) FROM dbo.team_player where team_name = ?"
+    COUNT_PLAYERS_IN_ROSTER = "select count(*) FROM dbo.team_player where team_name = ?"
     ## new player and old player name and stats
-    players_sql = f"Select full_name, {db.ALL_FANTASY_CAT} FROM dbo.nba_players p where full_name = ? or full_name = ?"
-    def __init__(self, cur_lg, team_key):
-        self.yl = YahooLeague(cur_lg)
-        self.team = self.yl.get_team(team_key)
-        self.length_team = len(self.team)
-        data = {'FGM': 0, 'FGA': 0, 'FG_PCT': [0], 'FTM': 0, 'FTA': 0, 'FT_PCT': [0], 'FG3M': [0], 'PTS': [0],
-                'REB': [0], 'AST': [0], 'STL': [0], 'BLK': [0],
-                'TOV': [0]}
-        self.team_total_df = pd.DataFrame(data)
+    PLAYERS_SQL = f"Select full_name, {db.ALL_FANTASY_CAT} FROM dbo.nba_players p where full_name = ? or full_name = ?"
+    ## get team stats
+    TEAM_STATS_QUERY = f"select {db.CURRENT_FANTASY_CAT} from dbo.yahoo_league_teams where team_name = ?"
+    ## search all games within the same week after the date
+    later_date = "SELECT count(*) FROM dbo.schedule WHERE week_number = ? AND " \
+                 "CONVERT(DATE, game_date, 101) >= CONVERT(DATE,?, 101) " \
+                 "and (dbo.schedule.home_team=? or  dbo.schedule.away_team=?)"
+    ## get player curent stats
+    get_player_current_stats = f"select {db.CURRENT_FANTASY_CAT} from dbo.players where player_name=?"
 
-    def __len__(self):
-        return len(self.team)
 
-def sub_player_effect(old_player, new_player, team_name):
-    db.cursor.execute(TeamAnalyzer.team_roster_sql, (team_name,))
-    team_roster_list = db.cursor.fetchall()[0:]
+# only for current year
+def sub_player_effect(old_players, new_players, team, season_stats):
+    yl = YahooLeague(team.league_id)
+    without_old_players = 0
+    with_new_players = 0
+    team_stats = (pg_avg_stats_team(season_stats, team, yl))
+    old_players_stats = get_list_of_players_stats(old_players)
+    new_players_stats = get_list_of_players_stats(new_players)
+    for i, j in zip(old_players_stats, new_players_stats):
+        print(i)
+        without_old_players = [round(x - y, 3) for x, y in zip(team_stats.values.tolist()[0], i)]
+        with_new_players = [round(x + y, 3) for x, y in zip(without_old_players, j)]
+    with_new_players[2] = round(with_new_players[0] / with_new_players[1], 3)
+    with_new_players[5] = round(with_new_players[3] / with_new_players[4], 3)
+    sum_of_old_players = [round(sum(x), 3) for x in zip(*old_players_stats)]
+    sum_of_new_players = [round(sum(x), 3) for x in zip(*new_players_stats)]
+    ## prints the differnce between the players and the team including them
+    df_player_comparison = pd.DataFrame([sum_of_new_players, sum_of_old_players],
+                                        columns=db.FANTASY_CAT_STATS.split(',')).rename(
+        index={0: 'new players', 1: 'old players'})
+    df_teams_comparison = pd.DataFrame([with_new_players, team_stats.values.tolist()[0]],
+                                       columns=db.FANTASY_CAT_STATS.split(',')).rename(
+        index={0: 'new team stats', 1: 'old team stats'})
+    print('The change for your team in each category')
+    for j in range(0, 13):
+        print(
+            f' change in {df_teams_comparison.columns[j]} is {(with_new_players[j] - team_stats.values.tolist()[0][j]):.3f} ')
+    return df_player_comparison, df_teams_comparison
 
-    in_roster = False
-    for i in team_roster_list:
-        if old_player == i[0]:
-            in_roster = True
-    if not in_roster:
-        raise ValueError(f"{old_player} is not in {team_name}")
+
+def get_matchup_of_team(team: Team):
+    league = League(team.league_id, team.league_name)
+    cur_df = analyze_matchup(league)
+    row_of_team = cur_df.loc[cur_df['NAME'] == team.team_name].index.to_numpy()[0]
+    if row_of_team % 2 == 0:
+        matchup_name = cur_df.loc[row_of_team + 1, 'NAME']
     else:
 
-        db.cursor.execute(TeamAnalyzer.team_sql, (team_name,))
-        team_stat = db.cursor.fetchall()
+        matchup_name = (cur_df.loc[row_of_team - 1, 'NAME'])
+    return matchup_name
 
-        db.cursor.execute(TeamAnalyzer.count_players_in_roster, (team_name,))
-        roster_len = db.cursor.fetchall()
 
-        db.cursor.execute(TeamAnalyzer.players_sql, (old_player, new_player,))
-        players_stat = db.cursor.fetchall()
+def projected_matchup(team: Team):
+    opp_team = Team(*get_team_object(get_matchup_of_team(team)))
+    yl = YahooLeague(team.league_id)
+    df = pd.DataFrame(yl.lg.matchups())
+    league_set = (df.fantasy_content.values.tolist()[1][0])
+    week_number = league_set['current_week']
+    current_date = league_set['edit_key']
+    converted_date = datetime.strptime(current_date, '%Y-%m-%d').strftime('%m/%d/%Y')
 
-        if players_stat[0][0] == old_player:
-            old_player_stat = players_stat[0]
-            new_player_stat = players_stat[1]
+    columns_name = db.CURRENT_FANTASY_CAT.split(',')
+    games_count = 0
+    cur_team_df = pd.DataFrame(columns=columns_name)
+    final_df = pd.DataFrame()
+    total_games_in_matchup = 0
+    for m in range(2):
+        if m == 0:
+            cur_team_roster = get_team_roster(team)
         else:
-            old_player_stat = players_stat[1]
-            new_player_stat = players_stat[0]
+            cur_team_df = pd.DataFrame(columns=columns_name)
+            cur_team_roster = get_team_roster(opp_team)
+        for full_name in cur_team_roster:
+            player = Player(*get_player_object(full_name))
+            if yl.is_injuerd(player.player_name) is False:
+                nba_team = get_player_nba_team(player)
+                try:
+                    db.cursor.execute(TeamAnalyzer.later_date, (week_number, converted_date, nba_team, nba_team,))
+                    games_in_schedule = db.cursor.fetchall()
+                    total_games_in_matchup += games_in_schedule[0][0]
+                except IndexError:
+                    continue
+                db.cursor.execute(TeamAnalyzer.get_player_current_stats, (player.player_name,))
+                pg_player_stats_opp = db.cursor.fetchall()
+                total_stat_player = [games_in_schedule[0][0] * pg_player_stats_opp[0][j] for j in range(0, 13)]
 
-        new_team_stats = []
-        for i in range(1, 14):
+                cur_team_df.loc[len(cur_team_df)] = total_stat_player
+        row_sum = cur_team_df.sum()
+        row_sum.at['current_FG_PCT'] = row_sum.at['current_FG_PCT'] / total_games_in_matchup
+        row_sum.at['current_FT_PCT'] = row_sum.at['current_FT_PCT'] / total_games_in_matchup
+        final_df = pd.concat([final_df, row_sum.to_frame().transpose()], ignore_index=True)
+        # final_df = final_df.rename(index={0: my_yahoo_team[0][0], 1: opp_yahoo_team[0][0]})
+        total_games_in_matchup = 0
+    return final_df.rename(index={0: team.team_name, 1: opp_team.team_name})
+
+
+def combine_match(team: Team):
+    league = League(team.league_id, team.league_name)
+    past_matchup = analyze_matchup(league)
+    projected_matchup_arg = projected_matchup(team)
+    opp_team = get_matchup_of_team(team)
+    my_team_past_matchup = past_matchup[past_matchup['NAME'] == team.team_name]
+    opp_team_past_matchup = past_matchup[past_matchup['NAME'] == opp_team]
+
+    for col in projected_matchup_arg:
+        if col in my_team_past_matchup:
             try:
-                new_team_stats.append(
-                    float(
-                        f"{(team_stat[0][i] * roster_len[0][0] + new_player_stat[i] - old_player_stat[i]) / 14:.3f}"))
-            except AttributeError:
+                projected_matchup_arg.loc[team.team_name, col] = float(projected_matchup_arg.loc[team.team_name, col]) + \
+                                                                 float(opp_team_past_matchup[col].iloc[0])
+                projected_matchup_arg.loc[opp_team, col] = float(projected_matchup_arg.loc[opp_team, col]) + \
+                                                           float(opp_team_past_matchup[col].iloc[0])
+            except KeyError:
                 continue
-        ## prints the differnce between the players and the team including them
-        df_players = pd.DataFrame([list(old_player_stat), list(new_player_stat)],
-                                  columns=['Name'] + Tools.fantasy_cat.split(','))
-        print(df_players)
-        df_team = pd.DataFrame([team_stat[0][1:], new_team_stats], columns=Tools.fantasy_cat.split(','))
-        print(df_team.rename(index={0: 'old team stats', 1: 'new team stats'}))
-        ## prints the change in each category
-        list_of_cat = Tools.fantasy_cat.split(',')
-        print('The change for your team in each category')
-        for j in range(0, 13):
-            print(f' change in {list_of_cat[j]} is {(new_team_stats[j] - team_stat[0][j + 1]):.3f} ')
+    try:
+        projected_matchup_arg.loc[team.team_name, 'current_FGM'] = projected_matchup_arg.loc[
+                                                                       team.team_name, 'current_FGM'] + float(
+            my_team_past_matchup['FGM/A'].iloc[0].split('/')[0])
+        projected_matchup_arg.loc[team.team_name, 'current_FGA'] = projected_matchup_arg.loc[
+                                                                       team.team_name, 'current_FGA'] + float(
+            my_team_past_matchup['FGM/A'].iloc[0].split('/')[1])
+        projected_matchup_arg.loc[opp_team, 'current_FGM'] = projected_matchup_arg.loc[opp_team, 'current_FGM'] + float(
+            opp_team_past_matchup['FGM/A'].iloc[0].split('/')[0])
+        projected_matchup_arg.loc[opp_team, 'current_FGA'] = projected_matchup_arg.loc[opp_team, 'current_FGA'] + float(
+            opp_team_past_matchup['FGM/A'].iloc[0].split('/')[1])
 
-    ### right now I dont need it
+    except KeyError:
+        pass
+    try:
+        projected_matchup_arg.loc[team.team_name, 'current_FTM'] = projected_matchup_arg.loc[
+                                                                       team.team_name, 'current_FTM'] + float(
+            my_team_past_matchup['FTM/A'].iloc[0].split('/')[0])
+        projected_matchup_arg.loc[team.team_name, 'current_FTA'] = projected_matchup_arg.loc[
+                                                                       team.team_name, 'current_FTA'] + float(
+            my_team_past_matchup['FTM/A'].iloc[0].split('/')[1])
+        projected_matchup_arg.loc[opp_team, 'current_FTM'] = projected_matchup_arg.loc[opp_team, 'current_FTM'] + float(
+            my_team_past_matchup['FTM/A'].iloc[0].split('/')[0])
+        projected_matchup_arg.loc[opp_team, 'current_FTA'] = projected_matchup_arg.loc[opp_team, 'current_FTA'] + float(
+            opp_team_past_matchup['FTM/A'].iloc[0].split('/')[1])
+    except KeyError:
+        pass
+    projected_matchup_arg.loc[team.team_name, 'current_FG_PCT'] = projected_matchup_arg.loc[
+                                                                      team.team_name, 'current_FGM'] / \
+                                                                  projected_matchup_arg.loc[
+                                                                      team.team_name, 'current_FGA']
+    projected_matchup_arg.loc[team.team_name, 'current_FT_PCT'] = projected_matchup_arg.loc[
+                                                                      team.team_name, 'current_FTM'] / \
+                                                                  projected_matchup_arg.loc[
+                                                                      team.team_name, 'current_FTA']
 
-    # def pg_total_stats_team(self, season_stats, count=0):
-    #
-    #     for name in self.team:
-    #         count += 1
-    #         player_stats = PlayerAnalyzer(name['name'])
-    #         fantasy_df = player_stats.pg_adj_fantasy(season_stats)
-    #         if season_stats != "2023-24":
-    #             if player_stats.is_rookie():
-    #                 self.length_team -= 1
-    #         for column in self.team_total_df.columns:
-    #             if column in fantasy_df.columns:
-    #                 try:
-    #                     self.team_total_df.at[count, column] = float(fantasy_df[column])
-    #                 except TypeError:
-    #
-    #                     continue
-    #
-    #     total_team = self.team_total_df.sum()
-    #     total_team['FG_PCT'] = total_team['FGM'] / total_team['FGA']
-    #     total_team['FT_PCT'] = total_team['FTM'] / total_team['FTA']
-    #
-    #     return pd.DataFrame(data=total_team).T
-    #
-    # def ps_team_stats_player(self, season_stats):
-    #
-    #     ps_team_stats = pd.DataFrame(self.pg_total_stats_team(season_stats) / self.length_team)
-    #     ps_team_stats['FG_PCT'] = ps_team_stats['FG_PCT'] * self.length_team
-    #     ps_team_stats['FT_PCT'] = ps_team_stats['FT_PCT'] * self.length_team
-    #     return ps_team_stats
-
-
+    return projected_matchup_arg

@@ -3,8 +3,6 @@ import pyodbc
 from YahooLeague import YahooLeague
 
 
-
-
 ### function that check what happens to your team when you change one player in another
 
 def matchup_analyzer(week_num, cur_league, season_stats='2023-24'):
@@ -68,9 +66,6 @@ def matchup_analyzer(week_num, cur_league, season_stats='2023-24'):
     return final_df
 
 
-
-
-
 class Tools:
     connection = pyodbc.connect('Driver={SQL Server};'
                                 'Server=PC-URI;'
@@ -86,29 +81,28 @@ class Tools:
     last_season_fantasy_cat = "last_FGM,last_FGA,last_FG_PCT,last_FTM,last_FTA,last_FT_PCT,last_FG3M," \
                               "last_PTS,last_REB,last_AST,last_STL,last_BLK,last_TOV"
 
-
     ## count players in roster
-    count_players_in_roster = "select count(*) FROM dbo.team_player where team_name = ?"
+    count_players_in_roster = "select count(*) FROM dbo.team_players where team_name = ?"
     ## get team name and stats
-    team_sql = f"Select team_name, {fantasy_cat} FROM dbo.league_teams where team_name = ? "
+    team_sql = f"Select team_name, {fantasy_cat} FROM dbo.yahoo_league_teams where team_name = ? "
     ## get team roster
-    team_roster_sql = "select player_name FROM dbo.team_player where team_name = ?"
+    team_roster_sql = "select player_name FROM dbo.team_players where team_name = ?"
     ## get league name
     leagues_sql = "SELECT league_name FROM dbo.leagues"
     ## search for player in each league in which team he is
     search_sql = f"Select player_id,player_name,team_name,league_name,{fantasy_cat}" \
-                 f" From dbo.team_player Join dbo.nba_players on dbo.team_player.player_id = dbo.nba_players.id " \
+                 f" From dbo.yahoo_team_players Join dbo.players on dbo.team_players.player_id = dbo.players.id " \
                  f"where player_name=?"
     ## get team roster by team_key
-    get_team_roster_by_team_key = "select player_name from dbo.team_player where team_key =?"
+    get_team_roster_by_team_key = "select player_name from dbo.team_players where team_key =?"
     ## get nba_team_name by player name
-    get_nba_team_name = "select nba_team_name from dbo.nba_players where full_name=?"
+    get_nba_team_name = "select nba_team_name from dbo.players where full_name=?"
     ## count how much time player plays in a week
     games_in_matchup = "select distinct count(*) from dbo.schedule " \
                        "where dbo.schedule.week_number = ? and (dbo.schedule.home_team=? or  dbo.schedule.away_team=?)"
     ## get player stats
-    get_player_stats = f"select {current_fantasy_cat} from dbo.nba_players where full_name=?"
+    get_player_stats = f"select {current_fantasy_cat} from dbo.players where full_name=?"
     ## get team name bt team key
-    get_yahoo_team_name = "select team_name from dbo.league_teams where team_key = ?"
+    get_yahoo_team_name = "select team_name from dbo.yahoo_league_teams where team_key = ?"
     ## get league stats for all teams
-    league_stats = "select * from dbo.league_teams where league_id =?"
+    league_stats = "select * from dbo.yahoo_league_teams where league_id =?"

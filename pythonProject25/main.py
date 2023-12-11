@@ -1,15 +1,19 @@
 from DataBase import *
 from AdvancedTools import AdvancedTools
 from Leagues.leagueAccessor import *
+from Leagues.leagueAnalyzer import analyze_matchup
 from Players.playerAccessor import *
 from Players.player import Player
 from Players.playerAnalyzer import *
 from Teams.teamAccessor import *
 from TeamPlayer.teamPlayerAccessor import *
+from Teams.teamAnalyzer import *
+from Tools import matchup_analyzer
 
 if __name__ == '__main__':
     ### class Playerr
     # player = Player('Chris Paul',101108)
+    # print(get_players_new_stats(player,find_current_year()))
     # print(player.full_name,player.id)
     # print(get_all_players(True))
     # print(career_stats(player))
@@ -24,41 +28,63 @@ if __name__ == '__main__':
     # print(search_player_in_leagues(player))
 
     ### class Team
-    #team = Team('428.l.41083', '428.l.41083.t.6', 'Uri\'s Unmatched Team', 'Victorious Secret')
-    #print(pg_avg_stats_team('2023-24', team))
-    # print(pg_player_stats('2023-24', team,True))
-    # print(pg_player_stats('2023-24', team))
+    team = Team('428.l.41083.t.9', 'The Wall', 'Victorious Secret','428.l.41083')
+    # print(get_team_roster(team,True))
+    # print(get_team_roster(team))
+    # print(team_size(team,True))
+    # print(team_size(team))
+    #
+    # print(pg_avg_stats_team('2023-24', team))
+    # print(pg_avg_stats_team('2022-23', team))
+    # print(pg_team_stats(find_current_year(), team, True))
+    # print(pg_team_stats(find_last_year(), team, True))
+    # #print(team_size(team))
+    # print(pg_team_stats(find_current_year(), team))
+    #print(pg_team_stats('2023-24', team))
+    #update_players_db()
     #update_league_teams_db()
-    # sync_teams_to_database
+    #update
+    #team_player_to_database(True)
+    #sync
+    #team_player_to_database()
+    #sync_teams_to_database()
+    # print(get_list_of_players_stats(['Luka Doncic', 'Kevin Durant']))
+    # print(get_team_stats('Uri\'s Unmatched Team'))
+    #print(sub_player_effect(['Luka Doncic', 'Kevin Durant'], ['Lebron James', 'Chris Paul'], team, find_current_year()))
+    #print(get_matchup_of_team(team))
+    #print(get_team_object(team.team_name))
+    print(projected_matchup(team))
 
+
+
+
+    ## class League
+    #sync_leagues_to_database()
+    #league = League('428.l.41083', 'Victorious Secret')
+    # print(analyze_matchup(league))
     ### class League
     # sync_leagues_to_database()
     # print(sync_team_player_to_database())
-
-
+    #print(get_team_stats(team.team_name))
     ## Accessors
-    #sync_players_to_database()
-    #sync_teams_to_database()
-    #sync_team_player_to_database()
+    # sync_players_to_database()
+    # sync_teams_to_database()
+    # sync_team_player_to_database()
 
     ##DataBase
 
-    print(find_current_year())
-
-
-
+    #print(sub_player_effect(['Luka Doncic', 'Kevin Durant'], ['Lebron James', 'Chris Paul'], 'Uri\'s Unmatched Team',find_current_year()))
 
     ### class YahooLeague
-    # uri = YahooLeague('428.l.41083')
+    #uri = YahooLeague('428.l.41083')
     # print(uri.team_key())## current user team key
     # #print(uri.is_injuerd('D\'Angelo Russell'))
     # print(uri.is_injuerd('Kevin Durant'))
     # print(uri.get_matchup(3))
     #
-    # uri_roster = uri.get_team('428.l.41083.t.3')
+
     # # nice_uri_roster = ''
     # print("=== MY Tean ===")
-    # print(uri_roster)
     # for r in uri_roster:
     #     nice_uri_roster += f"{r['name']}\n"
     # print(nice_uri_roster)
@@ -153,10 +179,10 @@ if __name__ == '__main__':
 
     # print(search_player_in_leagues("Malik Monk"))
     # print(sub_player_effect('Gary Trent Jr.', 'Royce O\'neale', 'Uri\'s Unmatched Team'))
-    # print(matchup_analyzer(3, '41083'))
+    #print(matchup_analyzer(3, '41083'))
     # print(league_teams_stats('41083'))
     # print(league_ranking())
-    # print(matchup_week())
+    #print(matchup_week())
 
     ## class Advanced tools
     # at = AdvancedTools()
