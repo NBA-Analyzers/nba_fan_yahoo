@@ -2,8 +2,10 @@ from datetime import datetime
 
 from Leagues.league import League
 from Leagues.leagueAnalyzer import analyze_matchup
-from Players.playerAnalyzer import PlayerAnalyzer
+from Players.playerAnalyzer import *
 import pandas as pd
+
+from Players.playerAnalyzer import _rename_players
 from YahooLeague import YahooLeague
 from DataBase import DataBase as db
 from Teams.teamAccessor import get_team_stats, team_size, pg_avg_stats_team, get_team_object, get_team_roster
@@ -73,6 +75,14 @@ def get_matchup_of_team(team: Team):
     return matchup_name
 
 
+def current_result_of_matchup(team: Team):
+    league = League(team.league_id, team.league_name)
+    past_matchup = analyze_matchup(league)
+    opp_team = get_matchup_of_team(team)
+    my_team_past_matchup = past_matchup[past_matchup['NAME'] == team.team_name]
+    opp_team_past_matchup = past_matchup[past_matchup['NAME'] == opp_team]
+    result_past_matchup = pd.concat([my_team_past_matchup,opp_team_past_matchup])
+    return result_past_matchup
 def projected_matchup(team: Team):
     opp_team = Team(*get_team_object(get_matchup_of_team(team)))
     yl = YahooLeague(team.league_id)
@@ -94,6 +104,7 @@ def projected_matchup(team: Team):
             cur_team_df = pd.DataFrame(columns=columns_name)
             cur_team_roster = get_team_roster(opp_team)
         for full_name in cur_team_roster:
+            full_name = _rename_players(full_name)
             player = Player(*get_player_object(full_name))
             if yl.is_injuerd(player.player_name) is False:
                 nba_team = get_player_nba_team(player)
@@ -129,7 +140,7 @@ def combine_match(team: Team):
         if col in my_team_past_matchup:
             try:
                 projected_matchup_arg.loc[team.team_name, col] = float(projected_matchup_arg.loc[team.team_name, col]) + \
-                                                                 float(opp_team_past_matchup[col].iloc[0])
+                                                                 float(my_team_past_matchup[col].iloc[0])
                 projected_matchup_arg.loc[opp_team, col] = float(projected_matchup_arg.loc[opp_team, col]) + \
                                                            float(opp_team_past_matchup[col].iloc[0])
             except KeyError:
@@ -169,5 +180,13 @@ def combine_match(team: Team):
                                                                       team.team_name, 'current_FTM'] / \
                                                                   projected_matchup_arg.loc[
                                                                       team.team_name, 'current_FTA']
+    projected_matchup_arg.loc[opp_team, 'current_FG_PCT'] = projected_matchup_arg.loc[
+                                                                opp_team, 'current_FGM'] / \
+                                                            projected_matchup_arg.loc[
+                                                                opp_team, 'current_FGA']
+    projected_matchup_arg.loc[opp_team, 'current_FT_PCT'] = projected_matchup_arg.loc[
+                                                                opp_team, 'current_FTM'] / \
+                                                            projected_matchup_arg.loc[
+                                                                opp_team, 'current_FTA']
 
     return projected_matchup_arg

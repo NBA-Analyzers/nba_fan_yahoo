@@ -1,18 +1,19 @@
+import warnings
+
 from DataBase import *
 from AdvancedTools import AdvancedTools
 from Leagues.leagueAccessor import *
-from Leagues.leagueAnalyzer import analyze_matchup
+from Leagues.leagueAnalyzer import analyze_matchup, league_ranking, matchup_analyzer
 from Players.playerAccessor import *
 from Players.player import Player
 from Players.playerAnalyzer import *
 from Teams.teamAccessor import *
 from TeamPlayer.teamPlayerAccessor import *
 from Teams.teamAnalyzer import *
-from Tools import matchup_analyzer
 
 if __name__ == '__main__':
     ### class Playerr
-    # player = Player('Chris Paul',101108)
+    #player = Player('Chris Paul', 101108)
     # print(get_players_new_stats(player,find_current_year()))
     # print(player.full_name,player.id)
     # print(get_all_players(True))
@@ -20,15 +21,18 @@ if __name__ == '__main__':
     # print(current_season_stats(player))
     # print(last_season_stats(player))
     # print(adj_fantasy('2023-24',player))
-    # print(pg_adj_fantasy('2023-24',player))
+    # print(pg_adj_fantasy('2023-24',player))#25 seconds
     # print(pg_adj_fantasy('2022-23',player,True))
     # print(get_player_nba_team(player))
     # print(get_players_new_stats(player))
     # print(update_players_db())
     # print(search_player_in_leagues(player))
+    # print(fantasy_points(find_current_year(),player))#25 seconds
+    #print(specific_categories(find_current_year(),player,['AST','REB','PTS','TOV']))
+    # print(specific_categories_points(find_current_year(), player, ['AST', 'REB', 'PTS', 'TOV']))
 
     ### class Team
-    team = Team('428.l.41083.t.9', 'The Wall', 'Victorious Secret','428.l.41083')
+    # team = Team('428.l.144401.t.1', 'Uri\'s Game-Changing Team', 'IFSL - Robinson League','428.l.144401')
     # print(get_team_roster(team,True))
     # print(get_team_roster(team))
     # print(team_size(team,True))
@@ -40,43 +44,54 @@ if __name__ == '__main__':
     # print(pg_team_stats(find_last_year(), team, True))
     # #print(team_size(team))
     # print(pg_team_stats(find_current_year(), team))
-    #print(pg_team_stats('2023-24', team))
-    #update_players_db()
-    #update_league_teams_db()
-    #update
-    #team_player_to_database(True)
-    #sync
-    #team_player_to_database()
-    #sync_teams_to_database()
+    # print(pg_team_stats('2023-24', team))
+    # update_players_db()
+    # update_league_teams_db()
+    # update
+    # team_player_to_database(True)
+    # sync
+    # team_player_to_database()
+    # sync_teams_to_database()
     # print(get_list_of_players_stats(['Luka Doncic', 'Kevin Durant']))
     # print(get_team_stats('Uri\'s Unmatched Team'))
-    #print(sub_player_effect(['Luka Doncic', 'Kevin Durant'], ['Lebron James', 'Chris Paul'], team, find_current_year()))
-    #print(get_matchup_of_team(team))
-    #print(get_team_object(team.team_name))
-    print(projected_matchup(team))
-
-
-
+    # print(sub_player_effect(['Luka Doncic', 'Kevin Durant'], ['Lebron James', 'Chris Paul'], team, find_current_year()))
+    # print(get_matchup_of_team(team))
+    # print(get_team_object(team.team_name))
+    # pd.set_option('display.max_rows', None)
+    # pd.set_option('display.max_columns', None)
+    # print('### matchup until now ###')
+    # print(current_result_of_matchup(team))
+    # print('### projected matchup """')
+    # print(projected_matchup(team))
+    # print('### the projected result of matchup """')
+    # print(combine_match(team))
 
     ## class League
-    #sync_leagues_to_database()
-    #league = League('428.l.41083', 'Victorious Secret')
+    # sync_leagues_to_database()
+    league = League('428.l.41083', 'Victorious Secret')
     # print(analyze_matchup(league))
     ### class League
     # sync_leagues_to_database()
     # print(sync_team_player_to_database())
-    #print(get_team_stats(team.team_name))
+    # print(get_team_stats(team.team_name))
+    ### positions are PG/SG/G/SF/PF/F/C/Util
+    # print(get_free_agents(league, 'Util'))
+
+    print(get_best_fa_in_categories(find_current_year(), league, 'Util', ['AST', 'REB', 'PTS', 'TOV']))
     ## Accessors
     # sync_players_to_database()
     # sync_teams_to_database()
     # sync_team_player_to_database()
-
+    # print(league_ranking(find_current_year(), league))
+    # print(matchup_analyzer(8, league))
     ##DataBase
-
-    #print(sub_player_effect(['Luka Doncic', 'Kevin Durant'], ['Lebron James', 'Chris Paul'], 'Uri\'s Unmatched Team',find_current_year()))
+    # db.cursor.execute(PlayerAccesor.GAMES_IN_MATCHUP, (8, 'Lakers',  'Lakers'))
+    # my_count_games_in_matchup = db.cursor.fetchall()
+    # print(my_count_games_in_matchup[0][0])
+    # print(sub_player_effect(['Luka Doncic', 'Kevin Durant'], ['Lebron James', 'Chris Paul'], 'Uri\'s Unmatched Team',find_current_year()))
 
     ### class YahooLeague
-    #uri = YahooLeague('428.l.41083')
+    # uri = YahooLeague('428.l.41083')
     # print(uri.team_key())## current user team key
     # #print(uri.is_injuerd('D\'Angelo Russell'))
     # print(uri.is_injuerd('Kevin Durant'))
@@ -179,10 +194,10 @@ if __name__ == '__main__':
 
     # print(search_player_in_leagues("Malik Monk"))
     # print(sub_player_effect('Gary Trent Jr.', 'Royce O\'neale', 'Uri\'s Unmatched Team'))
-    #print(matchup_analyzer(3, '41083'))
+    # print(matchup_analyzer(3, '41083'))
     # print(league_teams_stats('41083'))
     # print(league_ranking())
-    #print(matchup_week())
+    # print(matchup_week())
 
     ## class Advanced tools
     # at = AdvancedTools()

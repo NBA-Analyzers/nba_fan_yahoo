@@ -20,11 +20,11 @@ class PlayerAnalyzer:
                  f" From dbo.team_player Join dbo.nba_players on dbo.team_player.player_id = dbo.nba_players.id " \
                  f"where player_name=?"
 
-    def _rename_players(self, full_name):
-        if full_name in PlayerAnalyzer.players_rename:
-            full_name = PlayerAnalyzer.players_rename[full_name]
+def _rename_players( full_name):
+    if full_name in PlayerAnalyzer.players_rename:
+        full_name = PlayerAnalyzer.players_rename[full_name]
 
-        return full_name
+    return full_name
 
 
 ### function that check where a player you search for is playing and if he is free agent

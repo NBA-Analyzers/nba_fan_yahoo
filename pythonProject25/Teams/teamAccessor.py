@@ -1,8 +1,7 @@
 import pandas as pd
 from nba_api.stats.static import players
 import pyodbc
-from Leagues.league import League
-from Leagues.leagueAnalyzer import analyze_matchup
+
 from Players.player import Player
 from Players.playerAccessor import pg_adj_fantasy
 
@@ -15,14 +14,21 @@ from DataBase import DataBase as db, find_last_year, find_current_year
 class TeamAccessor(object):
     TEAM_LENGTH = 0
     ## get team name and stats
-    current_team_stats_query = f"Select {db.CURRENT_FANTASY_CAT} FROM dbo.yahoo_league_teams where team_name = ? "
-    last_team_stats_query = f"Select {db.LAST_SEASON_FANTASY_CAT} FROM dbo.yahoo_league_teams where team_name = ? "
-    get_team_roster_by_team_key = "select player_name from dbo.team_players where team_key =?"
-    get_team_object_query = "select team_key,team_name,tm.league_name, league_id from dbo.yahoo_league_teams tm join dbo.leagues lg on lg.league_name = tm.league_name where team_name = ?"
+    CURRENT_TEAM_STATS_QUERY = f"Select {db.CURRENT_FANTASY_CAT} FROM dbo.yahoo_league_teams where team_name = ? "
+    LAST_TEAM_STATS_QUERY = f"Select {db.LAST_SEASON_FANTASY_CAT} FROM dbo.yahoo_league_teams where team_name = ? "
+    GET_TEAM_ROSTER_BY_TEAM_KEY = "select player_name from dbo.team_players where team_key =?"
+    GET_TEAM_OBJECT_QUERY = "select team_key,team_name,tm.league_name, league_id from dbo.yahoo_league_teams tm join dbo.leagues lg on lg.league_name = tm.league_name where team_name = ?"
+    GET_TEAM_OBJECT_BY_KEY_QUERY = "select team_key,team_name,tm.league_name, league_id from dbo.yahoo_league_teams tm join dbo.leagues lg on lg.league_name = tm.league_name where team_key = ?"
+
+
+def get_team_object_by_key(team_key):
+    db.cursor.execute(TeamAccessor.GET_TEAM_OBJECT_BY_KEY_QUERY, (team_key,))
+    team_object = db.cursor.fetchall()
+    return team_object[0]
 
 
 def get_team_object(team_name):
-    db.cursor.execute(TeamAccessor.get_team_object_query, (team_name,))
+    db.cursor.execute(TeamAccessor.GET_TEAM_OBJECT_QUERY, (team_name,))
     team_object = db.cursor.fetchall()
     return team_object[0]
 
@@ -91,11 +97,11 @@ def pg_team_stats(season_stats, team: Team, from_api=False):
 
     else:
         if season_stats == find_current_year():
-            db.cursor.execute(TeamAccessor.current_team_stats_query, (team.team_name,))
+            db.cursor.execute(TeamAccessor.CURRENT_TEAM_STATS_QUERY, (team.team_name,))
             data_from_sql = db.cursor.fetchall()
             pg_play_stats = pd.DataFrame.from_records([data_from_sql[0]], columns=db.CURRENT_FANTASY_CAT.split(','))
         else:
-            db.cursor.execute(TeamAccessor.last_team_stats_query, (team.team_name,))
+            db.cursor.execute(TeamAccessor.LAST_TEAM_STATS_QUERY, (team.team_name,))
             data_from_sql = db.cursor.fetchall()
             pg_play_stats = pd.DataFrame.from_records([data_from_sql[0]], columns=db.LAST_SEASON_FANTASY_CAT.split(','))
 
@@ -141,11 +147,11 @@ def sync_teams_to_database(commit_count=0):
     db.connection.close()
 
 
-def update_league_teams_db(commit_count=0):
+def update_league_teams_db(commit_count=0,count=0):
     set_clause = ', '.join([f"{column} = ?" for column in db.ALL_FANTASY_CAT.split(',')])
 
     update_query_teams = f"UPDATE yahoo_league_teams " \
-                         f"SET {set_clause} " \
+                         f"SET team_name=?,{set_clause} " \
                          f"WHERE  team_key = ? "
     affected_rows = 0
     for league_id in db.yahoo_game.league_ids():
@@ -154,21 +160,23 @@ def update_league_teams_db(commit_count=0):
             cur_teams = cur_league.teams()
 
             for team_key in cur_teams:
-                team = Team(cur_teams[team_key]['team_key'], cur_teams[team_key]['name'],
-                            cur_league.settings()['name'], league_id)
-                team.current_stats = pg_team_stats(find_current_year(), team, True)
-                team.last_stats = pg_team_stats(find_last_year(), team, True)
+                count+=1
+                if count>20:
+                    team = Team(cur_teams[team_key]['team_key'], cur_teams[team_key]['name'],
+                                cur_league.settings()['name'], league_id)
+                    team.current_stats = pg_team_stats(find_current_year(), team, True)
+                    team.last_stats = pg_team_stats(find_last_year(), team, True)
 
-                data = (
-                    *team.current_stats.iloc[0].tolist(), *team.last_stats.iloc[0].tolist(),
-                    team_key
-                )
-                print(cur_teams[team_key]['name'])
-                affected_rows = db.cursor.execute(update_query_teams, data).rowcount
-                commit_count += 1
-                if commit_count >= 10:
-                    db.connection.commit()
-                    commit_count = 0
+                    data = (team.team_name,
+                            *team.current_stats.iloc[0].tolist(), *team.last_stats.iloc[0].tolist(),
+                            team_key
+                            )
+                    print(cur_teams[team_key]['name'])
+                    affected_rows = db.cursor.execute(update_query_teams, data).rowcount
+                    commit_count += 1
+                    if commit_count >= 10:
+                        db.connection.commit()
+                        commit_count = 0
 
     if commit_count > 0:
         db.connection.commit()
@@ -182,6 +190,6 @@ def update_league_teams_db(commit_count=0):
 def get_team_stats(my_team_name):
     ## get team stats
 
-    db.cursor.execute(TeamAccessor.current_team_stats_query, (my_team_name,))
+    db.cursor.execute(TeamAccessor.CURRENT_TEAM_STATS_QUERY, (my_team_name,))
     team_roster_stats = db.cursor.fetchall()
     return team_roster_stats[0]

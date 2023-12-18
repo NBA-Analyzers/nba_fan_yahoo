@@ -1,3 +1,5 @@
+import warnings
+
 from nba_api.stats.endpoints import playercareerstats
 from nba_api.stats.static import players, teams
 import pyodbc
@@ -15,14 +17,24 @@ class PlayerAccesor(object):
     ## get nba_team_name by player name
     GET_NBA_TEAM_NAME = "select nba_team_name from dbo.players where player_name=?"
     THIRTEEN_NONE = [None] * 13
-    insert_query_players = f"INSERT INTO players (player_id, player_name,nba_team_name," \
+    INSERT_QUERY_PLAYERS = f"INSERT INTO players (player_id, player_name,nba_team_name," \
                            f"{db.CURRENT_FANTASY_CAT},{db.LAST_SEASON_FANTASY_CAT}) " \
                            f"VALUES (?,?, ?, ?, ?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
-    get_player_object_query = "select player_name,player_id from dbo.players where player_name = ?"
+    GET_PLAYER_OBJECT_QUERY = "select player_name,player_id from dbo.players where player_name = ?"
+    GAMES_IN_MATCHUP = "select count(distinct game_id) from dbo.schedule " \
+                       "where dbo.schedule.week_number = ? and (dbo.schedule.home_team=? or  dbo.schedule.away_team=?)"
+    ## get player stats
+    GET_PLAYER_STATS = f"select {db.CURRENT_FANTASY_CAT} from dbo.players where player_name=?"
+    STATS_FANTASY_POINTS = {'FGM': 1, 'FGA': -0.45, 'FG_PCT': 0, 'FTM': 1, 'FTA': -0.75, 'FT_PCT': 0, 'FG3M': 3,
+                            'PTS': 0.5, 'REB': 1.5, 'AST': 2, 'STL': 3, 'BLK': 3, 'TOV': -2}
+
+
 def get_player_object(player_name):
-    db.cursor.execute(PlayerAccesor.get_player_object_query, (player_name,))
+    db.cursor.execute(PlayerAccesor.GET_PLAYER_OBJECT_QUERY, (player_name,))
     player_object = db.cursor.fetchall()
     return player_object[0]
+
+
 ## career stats, can only be from api
 def career_stats(player: Player):
     stats_by_career = playercareerstats.PlayerCareerStats(player_id=player.player_id)
@@ -88,14 +100,15 @@ def pg_adj_fantasy(season_stats, player: Player, from_api=False):
                 except TypeError:
                     continue
     else:
-        columns_name = db.ALL_FANTASY_CAT.split(',')
-
+        columns_name = db.FANTASY_CAT_STATS.split(',')
         if season_stats == find_current_year():
-            pg_adj = pd.read_sql_query(db.CURRENT_STATS_QUERY, PlayerAccesor.connection, params=(player.id,))
+
+            pg_adj = pd.read_sql(sql=PlayerAccesor.CURRENT_STATS_QUERY, con=db.connection, params=(player.player_id,))
 
         else:
-            pg_adj = pd.read_sql_query(db.LAST_SEASON_STATS_QUERY, PlayerAccesor.connection,
-                                       params=(player.id,))
+
+            pg_adj = pd.read_sql(PlayerAccesor.LAST_SEASON_STATS_QUERY, db.connection,
+                                 params=(player.player_id,))
         pg_adj.columns = columns_name
     return pg_adj
 
@@ -160,7 +173,7 @@ def sync_players_to_database():
             data = (nba_player.player_id, nba_player.player_name,
                     get_player_nba_team(nba_player, from_api=True),
                     *all_current_stats, *all_last_stats)
-            db.cursor.execute(PlayerAccesor.insert_query_players, data)
+            db.cursor.execute(PlayerAccesor.INSERT_QUERY_PLAYERS, data)
             print(data)
 
         elif all_last_stats is not None and all_last_stats is None:
@@ -169,20 +182,20 @@ def sync_players_to_database():
                 nba_player.player_id, nba_player.player_name,
                 get_player_nba_team(nba_player),
                 *all_current_stats, *PlayerAccesor.THIRTEEN_NONE)
-            db.cursor.execute(PlayerAccesor.insert_query_players, data)
+            db.cursor.execute(PlayerAccesor.INSERT_QUERY_PLAYERS, data)
             print(data)
         elif all_last_stats is None and all_last_stats is not None:
             ### players that didn't play this year until now
             data = (
                 nba_player.player_id, nba_player.player_name,
                 *PlayerAccesor.THIRTEEN_NONE, *all_last_stats)
-            db.cursor.execute(PlayerAccesor.insert_query_players, data)
+            db.cursor.execute(PlayerAccesor.INSERT_QUERY_PLAYERS, data)
             print(data)
         else:
             data = (
                 nba_player.player_id, nba_player.player_name,
                 *PlayerAccesor.THIRTEEN_NONE, *PlayerAccesor.THIRTEEN_NONE)
-            db.cursor.execute(PlayerAccesor.insert_query_players, data)
+            db.cursor.execute(PlayerAccesor.INSERT_QUERY_PLAYERS, data)
             print(data)
 
     # Commit the changes to the database
@@ -237,3 +250,40 @@ def get_list_of_players_stats(players):
     db.cursor.execute(query_template, *players)
     PLAYERS_STATS_NEW_QUERY = db.cursor.fetchall()
     return PLAYERS_STATS_NEW_QUERY
+
+
+def fantasy_points(season_stats, player: Player, sum_of_points=0):
+    player.stats = pg_adj_fantasy(season_stats, player)
+
+    for stat in player.stats.columns:
+        sum_of_points += PlayerAccesor.STATS_FANTASY_POINTS[stat] * player.stats.loc[0, stat]
+    return sum_of_points
+
+
+def specific_categories(season_stats, player, list_of_cat):
+    per_year_list_of_cat=[]
+    if season_stats == find_current_year():
+        for i in range(0, len(list_of_cat)):
+            per_year_list_of_cat.append('current_' + list_of_cat[i])
+
+
+    else:
+        for i in range(0, len(list_of_cat)):
+            per_year_list_of_cat.append('last_' + list_of_cat[i])
+    string_of_cat = ','.join(per_year_list_of_cat)
+    warnings.filterwarnings('ignore', category=UserWarning, module='pandas')
+    SPECIFIC_CAT_STATS_QUERY = f"select {string_of_cat} from dbo.players where player_id={player.player_id}"
+    df_specific_cat = pd.read_sql(SPECIFIC_CAT_STATS_QUERY, db.connection)
+    columns_name = string_of_cat.split(',')
+    df_specific_cat.columns = columns_name
+    return df_specific_cat
+
+
+def specific_categories_points(season_stats, player, list_of_cat, sum_of_points=0):
+    df_specific_cat = specific_categories(season_stats, player, list_of_cat)
+    for stat in df_specific_cat.columns:
+        if df_specific_cat.loc[0, stat] is not None:
+            sum_of_points += PlayerAccesor.STATS_FANTASY_POINTS[stat.split('_')[1]] * df_specific_cat.loc[0, stat]
+    return round(sum_of_points, 3)
+
+

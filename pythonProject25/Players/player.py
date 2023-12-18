@@ -8,4 +8,4 @@ class Player(object):
         self.player_name: str = player_name
         self.player_id = player_id
         self.stats = stats
-        # TODO nba_team
+        self.nba_team=None

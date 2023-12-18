@@ -73,5 +73,5 @@ class DataBase:
     FANTASY_CAT_STATS = "FGM,FGA,FG_PCT,FTM,FTA,FT_PCT,FG3M,PTS,REB,AST,STL,BLK,TOV"
     LAST_SEASON_FANTASY_CAT = "last_FGM,last_FGA,last_FG_PCT,last_FTM,last_FTA,last_FT_PCT,last_FG3M," \
                               "last_PTS,last_REB,last_AST,last_STL,last_BLK,last_TOV"
-    STATS_FOR_MATCHUP = 'NAME,FGM/A,current_FG_PCT,FTM/A,current_FT_PCT,current_FG3,current_PTS,current_REB,' \
-                        'current_AST,current_STL,current_BLK, current_TOV '
+    STATS_FOR_MATCHUP = 'NAME,FGM/A,current_FG_PCT,FTM/A,current_FT_PCT,current_FG3M,current_PTS,current_REB,' \
+                        'current_AST,current_STL,current_BLK,current_TOV'
