@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from Leagues.league import League
-from Leagues.leagueAnalyzer import analyze_matchup
+from Leagues.leagueAnalyzer import analyze_matchup, league_ranking
 from Players.playerAnalyzer import *
 import pandas as pd
 
@@ -81,8 +81,10 @@ def current_result_of_matchup(team: Team):
     opp_team = get_matchup_of_team(team)
     my_team_past_matchup = past_matchup[past_matchup['NAME'] == team.team_name]
     opp_team_past_matchup = past_matchup[past_matchup['NAME'] == opp_team]
-    result_past_matchup = pd.concat([my_team_past_matchup,opp_team_past_matchup])
+    result_past_matchup = pd.concat([my_team_past_matchup, opp_team_past_matchup])
     return result_past_matchup
+
+
 def projected_matchup(team: Team):
     opp_team = Team(*get_team_object(get_matchup_of_team(team)))
     yl = YahooLeague(team.league_id)
@@ -190,3 +192,13 @@ def combine_match(team: Team):
                                                                 opp_team, 'current_FTA']
 
     return projected_matchup_arg
+
+
+def what_categories_you_good(season_stats, team: Team):
+    league = League(team.league_id, team.league_name)
+    df_league_rank = league_ranking(season_stats, league)
+    return df_league_rank.loc[team.team_name]
+
+def rank_what_you_good(season_stats,team: Team):
+    for i in what_categories_you_good(season_stats,team):
+        print(i)

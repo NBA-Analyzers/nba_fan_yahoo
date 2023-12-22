@@ -54,6 +54,7 @@ def league_stats(season_stats, league: League):
     else:
         apply_sql = LeagueAccessor.last_season_league_stats
         df = pd.read_sql_query(apply_sql, LeagueAccessor.connection, params=[league.league_name])
+    df.set_index('team_name', inplace=True)
     return df
 
 
