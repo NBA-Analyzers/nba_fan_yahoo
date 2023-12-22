@@ -30,9 +30,14 @@ if __name__ == '__main__':
     # print(fantasy_points(find_current_year(),player))#25 seconds
     #print(specific_categories(find_current_year(),player,['AST','REB','PTS','TOV']))
     # print(specific_categories_points(find_current_year(), player, ['AST', 'REB', 'PTS', 'TOV']))
+    print(get_best_player_overall_in_categories(find_current_year(),'Util',['FGM','FGA','FTM','FTA','FG3M','PTS','AST', 'REB', 'STL','BLK', 'TOV']))
+
+
+
+
 
     ### class Team
-    # team = Team('428.l.144401.t.1', 'Uri\'s Game-Changing Team', 'IFSL - Robinson League','428.l.144401')
+    #team = Team('428.l.144401.t.1', 'Uri\'s Game-Changing Team', 'IFSL - Robinson League','428.l.144401')
     # print(get_team_roster(team,True))
     # print(get_team_roster(team))
     # print(team_size(team,True))
@@ -45,18 +50,14 @@ if __name__ == '__main__':
     # #print(team_size(team))
     # print(pg_team_stats(find_current_year(), team))
     # print(pg_team_stats('2023-24', team))
-    # update_players_db()
-    # update_league_teams_db()
-    # update
-    # team_player_to_database(True)
-    # sync
-    # team_player_to_database()
-    # sync_teams_to_database()
     # print(get_list_of_players_stats(['Luka Doncic', 'Kevin Durant']))
     # print(get_team_stats('Uri\'s Unmatched Team'))
     # print(sub_player_effect(['Luka Doncic', 'Kevin Durant'], ['Lebron James', 'Chris Paul'], team, find_current_year()))
     # print(get_matchup_of_team(team))
     # print(get_team_object(team.team_name))
+
+
+
     # pd.set_option('display.max_rows', None)
     # pd.set_option('display.max_columns', None)
     # print('### matchup until now ###')
@@ -68,7 +69,7 @@ if __name__ == '__main__':
 
     ## class League
     # sync_leagues_to_database()
-    league = League('428.l.41083', 'Victorious Secret')
+    #league = League('428.l.144401', 'IFSL - Robinson League')
     # print(analyze_matchup(league))
     ### class League
     # sync_leagues_to_database()
@@ -77,7 +78,17 @@ if __name__ == '__main__':
     ### positions are PG/SG/G/SF/PF/F/C/Util
     # print(get_free_agents(league, 'Util'))
 
-    print(get_best_fa_in_categories(find_current_year(), league, 'Util', ['AST', 'REB', 'PTS', 'TOV']))
+
+
+    # update_players_db()
+    # update_league_teams_db()
+    # update
+    # team_player_to_database(True)
+    # sync
+    # team_player_to_database()
+    # sync_teams_to_database()
+
+    #print(get_best_fa_in_categories(find_current_year(), league, 'Util', ['FG3M', 'REB','AST','BLK']))
     ## Accessors
     # sync_players_to_database()
     # sync_teams_to_database()

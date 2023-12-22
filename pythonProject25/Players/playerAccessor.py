@@ -9,7 +9,7 @@ from DataBase import DataBase as db, find_current_year, find_last_year
 
 
 class PlayerAccesor(object):
-    GET_ALL_ACTIVE_PLAYERS = "select player_id,player_name from dbo.players"
+    GET_ALL_ACTIVE_PLAYERS = "select player_name,player_id from dbo.players"
     ## gets stats of current season by id
     CURRENT_STATS_QUERY = f"select {db.CURRENT_FANTASY_CAT} from dbo.players where player_id=?"
     ## get stats of last season per id

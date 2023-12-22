@@ -20,7 +20,8 @@ class PlayerAnalyzer:
                  f" From dbo.team_player Join dbo.nba_players on dbo.team_player.player_id = dbo.nba_players.id " \
                  f"where player_name=?"
 
-def _rename_players( full_name):
+
+def _rename_players(full_name):
     if full_name in PlayerAnalyzer.players_rename:
         full_name = PlayerAnalyzer.players_rename[full_name]
 
@@ -42,4 +43,11 @@ def search_player_in_leagues(player: Player):
             print(f"{player.player_name} is FA in {i[0]} league")
 
 
+def get_best_player_overall_in_categories(seasom_stats, position, list_of_cat):
+    best_player_list = {}
+    for i in get_all_players():
+        player =Player(*i)
+        best_player_list.update({player.player_name:specific_categories_points(seasom_stats,player,list_of_cat)})
+    sorted_best_player= dict(sorted(best_player_list.items(),key=lambda item: item[1],reverse=True))
 
+    return sorted_best_player
