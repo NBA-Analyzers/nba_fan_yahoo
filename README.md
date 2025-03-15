@@ -14,7 +14,6 @@ NBA Fantasy League Analyzer is a Python-based tool designed to analyze fantasy b
 nba_fantasy/ │── database.py # Inserts NBA player data into the database │── LeagueAnalyzer.py # Analyzes league-wide performance │── PlayerAnalyzer.py # Retrieves and processes player stats │── TeamAnalyzer.py # Computes team stats based on player data │── YahooLeague.py # Handles Yahoo Fantasy API interactions │── main.py # Entry point for running the analysis
 
 ## Installation
-### Prerequisites
 - Python 3.8+
 - Microsoft SQL Server
 - Yahoo Fantasy API Credentials
