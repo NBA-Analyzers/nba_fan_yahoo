@@ -19,14 +19,15 @@ nba_fantasy/ │── database.py # Inserts NBA player data into the database �
 - Microsoft SQL Server
 - Yahoo Fantasy API Credentials
 - Required Python packages: pip install pandas pyodbc yahoo_fantasy_api nba_api
-- 
+  
 ## Usage
 1. **Set up Yahoo Fantasy API authentication**  
  Ensure `oauth22.json` is correctly configured for OAuth2 authentication.
 
 2. **Run the main script**  python main.py
    This script fetches league data, analyzes team and player performance, and outputs results.
-Future Improvements:
+
+## Future Improvements
 - Add visualization for player and team stats.
 - Implement an interactive UI for better insights.
 - Expand database schema for additional analytics.
