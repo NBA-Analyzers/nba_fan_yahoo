@@ -6,7 +6,7 @@ from YahooLeague import YahooLeague
 class TeamAnalyzer:
     def __init__(self, cur_lg, team_key):
         self.yl = YahooLeague(cur_lg)
-        self.team = self.yl.get_team(team_key)
+        self.team = self.yl.get_team_roster(team_key)
         self.length_team = len(self.team)
         data = {'FG_PCT': [0], 'FT_PCT': [0], 'FG3M': [0], 'PTS': [0], 'REB': [0], 'AST': [0], 'STL': [0], 'BLK': [0],
                 'TOV': [0]}

@@ -12,7 +12,7 @@ class AdvancedTools:
 
     def __init__(self, cur_league='41083'):
         self.league = YahooLeague(cur_league)
-        self.df = pd.DataFrame(self.league.lg.matchups())
+        self.df = pd.DataFrame(self.league.league_yahoo.matchups())
         self.data = {'NAME': [], 'FGM/A': [], 'current_FG_PCT': [], 'FTM/A': [], 'current_FT_PCT': [],
                      'current_FG3M': [], 'current_PTS': [], 'current_REB': [],
                      'current_AST': [], 'current_STL': [], 'current_BLK': [], 'current_TOV': []}

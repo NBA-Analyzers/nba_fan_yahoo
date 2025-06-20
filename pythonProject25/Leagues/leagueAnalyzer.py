@@ -20,7 +20,7 @@ def league_ranking(season_stats, league: League):
 
 def analyze_matchup(league: League):
     yl = YahooLeague(league.league_id)
-    df = pd.DataFrame(yl.lg.matchups())
+    df = pd.DataFrame(yl.league_yahoo.matchups())
     bn = pd.DataFrame(df.fantasy_content.values.tolist()[1])['scoreboard']
     df_matchup = pd.DataFrame(columns=db.STATS_FOR_MATCHUP.split(','))
     count_row = 0

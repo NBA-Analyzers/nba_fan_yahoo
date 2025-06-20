@@ -88,7 +88,7 @@ def current_result_of_matchup(team: Team):
 def projected_matchup(team: Team):
     opp_team = Team(*get_team_object(get_matchup_of_team(team)))
     yl = YahooLeague(team.league_id)
-    df = pd.DataFrame(yl.lg.matchups())
+    df = pd.DataFrame(yl.league_yahoo.matchups())
     league_set = (df.fantasy_content.values.tolist()[1][0])
     week_number = league_set['current_week']
     current_date = league_set['edit_key']

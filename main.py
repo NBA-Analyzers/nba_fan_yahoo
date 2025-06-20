@@ -5,18 +5,20 @@ from TeamAnalyzer import TeamAnalyzer
 from LeagueAnalyzer import LeagueAnalyzer
 from nba_api.stats.endpoints import playercareerstats
 from nba_api.stats.static import players
+
 if __name__ == '__main__':
 
-
+    URI_FANTAZY_ID_2024 = '41083'
     ### class YahooLeague
-    uri = YahooLeague('41083')
+    yahoo_fantazy_league = YahooLeague(URI_FANTAZY_ID_2024)
     #uri.sync_game_to_database()
 
     #uri.sync_league_to_database()
-    uri_roster = uri.get_team('3')
+    team_key = yahoo_fantazy_league.get_team_key_by_name('king douchebag')
+    team_roster = yahoo_fantazy_league.get_team_roster(team_key)
     nice_uri_roster = ''
-    print("=== MY Tean ===")
-    print(uri_roster)
+    print("=== MY Team ===")
+    print(team_roster)
     # for r in uri_roster:
     #     nice_uri_roster += f"{r['name']}\n"
     # print(nice_uri_roster)
