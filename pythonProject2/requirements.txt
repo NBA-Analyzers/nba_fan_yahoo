@@ -1,0 +1,5 @@
+pandas~=2.3.0
+pyodbc~=4.0.34
+yahoo_oauth
+yahoo_fantasy_api
+nba_api
