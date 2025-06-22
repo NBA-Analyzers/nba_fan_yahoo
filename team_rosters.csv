@@ -1,0 +1,175 @@
+Team,player_id,name,status,position_type,eligible_positions,selected_position
+Uri's Unmatched Team,5161,CJ McCollum,,P,"['PG', 'SG', 'G', 'Util']",PG
+Uri's Unmatched Team,5475,Kelly Oubre Jr.,,P,"['SG', 'G', 'SF', 'F', 'Util']",SG
+Uri's Unmatched Team,5433,D'Angelo Russell,,P,"['PG', 'SG', 'G', 'Util']",G
+Uri's Unmatched Team,4614,DeMar DeRozan,,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util']",SF
+Uri's Unmatched Team,10080,Trayce Jackson-Davis,,P,"['PF', 'F', 'C', 'Util']",PF
+Uri's Unmatched Team,5658,Pascal Siakam,,P,"['PF', 'F', 'C', 'Util']",F
+Uri's Unmatched Team,5327,Jusuf Nurkić,,P,"['C', 'Util']",C
+Uri's Unmatched Team,6420,Jaden McDaniels,,P,"['SF', 'PF', 'F', 'Util']",Util
+Uri's Unmatched Team,6753,Keon Ellis,,P,"['SG', 'G', 'SF', 'F', 'Util']",Util
+Uri's Unmatched Team,6695,Jaden Ivey,,P,"['PG', 'SG', 'G', 'Util']",Util
+Uri's Unmatched Team,4244,Kevin Durant,,P,"['SF', 'PF', 'F', 'Util']",BN
+Uri's Unmatched Team,6418,Payton Pritchard,,P,"['PG', 'SG', 'G', 'Util']",BN
+Uri's Unmatched Team,5842,Derrick White,,P,"['PG', 'SG', 'G', 'Util']",BN
+Uri's Unmatched Team,5318,Julius Randle,GTD,P,"['PF', 'F', 'Util', 'IL+']",IL
+The Boorkini youth movement,10108,Amen Thompson,,P,"['PG', 'SG', 'G', 'SF', 'F', 'Util']",PG
+The Boorkini youth movement,6216,Jordan Poole,GTD,P,"['PG', 'SG', 'G', 'Util', 'IL+']",SG
+The Boorkini youth movement,4725,Paul George,,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util']",G
+The Boorkini youth movement,4896,Kawhi Leonard,GTD,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util', 'IL+']",SF
+The Boorkini youth movement,6549,Jonathan Kuminga,,P,"['PF', 'F', 'Util']",PF
+The Boorkini youth movement,6028,Donte DiVincenzo,,P,"['SG', 'G', 'SF', 'F', 'Util']",F
+The Boorkini youth movement,6402,Jalen Smith,,P,"['PF', 'F', 'C', 'Util']",C
+The Boorkini youth movement,5754,Alex Caruso,,P,"['PG', 'SG', 'G', 'Util']",Util
+The Boorkini youth movement,6694,Keegan Murray,,P,"['SF', 'PF', 'F', 'Util']",Util
+The Boorkini youth movement,6053,Bruce Brown,,P,"['PG', 'SG', 'G', 'SF', 'F', 'Util']",Util
+The Boorkini youth movement,5602,Jaylen Brown,,P,"['SG', 'G', 'SF', 'F', 'Util']",BN
+The Boorkini youth movement,5464,Kristaps Porziņģis,INJ,P,"['PF', 'F', 'C', 'Util', 'IL', 'IL+']",BN
+The Boorkini youth movement,5473,Devin Booker,,P,"['PG', 'SG', 'G', 'SF', 'F', 'Util']",BN
+The Boorkini youth movement,6703,Jalen Duren,GTD,P,"['C', 'Util', 'IL+']",IL+
+DraCaris LeVert,6022,Shai Gilgeous-Alexander,,P,"['PG', 'SG', 'G', 'Util']",PG
+DraCaris LeVert,6032,Grayson Allen,GTD,P,"['SG', 'G', 'SF', 'F', 'Util', 'IL+']",SG
+DraCaris LeVert,5159,Kentavious Caldwell-Pope,,P,"['SG', 'G', 'SF', 'F', 'Util']",G
+DraCaris LeVert,6577,Herbert Jones,,P,"['SF', 'PF', 'F', 'Util']",SF
+DraCaris LeVert,6163,Zion Williamson,GTD,P,"['PF', 'F', 'C', 'Util', 'IL+']",PF
+DraCaris LeVert,6450,Paul Reed,,P,"['PF', 'F', 'C', 'Util']",F
+DraCaris LeVert,5069,Draymond Green,,P,"['PF', 'F', 'C', 'Util']",C
+DraCaris LeVert,6406,Aaron Nesmith,,P,"['SF', 'PF', 'F', 'Util']",Util
+DraCaris LeVert,5663,Ivica Zubac,,P,"['C', 'Util']",Util
+DraCaris LeVert,4912,Jimmy Butler III,GTD,P,"['SF', 'PF', 'F', 'Util', 'IL+']",Util
+DraCaris LeVert,6433,Tre Jones,,P,"['PG', 'G', 'Util']",BN
+DraCaris LeVert,5856,Isaiah Hartenstein,,P,"['C', 'Util']",BN
+DraCaris LeVert,6619,Sam Hauser,,P,"['SF', 'PF', 'F', 'Util']",BN
+DraCaris LeVert,5294,Joel Embiid,,P,"['C', 'Util']",IL
+2Tall2Miss,6613,Jose Alvarado,,P,"['PG', 'G', 'Util']",PG
+2Tall2Miss,6499,Naji Marshall,,P,"['SG', 'G', 'SF', 'F', 'Util']",SG
+2Tall2Miss,6019,Collin Sexton,GTD,P,"['PG', 'SG', 'G', 'Util', 'IL+']",G
+2Tall2Miss,6691,Paolo Banchero,,P,"['SF', 'PF', 'F', 'Util']",SF
+2Tall2Miss,6171,Rui Hachimura,,P,"['SF', 'PF', 'F', 'Util']",PF
+2Tall2Miss,5292,Andrew Wiggins,,P,"['SF', 'PF', 'F', 'Util']",F
+2Tall2Miss,5007,Anthony Davis,,P,"['PF', 'F', 'C', 'Util']",C
+2Tall2Miss,10092,Jaime Jaquez Jr.,,P,"['SG', 'G', 'SF', 'F', 'Util']",Util
+2Tall2Miss,10048,Scoot Henderson,GTD,P,"['PG', 'G', 'Util', 'IL+']",Util
+2Tall2Miss,5352,Nikola Jokić,,P,"['C', 'Util']",Util
+2Tall2Miss,6560,Tre Mann,,P,"['PG', 'SG', 'G', 'Util']",BN
+2Tall2Miss,5295,Aaron Gordon,,P,"['PF', 'F', 'Util']",BN
+2Tall2Miss,5958,Deandre Ayton,,P,"['C', 'Util']",BN
+2Tall2Miss,6073,Duncan Robinson,,P,"['SG', 'G', 'SF', 'F', 'Util']",IL+
+Scottie Doesn't Know,5638,Jamal Murray,,P,"['PG', 'SG', 'G', 'Util']",PG
+Scottie Doesn't Know,6397,Isaac Okoro,,P,"['SG', 'G', 'SF', 'F', 'Util']",SG
+Scottie Doesn't Know,5187,Dennis Schröder,,P,"['PG', 'G', 'Util']",G
+Scottie Doesn't Know,6021,Mikal Bridges,,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util']",SF
+Scottie Doesn't Know,6401,Deni Avdija,,P,"['SF', 'PF', 'F', 'Util']",PF
+Scottie Doesn't Know,5840,Kyle Kuzma,GTD,P,"['SF', 'PF', 'F', 'Util', 'IL+']",F
+Scottie Doesn't Know,5497,Richaun Holmes,,P,"['PF', 'F', 'C', 'Util']",C
+Scottie Doesn't Know,5832,John Collins,GTD,P,"['PF', 'F', 'C', 'Util', 'IL+']",Util
+Scottie Doesn't Know,6169,Coby White,,P,"['PG', 'SG', 'G', 'Util']",Util
+Scottie Doesn't Know,5164,Kelly Olynyk,,P,"['PF', 'F', 'C', 'Util']",Util
+Scottie Doesn't Know,10100,Keyonte George,,P,"['PG', 'SG', 'G', 'Util']",BN
+Scottie Doesn't Know,6023,Miles Bridges,GTD,P,"['SF', 'PF', 'F', 'Util', 'IL+']",BN
+Scottie Doesn't Know,6355,Anthony Edwards,,P,"['SG', 'G', 'SF', 'F', 'Util']",BN
+Scottie Doesn't Know,6515,Scottie Barnes,,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util']",IL
+Scottie Doesn't Know,10096,Ausar Thompson,GTD,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util', 'IL+']",IL+
+yoav's Champion Team,4563,James Harden,,P,"['PG', 'SG', 'G', 'Util']",PG
+yoav's Champion Team,5651,Caris LeVert,GTD,P,"['SG', 'G', 'SF', 'F', 'Util', 'IL+']",SG
+yoav's Champion Team,5506,Norman Powell,,P,"['SG', 'G', 'SF', 'F', 'Util']",G
+yoav's Champion Team,5765,Jayson Tatum,,P,"['SF', 'PF', 'F', 'Util']",SF
+yoav's Champion Team,5482,Bobby Portis,,P,"['PF', 'F', 'C', 'Util']",PF
+yoav's Champion Team,5341,Kyle Anderson,,P,"['SF', 'PF', 'F', 'Util']",F
+yoav's Champion Team,6434,Nick Richards,GTD,P,"['C', 'Util', 'IL+']",C
+yoav's Champion Team,5824,Malik Monk,GTD,P,"['SG', 'G', 'SF', 'F', 'Util', 'IL+']",Util
+yoav's Champion Team,5582,T.J. McConnell,,P,"['PG', 'G', 'Util']",Util
+yoav's Champion Team,5197,Rudy Gobert,,P,"['C', 'Util']",Util
+yoav's Champion Team,4913,Bojan Bogdanović,NA,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util']",BN
+yoav's Champion Team,5350,Jerami Grant,GTD,P,"['SF', 'PF', 'F', 'Util', 'IL+']",BN
+yoav's Champion Team,6226,Daniel Gafford,,P,"['PF', 'F', 'C', 'Util']",BN
+yoav's Champion Team,5667,Malcolm Brogdon,,P,"['PG', 'SG', 'G', 'Util']",IL
+yoav's Champion Team,4612,Stephen Curry,,P,"['PG', 'SG', 'G', 'Util']",IL+
+king douchebag,6275,Caleb Martin,,P,"['SG', 'G', 'SF', 'F', 'Util']",SG
+king douchebag,10115,Brandin Podziemski,,P,"['SG', 'G', 'Util']",G
+king douchebag,3704,LeBron James,,P,"['SF', 'PF', 'F', 'Util']",SF
+king douchebag,5185,Giannis Antetokounmpo,,P,"['PF', 'F', 'C', 'Util']",PF
+king douchebag,5073,Khris Middleton,O,P,"['SF', 'PF', 'F', 'Util', 'IL+']",F
+king douchebag,6253,Naz Reid,,P,"['PF', 'F', 'C', 'Util']",C
+king douchebag,5012,Damian Lillard,,P,"['PG', 'G', 'Util']",Util
+king douchebag,5487,Larry Nance Jr.,,P,"['PF', 'F', 'C', 'Util']",Util
+king douchebag,6254,Luguentz Dort,,P,"['SG', 'G', 'SF', 'F', 'Util']",Util
+king douchebag,6513,Jalen Green,,P,"['PG', 'SG', 'G', 'Util']",BN
+king douchebag,6219,Nic Claxton,,P,"['C', 'Util']",BN
+king douchebag,5767,De'Aaron Fox,,P,"['PG', 'G', 'Util']",BN
+king douchebag,6217,Keldon Johnson,GTD,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util', 'IL+']",BN
+king douchebag,5357,Jordan Clarkson,GTD,P,"['PG', 'SG', 'G', 'Util', 'IL+']",IL
+king douchebag,6174,P.J. Washington,,P,"['PF', 'F', 'C', 'Util']",IL+
+The Wall,6417,Immanuel Quickley,,P,"['PG', 'SG', 'G', 'Util']",PG
+The Wall,6403,Devin Vassell,GTD,P,"['SG', 'G', 'SF', 'F', 'Util', 'IL+']",SG
+The Wall,6404,Tyrese Haliburton,GTD,P,"['PG', 'SG', 'G', 'Util', 'IL+']",G
+The Wall,6606,Austin Reaves,,P,"['PG', 'SG', 'G', 'SF', 'F', 'Util']",SF
+The Wall,10094,Victor Wembanyama,,P,"['PF', 'F', 'C', 'Util']",PF
+The Wall,5905,Royce O'Neale,,P,"['SG', 'G', 'SF', 'F', 'Util']",F
+The Wall,6356,James Wiseman,NA,P,"['C', 'Util']",C
+The Wall,4246,Mike Conley,,P,"['PG', 'G', 'Util']",Util
+The Wall,6232,Bol Bol,,P,"['PF', 'F', 'C', 'Util']",Util
+The Wall,4472,Brook Lopez,,P,"['C', 'Util']",Util
+The Wall,6025,Michael Porter Jr.,,P,"['SF', 'PF', 'F', 'Util']",BN
+The Wall,6571,Day'Ron Sharpe,GTD,P,"['C', 'Util', 'IL+']",BN
+The Wall,6224,Cody Martin,GTD,P,"['SG', 'G', 'SF', 'F', 'Util', 'IL+']",BN
+The Wall,6395,LaMelo Ball,GTD,P,"['PG', 'SG', 'G', 'Util', 'IL+']",IL
+The Wall,6558,Alperen Şengün,GTD,P,"['C', 'Util', 'IL+']",IL+
+Grimes for MVP,6413,Tyrese Maxey,,P,"['PG', 'SG', 'G', 'Util']",PG
+Grimes for MVP,4892,Klay Thompson,,P,"['SG', 'G', 'SF', 'F', 'Util']",SG
+Grimes for MVP,6044,Jalen Brunson,,P,"['PG', 'G', 'Util']",G
+Grimes for MVP,6550,Franz Wagner,,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util']",SF
+Grimes for MVP,6559,Trey Murphy III,,P,"['SF', 'PF', 'F', 'Util']",PF
+Grimes for MVP,6562,Jalen Johnson,GTD,P,"['SF', 'PF', 'F', 'Util', 'IL+']",F
+Grimes for MVP,5827,Bam Adebayo,,P,"['C', 'Util']",C
+Grimes for MVP,4901,Tobias Harris,,P,"['SF', 'PF', 'F', 'Util']",Util
+Grimes for MVP,5640,Jakob Poeltl,GTD,P,"['C', 'Util', 'IL+']",Util
+Grimes for MVP,5471,Myles Turner,,P,"['C', 'Util']",Util
+Grimes for MVP,5643,Taurean Prince,,P,"['SF', 'PF', 'F', 'Util']",BN
+Grimes for MVP,5349,Spencer Dinwiddie,,P,"['PG', 'SG', 'G', 'Util']",BN
+Grimes for MVP,5650,Malik Beasley,,P,"['SG', 'G', 'SF', 'F', 'Util']",BN
+Grimes for MVP,6422,Desmond Bane,GTD,P,"['SG', 'G', 'SF', 'F', 'Util', 'IL+']",IL
+Maccabi Secret,6516,Jalen Suggs,,P,"['PG', 'SG', 'G', 'Util']",PG
+Maccabi Secret,5660,Dejounte Murray,,P,"['PG', 'SG', 'G', 'Util']",SG
+Maccabi Secret,5843,Josh Hart,,P,"['SG', 'G', 'SF', 'F', 'Util']",G
+Maccabi Secret,6548,Josh Giddey,,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util']",SF
+Maccabi Secret,5642,Domantas Sabonis,,P,"['PF', 'F', 'C', 'Util']",PF
+Maccabi Secret,6267,Max Strus,,P,"['SG', 'G', 'SF', 'F', 'Util']",F
+Maccabi Secret,6693,Jabari Smith Jr.,,P,"['PF', 'F', 'C', 'Util']",C
+Maccabi Secret,4152,Kyle Lowry,,P,"['PG', 'G', 'Util']",Util
+Maccabi Secret,5484,Tyus Jones,GTD,P,"['PG', 'G', 'Util', 'IL+']",Util
+Maccabi Secret,4886,Jonas Valančiūnas,,P,"['C', 'Util']",Util
+Maccabi Secret,3930,Chris Paul,,P,"['PG', 'G', 'Util']",BN
+Maccabi Secret,4840,Kyrie Irving,GTD,P,"['PG', 'SG', 'G', 'Util', 'IL+']",BN
+Maccabi Secret,4897,Nikola Vučević,,P,"['C', 'Util']",BN
+Maccabi Secret,5317,Marcus Smart,GTD,P,"['PG', 'SG', 'G', 'Util', 'IL+']",IL+
+Ugly Kid Joe,6167,Darius Garland,,P,"['PG', 'G', 'Util']",PG
+Ugly Kid Joe,6512,Cade Cunningham,,P,"['PG', 'SG', 'G', 'Util']",SG
+Ugly Kid Joe,10104,Brandon Miller,GTD,P,"['SG', 'G', 'SF', 'F', 'Util', 'IL+']",G
+Ugly Kid Joe,6580,Ayo Dosunmu,,P,"['SG', 'G', 'SF', 'F', 'Util']",SF
+Ugly Kid Joe,6699,Jeremy Sochan,,P,"['PG', 'G', 'PF', 'F', 'Util']",PF
+Ugly Kid Joe,5013,Harrison Barnes,,P,"['SF', 'PF', 'F', 'Util']",F
+Ugly Kid Joe,10097,Dereck Lively II,,P,"['C', 'Util']",C
+Ugly Kid Joe,5727,Fred VanVleet,GTD,P,"['PG', 'G', 'Util', 'IL+']",Util
+Ugly Kid Joe,5601,Brandon Ingram,,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util']",Util
+Ugly Kid Joe,5338,Bogdan Bogdanović,,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util']",Util
+Ugly Kid Joe,5637,Buddy Hield,,P,"['SG', 'G', 'SF', 'F', 'Util']",BN
+Ugly Kid Joe,6572,Santi Aldama,,P,"['PF', 'F', 'C', 'Util']",BN
+Ugly Kid Joe,6692,Chet Holmgren,,P,"['PF', 'F', 'C', 'Util']",BN
+Ugly Kid Joe,6015,Jaren Jackson Jr.,GTD,P,"['PF', 'F', 'C', 'Util', 'IL+']",IL
+Ugly Kid Joe,6514,Evan Mobley,,P,"['PF', 'F', 'C', 'Util']",IL+
+Arul minion's,5826,Donovan Mitchell,GTD,P,"['PG', 'SG', 'G', 'Util', 'IL+']",PG
+Arul minion's,5009,Bradley Beal,,P,"['PG', 'SG', 'G', 'Util']",SG
+Arul minion's,5476,Terry Rozier,,P,"['PG', 'SG', 'G', 'Util']",G
+Arul minion's,6030,Kevin Huerter,GTD,P,"['SG', 'G', 'SF', 'F', 'Util', 'IL+']",SF
+Arul minion's,6173,Cameron Johnson,GTD,P,"['SF', 'PF', 'F', 'Util', 'IL+']",PF
+Arul minion's,6702,Jalen Williams,,P,"['SG', 'G', 'SF', 'PF', 'F', 'Util']",F
+Arul minion's,5835,Jarrett Allen,,P,"['C', 'Util']",C
+Arul minion's,5763,Markelle Fultz,,P,"['PG', 'SG', 'G', 'Util']",Util
+Arul minion's,6412,Precious Achiuwa,,P,"['PF', 'F', 'C', 'Util']",Util
+Arul minion's,5959,Marvin Bagley III,GTD,P,"['PF', 'F', 'C', 'Util', 'IL+']",Util
+Arul minion's,6035,Anfernee Simons,GTD,P,"['PG', 'SG', 'G', 'Util', 'IL+']",BN
+Arul minion's,5769,Lauri Markkanen,GTD,P,"['SF', 'PF', 'F', 'Util', 'IL+']",BN
+Arul minion's,6712,Walker Kessler,,P,"['C', 'Util']",BN
+Arul minion's,6569,Cam Thomas,,P,"['SG', 'G', 'SF', 'F', 'Util']",IL
+Arul minion's,6175,Tyler Herro,,P,"['PG', 'SG', 'G', 'Util']",IL+

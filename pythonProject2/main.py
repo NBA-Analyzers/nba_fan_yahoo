@@ -1,44 +1,24 @@
-import warnings
 
-from DataBase import *
-from AdvancedTools import AdvancedTools
-from Leagues.leagueAccessor import *
-from Leagues.leagueAnalyzer import analyze_matchup, league_ranking, matchup_analyzer
-from Players.playerAccessor import *
-from Players.player import Player
-from Players.playerAnalyzer import *
-from Teams.teamAccessor import *
-from TeamPlayer.teamPlayerAccessor import *
-from Teams.teamAnalyzer import *
 
-if __name__ == '__main__':
-    ### class Playerr
-    # player = Player('Chris Paul', 101108)
-    # print(get_players_new_stats(player,find_current_year()))
-    # print(player.full_name,player.id)
-    # print(get_all_players(True))
-    # print(career_stats(player))
-    # print(current_season_stats(player))
-    # print(last_season_stats(player))
-    # print(adj_fantasy('2023-24',player))
-    # print(pg_adj_fantasy('2023-24',player))#25 seconds
-    # print(pg_adj_fantasy('2022-23',player,True))
-    # print(get_player_nba_team(player))
-    # print(get_players_new_stats(player))
-    # print(update_players_db())
-    # print(search_player_in_leagues(player))
-    # print(fantasy_points(find_current_year(),player))#25 seconds
-    # print(specific_categories(find_current_year(),player,['AST','REB','PTS','TOV']))
-    # print(specific_categories_points(find_current_year(), player, ['AST', 'REB', 'PTS', 'TOV']))
-    # print(get_best_player_overall_in_categories(find_current_year(),'Util',['FGM','FGA','FTM','FTA','FG3M','PTS','AST', 'REB', 'STL','BLK', 'TOV']))
+# from Leagues.leagueAccessor import LeagueAccessor
+# from Leagues.league import League
 
+
+
+
+
+
+import time
+
+import requests
+
+
+def test_team():
     ### class Team
-    team = Team('428.l.144401.t.1', 'Uri\'s Game-Changing Team', 'IFSL - Robinson League', '428.l.144401')
-    # print(get_team_roster(team,True))
+    # team = Team('428.l.144401.t.1', 'Uri\'s Game-Changing Team', 'IFSL - Robinson League', '428.l.144401')
     # print(get_team_roster(team))
     # print(team_size(team,True))
     # print(team_size(team))
-    #
     # print(pg_avg_stats_team('2023-24', team))
     # print(pg_avg_stats_team('2022-23', team))
     # print(pg_team_stats(find_current_year(), team, True))
@@ -51,8 +31,8 @@ if __name__ == '__main__':
     # print(sub_player_effect(['Luka Doncic', 'Kevin Durant'], ['Lebron James', 'Chris Paul'], team, find_current_year()))
     # print(get_matchup_of_team(team))
     # print(get_team_object(team.team_name))
-    print(what_categories_you_good(find_current_year(), team))
-    print(rank_what_you_good(find_current_year(),team))
+    # print(what_categories_you_good(find_current_year(), team))
+    # print(rank_what_you_good(find_current_year(),team))
     # pd.set_option('display.max_rows', None)
     # pd.set_option('display.max_columns', None)
     # print('### matchup until now ###')
@@ -61,7 +41,10 @@ if __name__ == '__main__':
     # print(projected_matchup(team))
     # print('### the projected result of matchup """')
     # print(combine_match(team))
+    print('a')
 
+
+def test_league():
     ## class League
     # sync_leagues_to_database()
     # league = League('428.l.144401', 'Victorious Secret')
@@ -77,7 +60,9 @@ if __name__ == '__main__':
     # print(league_stats(find_current_year(), league))
     # print(league_ranking(find_current_year(), league))
     # print(matchup_analyzer(8, league))
-
+    print('a')
+    
+def test_stuff_todo_organize():
     # update_players_db()
     # update_league_teams_db()
     # update
@@ -211,3 +196,119 @@ if __name__ == '__main__':
     # at = AdvancedTools()
     # print(at.projected_matchup())
     # print(at.combine_match())
+    
+      ### class Playerr
+    # player = Player('Chris Paul', 101108)
+    # print(get_players_new_stats(player,find_current_year()))
+    # print(player.full_name,player.id)
+    # print(get_all_players(True))
+    # print(career_stats(player))
+    # print(current_season_stats(player))
+    # print(last_season_stats(player))
+    # print(adj_fantasy('2023-24',player))
+    # print(pg_adj_fantasy('2023-24',player))#25 seconds
+    # print(pg_adj_fantasy('2022-23',player,True))
+    # print(get_player_nba_team(player))
+    # print(get_players_new_stats(player))
+    # print(update_players_db())
+    # print(search_player_in_leagues(player))
+    # print(fantasy_points(find_current_year(),player))#25 seconds
+    # print(specific_categories(find_current_year(),player,['AST','REB','PTS','TOV']))
+    # print(specific_categories_points(find_current_year(), player, ['AST', 'REB', 'PTS', 'TOV']))
+    # print(get_best_player_overall_in_categories(find_current_year(),'Util',['FGM','FGA','FTM','FTA','FG3M','PTS','AST', 'REB', 'STL','BLK', 'TOV']))
+    print('a')
+    
+    
+if __name__ == '__main__':
+    URI_FANTAZY_ID_2024 = '41083'
+
+    # test_team()
+    
+    # test_league()
+    
+    # test_stuff_todo_organize() 
+    
+    # Initial Configurations
+    import yahoo_fantasy_api as yfa
+    from yahoo_oauth import OAuth2
+    from nba_api.stats.static import players
+    import pandas as pd
+    from nba_api.stats.endpoints import playercareerstats
+
+
+
+    # sc = OAuth2(None, None, from_file='./pythonProject2/oauth22.json')
+    # yahoo_game = yfa.Game(sc, 'nba')
+    
+    #Test League
+    URI_FANTAZY_ID_2024 = '41083'
+    NBA_SPORT_CODE = '428'
+    # league_yahoo = yahoo_game.to_league(f"{NBA_SPORT_CODE}.l.{URI_FANTAZY_ID_2024}")
+    
+    # Specific Team
+    # team_key = yahoo_fantazy_league.get_team_key_by_name('king douchebag')
+    # team_roster = yahoo_fantazy_league.get_team_roster(team_key)
+
+
+
+
+    # TODO - Data Plan
+    # 1. Sync League Details and Settings (How many teams? How many weeks? Playoff structure)
+    # ################   DONE   ##################
+    
+    # league_settings_df = pd.DataFrame([league_yahoo.settings()])
+    # league_settings_df.to_csv("league_settings.csv", index=True)
+    
+    # 2. Sync all Teams with Roster
+    # ################   DONE   ##################
+
+    # league_yahoo.teams().values
+    # team_rosters = {team_data['name']: league_yahoo.to_team(team_data['team_key']).roster() for team_data in league_yahoo.teams().values()}
+    # team_rosters_formatted = [{"Team": team, **player} for team, roster in team_rosters.items() for player in roster]
+    # pd.DataFrame(team_rosters_formatted).to_csv("team_rosters.csv", index=False)
+    
+    # 4. Sync Players Stat
+    player_data = players.get_active_players()
+    data = []
+
+    # Loop through all players and fetch stats safely
+    for i, player in enumerate(player_data):
+        if i<92:
+            continue
+        try:
+            print(f"[{i+1}/{len(player_data)}] Fetching {player['full_name']}")
+            stats_obj = playercareerstats.PlayerCareerStats(player_id=player["id"], timeout=10)
+            stats = {
+                'name': player['full_name'],
+                'stats_legend': stats_obj.season_totals_regular_season.data['headers'],
+                'full_stats_according_to_legend': [only_stats for only_stats in stats_obj.season_totals_regular_season.data['data']]
+                }
+            data.append(stats)
+        except requests.exceptions.ReadTimeout as ex:
+            print(f"Timeout for player {player['full_name']}: {ex}")
+            # time.sleep(5)
+
+        except Exception as e:
+            print(f"Error with player {player['full_name']}: {e}")
+        
+    pd.DataFrame(data).to_csv("players_stats2.csv", index=False)
+   
+
+    print("✅ Finished fetching all stats.")
+    
+    # 3. Sync Schedule, Matchups, Playoff Starts 
+    # 5. Sync Games Scoreboard
+    
+    # TODO - Test Plan
+    # 1. League rules
+    # 2. All Players in which Teams and FA players
+    # 3. (Bonus) Best players in Teams
+    # 4. Matchup Schedule and Playoff schedule
+    # 5. If Matchup have happened, Check Table, Matchup scoreboard, (bonus) what could be done better.
+    # 6. Estimation about Matchup Scores in the future.
+    # 7. General questions on team improvement.
+    # 8. Estimation on best teams in the league and ranking each category
+    
+
+    
+    
