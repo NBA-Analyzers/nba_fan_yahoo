@@ -328,15 +328,19 @@ if __name__ == '__main__':
     # 2. Sync all Teams with Roster
     # ################   DONE   ##################
 
-    # team_rosters = {team_data['name']: league_yahoo.to_team(team_data['team_key']).roster() for team_data in league_yahoo.teams().values()}
-    # team_rosters_formatted = [{"Team": team, **player} for team, roster in team_rosters.items() for player in roster]
-    # team_rosters_formatted = [{**p, "status": p["status"] if p.get("status") else "active"} for p in team_rosters_formatted]
-    # team_dict= defaultdict(list)
-    # for player in team_rosters_formatted:
-    #     team_dict[player['Team']].append(player)
-    # team_rosters_formatted_json =json.dumps(team_dict,indent=2)
-    # with open("team_roster.json", "w") as f:
-    #     f.write(team_rosters_formatted_json) 
+    team_rosters = {team_data['name']: league_yahoo.to_team(team_data['team_key']).roster() for team_data in league_yahoo.teams().values()}
+    team_rosters_formatted = [{"Team": team, **player} for team, roster in team_rosters.items() for player in roster]
+    team_rosters_formatted = [{**p, "status": p["status"] if p.get("status") else "active"} for p in team_rosters_formatted]
+    
+    team_dict= defaultdict(list)
+    for player in team_rosters_formatted:
+        team = player['Team']
+        del player['Team']           # Remove the 'Team' key
+        team_dict[team].append(player)
+        
+    team_rosters_formatted_json =json.dumps(team_dict,indent=2)
+    with open("team_roster.json", "w") as f:
+        f.write(team_rosters_formatted_json) 
         
            
     # 3. Sync Players Stat (TODO)

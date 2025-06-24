@@ -1,7 +1,6 @@
 {
   "Uri's Unmatched Team": [
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 5161,
       "name": "CJ McCollum",
       "status": "active",
@@ -15,7 +14,6 @@
       "selected_position": "PG"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 5475,
       "name": "Kelly Oubre Jr.",
       "status": "active",
@@ -30,7 +28,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 5433,
       "name": "D'Angelo Russell",
       "status": "active",
@@ -44,7 +41,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 4614,
       "name": "DeMar DeRozan",
       "status": "active",
@@ -60,7 +56,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 10080,
       "name": "Trayce Jackson-Davis",
       "status": "active",
@@ -74,7 +69,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 5658,
       "name": "Pascal Siakam",
       "status": "active",
@@ -88,7 +82,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 5327,
       "name": "Jusuf Nurki\u0107",
       "status": "active",
@@ -100,7 +93,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 6420,
       "name": "Jaden McDaniels",
       "status": "active",
@@ -114,7 +106,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 6753,
       "name": "Keon Ellis",
       "status": "active",
@@ -129,7 +120,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 6695,
       "name": "Jaden Ivey",
       "status": "active",
@@ -143,7 +133,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 4244,
       "name": "Kevin Durant",
       "status": "active",
@@ -157,7 +146,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 6418,
       "name": "Payton Pritchard",
       "status": "active",
@@ -171,7 +159,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 5842,
       "name": "Derrick White",
       "status": "active",
@@ -185,7 +172,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Uri's Unmatched Team",
       "player_id": 5318,
       "name": "Julius Randle",
       "status": "GTD",
@@ -201,7 +187,6 @@
   ],
   "The Boorkini youth movement": [
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 10108,
       "name": "Amen Thompson",
       "status": "active",
@@ -217,7 +202,6 @@
       "selected_position": "PG"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 6216,
       "name": "Jordan Poole",
       "status": "GTD",
@@ -232,7 +216,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 4725,
       "name": "Paul George",
       "status": "active",
@@ -248,7 +231,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 4896,
       "name": "Kawhi Leonard",
       "status": "GTD",
@@ -265,7 +247,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 6549,
       "name": "Jonathan Kuminga",
       "status": "active",
@@ -278,7 +259,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 6028,
       "name": "Donte DiVincenzo",
       "status": "active",
@@ -293,7 +273,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 6402,
       "name": "Jalen Smith",
       "status": "active",
@@ -307,7 +286,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 5754,
       "name": "Alex Caruso",
       "status": "active",
@@ -321,7 +299,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 6694,
       "name": "Keegan Murray",
       "status": "active",
@@ -335,7 +312,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 6053,
       "name": "Bruce Brown",
       "status": "active",
@@ -351,7 +327,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 5602,
       "name": "Jaylen Brown",
       "status": "active",
@@ -366,7 +341,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 5464,
       "name": "Kristaps Porzi\u0146\u0123is",
       "status": "INJ",
@@ -382,7 +356,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 5473,
       "name": "Devin Booker",
       "status": "active",
@@ -398,7 +371,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "The Boorkini youth movement",
       "player_id": 6703,
       "name": "Jalen Duren",
       "status": "GTD",
@@ -413,7 +385,6 @@
   ],
   "DraCaris LeVert": [
     {
-      "Team": "DraCaris LeVert",
       "player_id": 6022,
       "name": "Shai Gilgeous-Alexander",
       "status": "active",
@@ -427,7 +398,6 @@
       "selected_position": "PG"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 6032,
       "name": "Grayson Allen",
       "status": "GTD",
@@ -443,7 +413,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 5159,
       "name": "Kentavious Caldwell-Pope",
       "status": "active",
@@ -458,7 +427,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 6577,
       "name": "Herbert Jones",
       "status": "active",
@@ -472,7 +440,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 6163,
       "name": "Zion Williamson",
       "status": "GTD",
@@ -487,7 +454,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 6450,
       "name": "Paul Reed",
       "status": "active",
@@ -501,7 +467,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 5069,
       "name": "Draymond Green",
       "status": "active",
@@ -515,7 +480,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 6406,
       "name": "Aaron Nesmith",
       "status": "active",
@@ -529,7 +493,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 5663,
       "name": "Ivica Zubac",
       "status": "active",
@@ -541,7 +504,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 4912,
       "name": "Jimmy Butler III",
       "status": "GTD",
@@ -556,7 +518,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 6433,
       "name": "Tre Jones",
       "status": "active",
@@ -569,7 +530,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 5856,
       "name": "Isaiah Hartenstein",
       "status": "active",
@@ -581,7 +541,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 6619,
       "name": "Sam Hauser",
       "status": "active",
@@ -595,7 +554,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "DraCaris LeVert",
       "player_id": 5294,
       "name": "Joel Embiid",
       "status": "active",
@@ -609,7 +567,6 @@
   ],
   "2Tall2Miss": [
     {
-      "Team": "2Tall2Miss",
       "player_id": 6613,
       "name": "Jose Alvarado",
       "status": "active",
@@ -622,7 +579,6 @@
       "selected_position": "PG"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 6499,
       "name": "Naji Marshall",
       "status": "active",
@@ -637,7 +593,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 6019,
       "name": "Collin Sexton",
       "status": "GTD",
@@ -652,7 +607,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 6691,
       "name": "Paolo Banchero",
       "status": "active",
@@ -666,7 +620,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 6171,
       "name": "Rui Hachimura",
       "status": "active",
@@ -680,7 +633,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 5292,
       "name": "Andrew Wiggins",
       "status": "active",
@@ -694,7 +646,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 5007,
       "name": "Anthony Davis",
       "status": "active",
@@ -708,7 +659,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 10092,
       "name": "Jaime Jaquez Jr.",
       "status": "active",
@@ -723,7 +673,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 10048,
       "name": "Scoot Henderson",
       "status": "GTD",
@@ -737,7 +686,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 5352,
       "name": "Nikola Joki\u0107",
       "status": "active",
@@ -749,7 +697,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 6560,
       "name": "Tre Mann",
       "status": "active",
@@ -763,7 +710,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 5295,
       "name": "Aaron Gordon",
       "status": "active",
@@ -776,7 +722,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 5958,
       "name": "Deandre Ayton",
       "status": "active",
@@ -788,7 +733,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "2Tall2Miss",
       "player_id": 6073,
       "name": "Duncan Robinson",
       "status": "active",
@@ -805,7 +749,6 @@
   ],
   "Scottie Doesn't Know": [
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 5638,
       "name": "Jamal Murray",
       "status": "active",
@@ -819,7 +762,6 @@
       "selected_position": "PG"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 6397,
       "name": "Isaac Okoro",
       "status": "active",
@@ -834,7 +776,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 5187,
       "name": "Dennis Schr\u00f6der",
       "status": "active",
@@ -847,7 +788,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 6021,
       "name": "Mikal Bridges",
       "status": "active",
@@ -863,7 +803,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 6401,
       "name": "Deni Avdija",
       "status": "active",
@@ -877,7 +816,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 5840,
       "name": "Kyle Kuzma",
       "status": "GTD",
@@ -892,7 +830,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 5497,
       "name": "Richaun Holmes",
       "status": "active",
@@ -906,7 +843,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 5832,
       "name": "John Collins",
       "status": "GTD",
@@ -921,7 +857,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 6169,
       "name": "Coby White",
       "status": "active",
@@ -935,7 +870,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 5164,
       "name": "Kelly Olynyk",
       "status": "active",
@@ -949,7 +883,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 10100,
       "name": "Keyonte George",
       "status": "active",
@@ -963,7 +896,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 6023,
       "name": "Miles Bridges",
       "status": "GTD",
@@ -978,7 +910,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 6355,
       "name": "Anthony Edwards",
       "status": "active",
@@ -993,7 +924,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 6515,
       "name": "Scottie Barnes",
       "status": "active",
@@ -1009,7 +939,6 @@
       "selected_position": "IL"
     },
     {
-      "Team": "Scottie Doesn't Know",
       "player_id": 10096,
       "name": "Ausar Thompson",
       "status": "GTD",
@@ -1028,7 +957,6 @@
   ],
   "yoav's Champion Team": [
     {
-      "Team": "yoav's Champion Team",
       "player_id": 4563,
       "name": "James Harden",
       "status": "active",
@@ -1042,7 +970,6 @@
       "selected_position": "PG"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 5651,
       "name": "Caris LeVert",
       "status": "GTD",
@@ -1058,7 +985,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 5506,
       "name": "Norman Powell",
       "status": "active",
@@ -1073,7 +999,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 5765,
       "name": "Jayson Tatum",
       "status": "active",
@@ -1087,7 +1012,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 5482,
       "name": "Bobby Portis",
       "status": "active",
@@ -1101,7 +1025,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 5341,
       "name": "Kyle Anderson",
       "status": "active",
@@ -1115,7 +1038,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 6434,
       "name": "Nick Richards",
       "status": "GTD",
@@ -1128,7 +1050,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 5824,
       "name": "Malik Monk",
       "status": "GTD",
@@ -1144,7 +1065,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 5582,
       "name": "T.J. McConnell",
       "status": "active",
@@ -1157,7 +1077,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 5197,
       "name": "Rudy Gobert",
       "status": "active",
@@ -1169,7 +1088,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 4913,
       "name": "Bojan Bogdanovi\u0107",
       "status": "NA",
@@ -1185,7 +1103,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 5350,
       "name": "Jerami Grant",
       "status": "GTD",
@@ -1200,7 +1117,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 6226,
       "name": "Daniel Gafford",
       "status": "active",
@@ -1214,7 +1130,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 5667,
       "name": "Malcolm Brogdon",
       "status": "active",
@@ -1228,7 +1143,6 @@
       "selected_position": "IL"
     },
     {
-      "Team": "yoav's Champion Team",
       "player_id": 4612,
       "name": "Stephen Curry",
       "status": "active",
@@ -1244,7 +1158,6 @@
   ],
   "king douchebag": [
     {
-      "Team": "king douchebag",
       "player_id": 6275,
       "name": "Caleb Martin",
       "status": "active",
@@ -1259,7 +1172,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "king douchebag",
       "player_id": 10115,
       "name": "Brandin Podziemski",
       "status": "active",
@@ -1272,7 +1184,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "king douchebag",
       "player_id": 3704,
       "name": "LeBron James",
       "status": "active",
@@ -1286,7 +1197,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "king douchebag",
       "player_id": 5185,
       "name": "Giannis Antetokounmpo",
       "status": "active",
@@ -1300,7 +1210,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "king douchebag",
       "player_id": 5073,
       "name": "Khris Middleton",
       "status": "O",
@@ -1315,7 +1224,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "king douchebag",
       "player_id": 6253,
       "name": "Naz Reid",
       "status": "active",
@@ -1329,7 +1237,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "king douchebag",
       "player_id": 5012,
       "name": "Damian Lillard",
       "status": "active",
@@ -1342,7 +1249,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "king douchebag",
       "player_id": 5487,
       "name": "Larry Nance Jr.",
       "status": "active",
@@ -1356,7 +1262,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "king douchebag",
       "player_id": 6254,
       "name": "Luguentz Dort",
       "status": "active",
@@ -1371,7 +1276,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "king douchebag",
       "player_id": 6513,
       "name": "Jalen Green",
       "status": "active",
@@ -1385,7 +1289,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "king douchebag",
       "player_id": 6219,
       "name": "Nic Claxton",
       "status": "active",
@@ -1397,7 +1300,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "king douchebag",
       "player_id": 5767,
       "name": "De'Aaron Fox",
       "status": "active",
@@ -1410,7 +1312,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "king douchebag",
       "player_id": 6217,
       "name": "Keldon Johnson",
       "status": "GTD",
@@ -1427,7 +1328,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "king douchebag",
       "player_id": 5357,
       "name": "Jordan Clarkson",
       "status": "GTD",
@@ -1442,7 +1342,6 @@
       "selected_position": "IL"
     },
     {
-      "Team": "king douchebag",
       "player_id": 6174,
       "name": "P.J. Washington",
       "status": "active",
@@ -1458,7 +1357,6 @@
   ],
   "The Wall": [
     {
-      "Team": "The Wall",
       "player_id": 6417,
       "name": "Immanuel Quickley",
       "status": "active",
@@ -1472,7 +1370,6 @@
       "selected_position": "PG"
     },
     {
-      "Team": "The Wall",
       "player_id": 6403,
       "name": "Devin Vassell",
       "status": "GTD",
@@ -1488,7 +1385,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "The Wall",
       "player_id": 6404,
       "name": "Tyrese Haliburton",
       "status": "GTD",
@@ -1503,7 +1399,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "The Wall",
       "player_id": 6606,
       "name": "Austin Reaves",
       "status": "active",
@@ -1519,7 +1414,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "The Wall",
       "player_id": 10094,
       "name": "Victor Wembanyama",
       "status": "active",
@@ -1533,7 +1427,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "The Wall",
       "player_id": 5905,
       "name": "Royce O'Neale",
       "status": "active",
@@ -1548,7 +1441,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "The Wall",
       "player_id": 6356,
       "name": "James Wiseman",
       "status": "NA",
@@ -1560,7 +1452,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "The Wall",
       "player_id": 4246,
       "name": "Mike Conley",
       "status": "active",
@@ -1573,7 +1464,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "The Wall",
       "player_id": 6232,
       "name": "Bol Bol",
       "status": "active",
@@ -1587,7 +1477,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "The Wall",
       "player_id": 4472,
       "name": "Brook Lopez",
       "status": "active",
@@ -1599,7 +1488,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "The Wall",
       "player_id": 6025,
       "name": "Michael Porter Jr.",
       "status": "active",
@@ -1613,7 +1501,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "The Wall",
       "player_id": 6571,
       "name": "Day'Ron Sharpe",
       "status": "GTD",
@@ -1626,7 +1513,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "The Wall",
       "player_id": 6224,
       "name": "Cody Martin",
       "status": "GTD",
@@ -1642,7 +1528,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "The Wall",
       "player_id": 6395,
       "name": "LaMelo Ball",
       "status": "GTD",
@@ -1657,7 +1542,6 @@
       "selected_position": "IL"
     },
     {
-      "Team": "The Wall",
       "player_id": 6558,
       "name": "Alperen Sengun",
       "status": "GTD",
@@ -1672,7 +1556,6 @@
   ],
   "Grimes for MVP": [
     {
-      "Team": "Grimes for MVP",
       "player_id": 6413,
       "name": "Tyrese Maxey",
       "status": "active",
@@ -1686,7 +1569,6 @@
       "selected_position": "PG"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 4892,
       "name": "Klay Thompson",
       "status": "active",
@@ -1701,7 +1583,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 6044,
       "name": "Jalen Brunson",
       "status": "active",
@@ -1714,7 +1595,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 6550,
       "name": "Franz Wagner",
       "status": "active",
@@ -1730,7 +1610,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 6559,
       "name": "Trey Murphy III",
       "status": "active",
@@ -1744,7 +1623,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 6562,
       "name": "Jalen Johnson",
       "status": "GTD",
@@ -1759,7 +1637,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 5827,
       "name": "Bam Adebayo",
       "status": "active",
@@ -1771,7 +1648,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 4901,
       "name": "Tobias Harris",
       "status": "active",
@@ -1785,7 +1661,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 5640,
       "name": "Jakob Poeltl",
       "status": "GTD",
@@ -1798,7 +1673,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 5471,
       "name": "Myles Turner",
       "status": "active",
@@ -1810,7 +1684,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 5643,
       "name": "Taurean Prince",
       "status": "active",
@@ -1824,7 +1697,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 5349,
       "name": "Spencer Dinwiddie",
       "status": "active",
@@ -1838,7 +1710,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 5650,
       "name": "Malik Beasley",
       "status": "active",
@@ -1853,7 +1724,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Grimes for MVP",
       "player_id": 6422,
       "name": "Desmond Bane",
       "status": "GTD",
@@ -1871,7 +1741,6 @@
   ],
   "Maccabi Secret": [
     {
-      "Team": "Maccabi Secret",
       "player_id": 6516,
       "name": "Jalen Suggs",
       "status": "active",
@@ -1885,7 +1754,6 @@
       "selected_position": "PG"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 5660,
       "name": "Dejounte Murray",
       "status": "active",
@@ -1899,7 +1767,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 5843,
       "name": "Josh Hart",
       "status": "active",
@@ -1914,7 +1781,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 6548,
       "name": "Josh Giddey",
       "status": "active",
@@ -1930,7 +1796,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 5642,
       "name": "Domantas Sabonis",
       "status": "active",
@@ -1944,7 +1809,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 6267,
       "name": "Max Strus",
       "status": "active",
@@ -1959,7 +1823,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 6693,
       "name": "Jabari Smith Jr.",
       "status": "active",
@@ -1973,7 +1836,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 4152,
       "name": "Kyle Lowry",
       "status": "active",
@@ -1986,7 +1848,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 5484,
       "name": "Tyus Jones",
       "status": "GTD",
@@ -2000,7 +1861,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 4886,
       "name": "Jonas Valan\u010di\u016bnas",
       "status": "active",
@@ -2012,7 +1872,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 3930,
       "name": "Chris Paul",
       "status": "active",
@@ -2025,7 +1884,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 4840,
       "name": "Kyrie Irving",
       "status": "GTD",
@@ -2040,7 +1898,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 4897,
       "name": "Nikola Vu\u010devi\u0107",
       "status": "active",
@@ -2052,7 +1909,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Maccabi Secret",
       "player_id": 5317,
       "name": "Marcus Smart",
       "status": "GTD",
@@ -2069,7 +1925,6 @@
   ],
   "Ugly Kid Joe": [
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 6167,
       "name": "Darius Garland",
       "status": "active",
@@ -2082,7 +1937,6 @@
       "selected_position": "PG"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 6512,
       "name": "Cade Cunningham",
       "status": "active",
@@ -2096,7 +1950,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 10104,
       "name": "Brandon Miller",
       "status": "GTD",
@@ -2112,7 +1965,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 6580,
       "name": "Ayo Dosunmu",
       "status": "active",
@@ -2127,7 +1979,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 6699,
       "name": "Jeremy Sochan",
       "status": "active",
@@ -2142,7 +1993,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 5013,
       "name": "Harrison Barnes",
       "status": "active",
@@ -2156,7 +2006,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 10097,
       "name": "Dereck Lively II",
       "status": "active",
@@ -2168,7 +2017,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 5727,
       "name": "Fred VanVleet",
       "status": "GTD",
@@ -2182,7 +2030,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 5601,
       "name": "Brandon Ingram",
       "status": "active",
@@ -2198,7 +2045,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 5338,
       "name": "Bogdan Bogdanovi\u0107",
       "status": "active",
@@ -2214,7 +2060,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 5637,
       "name": "Buddy Hield",
       "status": "active",
@@ -2229,7 +2074,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 6572,
       "name": "Santi Aldama",
       "status": "active",
@@ -2243,7 +2087,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 6692,
       "name": "Chet Holmgren",
       "status": "active",
@@ -2257,7 +2100,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 6015,
       "name": "Jaren Jackson Jr.",
       "status": "GTD",
@@ -2272,7 +2114,6 @@
       "selected_position": "IL"
     },
     {
-      "Team": "Ugly Kid Joe",
       "player_id": 6514,
       "name": "Evan Mobley",
       "status": "active",
@@ -2288,7 +2129,6 @@
   ],
   "Arul minion's": [
     {
-      "Team": "Arul minion's",
       "player_id": 5826,
       "name": "Donovan Mitchell",
       "status": "GTD",
@@ -2303,7 +2143,6 @@
       "selected_position": "PG"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 5009,
       "name": "Bradley Beal",
       "status": "active",
@@ -2317,7 +2156,6 @@
       "selected_position": "SG"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 5476,
       "name": "Terry Rozier",
       "status": "active",
@@ -2331,7 +2169,6 @@
       "selected_position": "G"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 6030,
       "name": "Kevin Huerter",
       "status": "GTD",
@@ -2347,7 +2184,6 @@
       "selected_position": "SF"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 6173,
       "name": "Cameron Johnson",
       "status": "GTD",
@@ -2362,7 +2198,6 @@
       "selected_position": "PF"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 6702,
       "name": "Jalen Williams",
       "status": "active",
@@ -2378,7 +2213,6 @@
       "selected_position": "F"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 5835,
       "name": "Jarrett Allen",
       "status": "active",
@@ -2390,7 +2224,6 @@
       "selected_position": "C"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 5763,
       "name": "Markelle Fultz",
       "status": "active",
@@ -2404,7 +2237,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 6412,
       "name": "Precious Achiuwa",
       "status": "active",
@@ -2418,7 +2250,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 5959,
       "name": "Marvin Bagley III",
       "status": "GTD",
@@ -2433,7 +2264,6 @@
       "selected_position": "Util"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 6035,
       "name": "Anfernee Simons",
       "status": "GTD",
@@ -2448,7 +2278,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 5769,
       "name": "Lauri Markkanen",
       "status": "GTD",
@@ -2463,7 +2292,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 6712,
       "name": "Walker Kessler",
       "status": "active",
@@ -2475,7 +2303,6 @@
       "selected_position": "BN"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 6569,
       "name": "Cam Thomas",
       "status": "active",
@@ -2490,7 +2317,6 @@
       "selected_position": "IL"
     },
     {
-      "Team": "Arul minion's",
       "player_id": 6175,
       "name": "Tyler Herro",
       "status": "active",
