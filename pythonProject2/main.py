@@ -366,10 +366,6 @@ if __name__ == '__main__':
    
 
     # 4. Sync Schedule, Matchups
-   # Get total weeks in the season
-    # start_week = 1 #int(league_yahoo.start_week())
-    # end_week = league_yahoo.end_week() # int(league_yahoo.end_week())
-
     # # Collect all matchups
     # matchup_data = []
     
@@ -379,13 +375,12 @@ if __name__ == '__main__':
     #     matchup = extract_matchup_info(week_matchups['matchups'])
     #     matchup_data.append(matchup)
 
-    
-    # # Convert to DataFrame
+
+    # # Convert to JSON
     # matchup_data_json = json.dumps(matchup_data, indent=2)
     # with open("league_matchups.json", "w") as f:
     #     f.write(matchup_data_json)
 
-    
     # 5. Sync Games Scoreboard, Standings
     # 6. Sync FA players
     
