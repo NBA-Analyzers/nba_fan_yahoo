@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from YahooLeague import YahooLeague
 from DataBase import DataBase as db
 
 

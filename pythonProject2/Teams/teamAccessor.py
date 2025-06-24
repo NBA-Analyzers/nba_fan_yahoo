@@ -13,56 +13,53 @@ from DataBase import DataBase as db, find_last_year, find_current_year
 
 class TeamAccessor(object):
     TEAM_LENGTH = 0
-    ## get team name and stats
     CURRENT_TEAM_STATS_QUERY = f"Select {db.CURRENT_FANTASY_CAT} FROM dbo.yahoo_league_teams where team_name = ? "
     LAST_TEAM_STATS_QUERY = f"Select {db.LAST_SEASON_FANTASY_CAT} FROM dbo.yahoo_league_teams where team_name = ? "
     GET_TEAM_ROSTER_BY_TEAM_KEY = "select player_name from dbo.team_players where team_key =?"
     GET_TEAM_OBJECT_QUERY = "select team_key,team_name,tm.league_name, league_id from dbo.yahoo_league_teams tm join dbo.leagues lg on lg.league_name = tm.league_name where team_name = ?"
     GET_TEAM_OBJECT_BY_KEY_QUERY = "select team_key,team_name,tm.league_name, league_id from dbo.yahoo_league_teams tm join dbo.leagues lg on lg.league_name = tm.league_name where team_key = ?"
 
+    @staticmethod
+    def get_team_object_by_key(team_key):
+        db.cursor.execute(TeamAccessor.GET_TEAM_OBJECT_BY_KEY_QUERY, (team_key,))
+        team_object = db.cursor.fetchall()
+        return team_object[0]
 
-def get_team_object_by_key(team_key):
-    db.cursor.execute(TeamAccessor.GET_TEAM_OBJECT_BY_KEY_QUERY, (team_key,))
-    team_object = db.cursor.fetchall()
-    return team_object[0]
+    @staticmethod
+    def get_team_object(team_name):
+        db.cursor.execute(TeamAccessor.GET_TEAM_OBJECT_QUERY, (team_name,))
+        team_object = db.cursor.fetchall()
+        return team_object[0]
 
+    @staticmethod
+    def get_team_roster(team, from_api=False):
+        if from_api:
+            cur_team = yfa.team.Team(db.sc, team.team_key)
+            team_roster_info = cur_team.roster()
+            team_roster = [i['name'] for i in team_roster_info]
+        else:
+            get_team_roster_by_team_key = "select player_name from dbo.team_players where team_key =?"
+            db.cursor.execute(get_team_roster_by_team_key, (team.team_key,))
+            team_roster_query = db.cursor.fetchall()
+            team_roster = [i[0] for i in team_roster_query]
+        return team_roster
 
-def get_team_object(team_name):
-    db.cursor.execute(TeamAccessor.GET_TEAM_OBJECT_QUERY, (team_name,))
-    team_object = db.cursor.fetchall()
-    return team_object[0]
+    @staticmethod
+    def team_size(team: Team, yl, from_api=False):
+        team_length = 0
+        team.roster = TeamAccessor.get_team_roster(team,from_api)
 
-
-def get_team_roster(team, from_api=False):
-    if from_api:
-        cur_team = yfa.team.Team(db.sc, team.team_key)
-        team_roster_info = cur_team.roster()
-        team_roster = [i['name'] for i in team_roster_info]
-    else:
-        get_team_roster_by_team_key = "select player_name from dbo.team_players where team_key =?"
-
-        db.cursor.execute(get_team_roster_by_team_key, (team.team_key,))
-        team_roster_query = db.cursor.fetchall()
-        team_roster = [i[0] for i in team_roster_query]
-    return team_roster
-
-
-def team_size(team: Team, yl, from_api=False):
-    team_length = 0
-    if from_api:
-        team.roster = get_team_roster(team, True)
-    else:
-        team.roster = get_team_roster(team)
-    if team.roster is not None:
-        for i in team.roster:
-            if yl.is_injuerd(i) is False:
-                team_length += 1
-    return team_length
+        if team.roster is not None:
+            for i in team.roster:
+                if yl.is_injuerd(i) is False:
+                    team_length += 1
+                    
+        return team_length
 
 
 ## per game stats of all the team
 def pg_avg_stats_team(season_stats, team: Team, yl):
-    team.roster = get_team_roster(team, True)
+    team.roster = TeamAccessor.get_team_roster(team, True)
     team_total_df = pd.DataFrame(columns=db.FANTASY_CAT_STATS.split(','))
 
     for player_info in players.get_active_players():
@@ -91,7 +88,7 @@ def pg_team_stats(season_stats, team: Team, from_api=False):
     if from_api:
         yl = YahooLeague(team.league_id)
         stats = pg_avg_stats_team(season_stats, team, yl).round(3)
-        pg_play_stats = pd.DataFrame(stats / team_size(team, yl, True))
+        pg_play_stats = pd.DataFrame(stats / TeamAccessor.team_size(team, yl, True))
         pg_play_stats['FG_PCT'] = pg_play_stats['FG_PCT'] * TeamAccessor.TEAM_LENGTH
         pg_play_stats['FT_PCT'] = pg_play_stats['FT_PCT'] * TeamAccessor.TEAM_LENGTH
 

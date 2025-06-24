@@ -237,13 +237,13 @@ if __name__ == '__main__':
 
 
 
-    # sc = OAuth2(None, None, from_file='./pythonProject2/oauth22.json')
-    # yahoo_game = yfa.Game(sc, 'nba')
+    sc = OAuth2(None, None, from_file='./pythonProject2/oauth22.json')
+    yahoo_game = yfa.Game(sc, 'nba')
     
     #Test League
     URI_FANTAZY_ID_2024 = '41083'
     NBA_SPORT_CODE = '428'
-    # league_yahoo = yahoo_game.to_league(f"{NBA_SPORT_CODE}.l.{URI_FANTAZY_ID_2024}")
+    league_yahoo = yahoo_game.to_league(f"{NBA_SPORT_CODE}.l.{URI_FANTAZY_ID_2024}")
     
     # Specific Team
     # team_key = yahoo_fantazy_league.get_team_key_by_name('king douchebag')
@@ -267,37 +267,59 @@ if __name__ == '__main__':
     # team_rosters_formatted = [{"Team": team, **player} for team, roster in team_rosters.items() for player in roster]
     # pd.DataFrame(team_rosters_formatted).to_csv("team_rosters.csv", index=False)
     
-    # 4. Sync Players Stat
-    player_data = players.get_active_players()
-    data = []
+    # 3. Sync Players Stat (TODO)
+    # player_data = players.get_active_players()
+    # data = []
+    # # failed_players_data = ['DeMar DeRozan', 'David Duke Jr.', 'Kris Dunn', 'Ryan Dunn', 'Kevin Durant', 'Jalen Duren', 'Tari Eason', 'Zach Edey', 'Anthony Edwards', 'Jesse Edwards', 'Justin Edwards', 'Kessler Edwards', 'Keon Ellis', 'Joel Embiid', 'Tyson Etienne', 'Drew Eubanks', 'Tosan Evbuomwan', 'Danté Exum', 'Bruno Fernando', 'Kyle Filipowski', 'Dorian Finney-Smith', 'Adam Flagler', 'Trentyn Flowers', 'Malachi Flynn', 'Simone Fontecchio', "De'Aaron Fox", 'Enrique Freeman', 'Markelle Fultz', 'Johnny Furphy', 'Daniel Gafford', 'Darius Garland', 'Marcus Garrett', 'Luka Garza', 'Keyonte George', 'Kyshawn George', 'Paul George', 'Taj Gibson', 'Josh Giddey', 'Shai Gilgeous-Alexander', 'Anthony Gill', 'Collin Gillespie', 'Rudy Gobert', 'Jordan Goodwin', 'Aaron Gordon', 'Eric Gordon', 'Jazian Gortman', 'Jerami Grant', 'AJ Green', 'Draymond Green', 'Jalen Green', 'Javonte Green', 'Jeff Green', 'Josh Green', 'Quentin Grimes', 'Mouhamed Gueye', 'Rui Hachimura', 'Tyrese Haliburton', 'PJ Hall', 'Tim Hardaway Jr.', 'James Harden', 'Jaden Hardy', 'Jett Howard', 'Kevin Huerter', 'Keshad Johnson', 'Nikola Jokić', 'Colby Jones', 'Dillon Jones', 'Herbert Jones', 'Isaac Jones', 'Kai Jones', 'Mason Jones', 'Spencer Jones', 'Tre Jones', 'Tyus Jones', 'Derrick Jones Jr.', 'DeAndre Jordan', 'Cory Joseph', 'Nikola Jović', 'Johnny Juzang', 'Yuki Kawamura', 'Kylor Kelley', 'Luke Kennard', 'Walker Kessler', 'Braxton Key', 'Corey Kispert', 'Maxi Kleber', 'Bobi Klintman', 'Dalton Knecht', 'Kevin Knox II', 'Tyler Kolek', 'Christian Koloko', 'John Konchar', 'Luke Kornet', 'Vít Krejčí', 'Jonathan Kuminga', 'Kyle Kuzma', 'Jake LaRavia', 'Zach LaVine', 'Skal Labissiere', 'Jock Landale', 'Pelle Larsson', 'A.J. Lawson', 'Caris LeVert', 'Damion Lee', 'Alex Len', 'Kawhi Leonard', 'Malevy Leons', 'Maxwell Lewis', 'E.J. Liddell', 'Damian Lillard', 'Dereck Lively II', 'Chris Livingston', 'Kevon Looney', 'Brook Lopez', 'Kevin Love', 'Kyle Lowry', 'Seth Lundy', 'Trey Lyles', 'Sandro Mamukelashvili', 'Terance Mann', 'Jalen McDaniels', 'Doug McDermott', 'Monté Morris', 'Trey Murphy III', 'Dejounte Murray', 'Jamal Murray', 'Keegan Murray', 'Kris Murray', 'Svi Mykhailiuk', 'Pete Nance', 'Larry Nance Jr.', 'Andrew Nembhard', 'Aaron Nesmith', 'Tristen Newton', 'Georges Niang', 'Daishen Nix', 'Zeke Nnaji', 'Miles Norris', 'Jaylen Nowell', 'Jusuf Nurkić', "Royce O'Neale", 'Jahlil Okafor', 'Chuma Okeke', 'Josh Okogie', 'Onyeka Okongwu', 'Isaac Okoro', 'Quincy Olivari', 'Kelly Olynyk', 'Kelly Oubre Jr.', 'Chris Paul', 'Cameron Payne', 'Elfrid Payton', 'Gary Payton II', 'Drew Peterson', 'Julian Phillips', 'Jalen Pickett', 'Scotty Pippen Jr.', 'Daeqwon Plowden', 'Mason Plumlee', 'Brandin Podziemski', 'Jakob Poeltl', 'Jordan Poole', 'Craig Porter Jr.', 'Kevin Porter Jr.', 'Michael Porter Jr.', 'Bobby Portis', 'Kristaps Porziņģis', 'Quinten Post', 'Micah Potter', 'Dwight Powell', 'Norman Powell', 'Taurean Prince', 'Payton Pritchard', 'Olivier-Maxence Prosper', 'Zyon Pullin', 'Trevelin Queen', 'Neemias Queta', 'Immanuel Quickley', 'Lester Quinones', 'Terry Rozier', 'Rayan Rupert', 'Dru Smith', 'Jalen Smith', 'Tolu Smith', 'Tyler Smith', 'Jabari Smith Jr.', 'Nick Smith Jr.', 'Jeremy Sochan', 'Cam Spencer', 'Pat Spencer', 'Jaden Springer', 'Isaiah Stevens', 'Lamar Stevens', 'Isaiah Stewart', 'Julian Strawther', 'Max Strus', 'Jalen Suggs', 'Cole Swider', "Jae'Sean Tate", 'Jayson Tatum', 'Terry Taylor', 'Garrett Temple', 'Dalen Terry', 'Daniel Theis', 'Cam Thomas', 'Amen Thompson', 'Ausar Thompson', 'Ethan Thompson', 'Klay Thompson', 'Tristan Thompson', 'JT Thor', 'Matisse Thybulle', 'Xavier Tillman', 'Drew Timme', "Nae'Qwan Tomlin", 'Nikola Topić', 'Jacob Toppin', 'Obi Toppin', 'Karl-Anthony Towns', 'Armel Traoré', 'Luke Travers', 'Gary Trent Jr.', 'Oscar Tshiebwe', 'P.J. Tucker', 'Myles Turner', 'Hunter Tyson', 'Jaylon Tyson', 'Stanley Umude', 'Jonas Valančiūnas', 'Fred VanVleet', 'Jarred Vanderbilt', 'Devin Vassell', 'Gabe Vincent', 'Tristan Vukcevic', 'Nikola Vučević', 'Dean Wade', 'Franz Wagner', 'Moritz Wagner', 'Derrick White', 'Dariq Whitehead', 'Tristan da Silva', 'Vlatko Čančar', 'Dario Šarić']
+    # # print(len(failed_players_data))
+    # failed_players = []
 
-    # Loop through all players and fetch stats safely
-    for i, player in enumerate(player_data):
-        if i<92:
-            continue
-        try:
-            print(f"[{i+1}/{len(player_data)}] Fetching {player['full_name']}")
-            stats_obj = playercareerstats.PlayerCareerStats(player_id=player["id"], timeout=10)
-            stats = {
-                'name': player['full_name'],
-                'stats_legend': stats_obj.season_totals_regular_season.data['headers'],
-                'full_stats_according_to_legend': [only_stats for only_stats in stats_obj.season_totals_regular_season.data['data']]
-                }
-            data.append(stats)
-        except requests.exceptions.ReadTimeout as ex:
-            print(f"Timeout for player {player['full_name']}: {ex}")
-            # time.sleep(5)
+    # # Loop through all players and fetch stats safely
+    # for i, player in enumerate(player_data):
+    #     try:
+    #         print(f"[{i+1}/{len(player_data)}] Fetching {player['full_name']}")
+    #         stats_obj = playercareerstats.PlayerCareerStats(player_id=player["id"], timeout=10)
+    #         stats = {
+    #             'name': player['full_name'],
+    #             'stats_legend': stats_obj.season_totals_regular_season.data['headers'],
+    #             'full_stats_according_to_legend': [only_stats for only_stats in stats_obj.season_totals_regular_season.data['data']]
+    #             }
+    #         data.append(stats)
+    #     except requests.exceptions.ReadTimeout as ex:
+    #         failed_players.append((player['full_name'], player["id"]))
+    #         print(f"Timeout for player {player['full_name']}: {ex}")
+    #         time.sleep(30)
 
-        except Exception as e:
-            print(f"Error with player {player['full_name']}: {e}")
+    #     except Exception as e:
+    #         failed_players.append((player['full_name'], player["id"]))
+    #         print(f"Error with player {player['full_name']}: {e}")
         
-    pd.DataFrame(data).to_csv("players_stats2.csv", index=False)
+    # pd.DataFrame(data).to_csv("players_stats3.csv", index=False)
+
+    # print("✅ Finished fetching all stats.")
+    # print(f"Failed players: {failed_players}")
    
 
-    print("✅ Finished fetching all stats.")
+    # 4. Sync Schedule, Matchups
+   # Get total weeks in the season
+    start_week = 1 #int(league_yahoo.start_week())
+    end_week = league_yahoo.end_week() # int(league_yahoo.end_week())
+
+    # Collect all matchups
+    matchup_data = []
+
+    for week in range(start_week, end_week + 1):
+        matchups = league_yahoo.matchups(week)
+        week_matchups = matchups['fantasy_content']['league'][1]['scoreboard']['0']
+        matchup_data.append(week_matchups)
+
     
-    # 3. Sync Schedule, Matchups, Playoff Starts 
-    # 5. Sync Games Scoreboard
+    # Convert to DataFrame
+    df_matchups = pd.DataFrame(matchup_data)
+    df_matchups.to_csv("league_matchups.csv", index=False)
+    
+    # 5. Sync Games Scoreboard, Standings
+    # 6. Sync FA players
     
     # TODO - Test Plan
     # 1. League rules
@@ -308,7 +330,8 @@ if __name__ == '__main__':
     # 6. Estimation about Matchup Scores in the future.
     # 7. General questions on team improvement.
     # 8. Estimation on best teams in the league and ranking each category
+    # 9. How to know which players played in each matchup.
+    # 10. Check if he knows that the team is going to play a bad team so the stat inflates. 
     
 
-    
     
