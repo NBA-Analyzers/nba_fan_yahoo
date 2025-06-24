@@ -1,0 +1,5290 @@
+[
+  [
+    {
+      "week": "1",
+      "team_1": {
+        "week": "1",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "157/367",
+          "Field Goal Percentage (FG%)": ".428",
+          "Free Throws Made/Attempted (FTM/FTA)": "47/61",
+          "Free Throw Percentage (FT%)": ".770",
+          "3-Point Field Goals Made (3PTM)": "38",
+          "Points": "399",
+          "Rebounds": "187",
+          "Assists": "144",
+          "Steals": "47",
+          "Blocks": "17",
+          "Turnovers": "71"
+        }
+      },
+      "team_2": {
+        "week": "1",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "189/403",
+          "Field Goal Percentage (FG%)": ".469",
+          "Free Throws Made/Attempted (FTM/FTA)": "80/110",
+          "Free Throw Percentage (FT%)": ".727",
+          "3-Point Field Goals Made (3PTM)": "55",
+          "Points": "513",
+          "Rebounds": "184",
+          "Assists": "123",
+          "Steals": "31",
+          "Blocks": "13",
+          "Turnovers": "68"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "5"
+    },
+    {
+      "week": "1",
+      "team_1": {
+        "week": "1",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "167/373",
+          "Field Goal Percentage (FG%)": ".448",
+          "Free Throws Made/Attempted (FTM/FTA)": "65/76",
+          "Free Throw Percentage (FT%)": ".855",
+          "3-Point Field Goals Made (3PTM)": "39",
+          "Points": "438",
+          "Rebounds": "184",
+          "Assists": "120",
+          "Steals": "22",
+          "Blocks": "21",
+          "Turnovers": "67"
+        }
+      },
+      "team_2": {
+        "week": "1",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "171/369",
+          "Field Goal Percentage (FG%)": ".463",
+          "Free Throws Made/Attempted (FTM/FTA)": "100/118",
+          "Free Throw Percentage (FT%)": ".847",
+          "3-Point Field Goals Made (3PTM)": "36",
+          "Points": "478",
+          "Rebounds": "201",
+          "Assists": "112",
+          "Steals": "38",
+          "Blocks": "15",
+          "Turnovers": "68"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "5"
+    },
+    {
+      "week": "1",
+      "team_1": {
+        "week": "1",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "195/422",
+          "Field Goal Percentage (FG%)": ".462",
+          "Free Throws Made/Attempted (FTM/FTA)": "79/98",
+          "Free Throw Percentage (FT%)": ".806",
+          "3-Point Field Goals Made (3PTM)": "60",
+          "Points": "529",
+          "Rebounds": "193",
+          "Assists": "119",
+          "Steals": "38",
+          "Blocks": "23",
+          "Turnovers": "58"
+        }
+      },
+      "team_2": {
+        "week": "1",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "197/436",
+          "Field Goal Percentage (FG%)": ".452",
+          "Free Throws Made/Attempted (FTM/FTA)": "79/102",
+          "Free Throw Percentage (FT%)": ".775",
+          "3-Point Field Goals Made (3PTM)": "56",
+          "Points": "529",
+          "Rebounds": "189",
+          "Assists": "120",
+          "Steals": "26",
+          "Blocks": "31",
+          "Turnovers": "77"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "6"
+    },
+    {
+      "week": "1",
+      "team_1": {
+        "week": "1",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "215/464",
+          "Field Goal Percentage (FG%)": ".463",
+          "Free Throws Made/Attempted (FTM/FTA)": "95/128",
+          "Free Throw Percentage (FT%)": ".742",
+          "3-Point Field Goals Made (3PTM)": "54",
+          "Points": "579",
+          "Rebounds": "242",
+          "Assists": "133",
+          "Steals": "42",
+          "Blocks": "33",
+          "Turnovers": "66"
+        }
+      },
+      "team_2": {
+        "week": "1",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "244/512",
+          "Field Goal Percentage (FG%)": ".477",
+          "Free Throws Made/Attempted (FTM/FTA)": "124/154",
+          "Free Throw Percentage (FT%)": ".805",
+          "3-Point Field Goals Made (3PTM)": "80",
+          "Points": "692",
+          "Rebounds": "198",
+          "Assists": "98",
+          "Steals": "28",
+          "Blocks": "25",
+          "Turnovers": "78"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "5"
+    },
+    {
+      "week": "1",
+      "team_1": {
+        "week": "1",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "167/373",
+          "Field Goal Percentage (FG%)": ".448",
+          "Free Throws Made/Attempted (FTM/FTA)": "66/83",
+          "Free Throw Percentage (FT%)": ".795",
+          "3-Point Field Goals Made (3PTM)": "48",
+          "Points": "448",
+          "Rebounds": "163",
+          "Assists": "77",
+          "Steals": "38",
+          "Blocks": "18",
+          "Turnovers": "40"
+        }
+      },
+      "team_2": {
+        "week": "1",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "200/441",
+          "Field Goal Percentage (FG%)": ".454",
+          "Free Throws Made/Attempted (FTM/FTA)": "102/137",
+          "Free Throw Percentage (FT%)": ".745",
+          "3-Point Field Goals Made (3PTM)": "48",
+          "Points": "550",
+          "Rebounds": "190",
+          "Assists": "94",
+          "Steals": "36",
+          "Blocks": "23",
+          "Turnovers": "73"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "3"
+    },
+    {
+      "week": "1",
+      "team_1": {
+        "week": "1",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "199/440",
+          "Field Goal Percentage (FG%)": ".452",
+          "Free Throws Made/Attempted (FTM/FTA)": "110/147",
+          "Free Throw Percentage (FT%)": ".748",
+          "3-Point Field Goals Made (3PTM)": "66",
+          "Points": "574",
+          "Rebounds": "226",
+          "Assists": "142",
+          "Steals": "37",
+          "Blocks": "23",
+          "Turnovers": "70"
+        }
+      },
+      "team_2": {
+        "week": "1",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "187/376",
+          "Field Goal Percentage (FG%)": ".497",
+          "Free Throws Made/Attempted (FTM/FTA)": "84/121",
+          "Free Throw Percentage (FT%)": ".694",
+          "3-Point Field Goals Made (3PTM)": "35",
+          "Points": "493",
+          "Rebounds": "200",
+          "Assists": "127",
+          "Steals": "28",
+          "Blocks": "26",
+          "Turnovers": "71"
+        }
+      },
+      "team_win_name": "Uri's Unmatched Team",
+      "team_win_score": "7"
+    }
+  ],
+  [
+    {
+      "week": "2",
+      "team_1": {
+        "week": "2",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "231/444",
+          "Field Goal Percentage (FG%)": ".520",
+          "Free Throws Made/Attempted (FTM/FTA)": "58/74",
+          "Free Throw Percentage (FT%)": ".784",
+          "3-Point Field Goals Made (3PTM)": "42",
+          "Points": "562",
+          "Rebounds": "288",
+          "Assists": "170",
+          "Steals": "38",
+          "Blocks": "23",
+          "Turnovers": "71"
+        }
+      },
+      "team_2": {
+        "week": "2",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "250/549",
+          "Field Goal Percentage (FG%)": ".455",
+          "Free Throws Made/Attempted (FTM/FTA)": "112/144",
+          "Free Throw Percentage (FT%)": ".778",
+          "3-Point Field Goals Made (3PTM)": "70",
+          "Points": "682",
+          "Rebounds": "237",
+          "Assists": "182",
+          "Steals": "30",
+          "Blocks": "38",
+          "Turnovers": "98"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "5"
+    },
+    {
+      "week": "2",
+      "team_1": {
+        "week": "2",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "261/552",
+          "Field Goal Percentage (FG%)": ".473",
+          "Free Throws Made/Attempted (FTM/FTA)": "98/125",
+          "Free Throw Percentage (FT%)": ".784",
+          "3-Point Field Goals Made (3PTM)": "69",
+          "Points": "689",
+          "Rebounds": "224",
+          "Assists": "172",
+          "Steals": "34",
+          "Blocks": "23",
+          "Turnovers": "76"
+        }
+      },
+      "team_2": {
+        "week": "2",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "204/393",
+          "Field Goal Percentage (FG%)": ".519",
+          "Free Throws Made/Attempted (FTM/FTA)": "113/156",
+          "Free Throw Percentage (FT%)": ".724",
+          "3-Point Field Goals Made (3PTM)": "45",
+          "Points": "566",
+          "Rebounds": "202",
+          "Assists": "119",
+          "Steals": "46",
+          "Blocks": "24",
+          "Turnovers": "72"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "5"
+    },
+    {
+      "week": "2",
+      "team_1": {
+        "week": "2",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "223/489",
+          "Field Goal Percentage (FG%)": ".456",
+          "Free Throws Made/Attempted (FTM/FTA)": "110/141",
+          "Free Throw Percentage (FT%)": ".780",
+          "3-Point Field Goals Made (3PTM)": "57",
+          "Points": "613",
+          "Rebounds": "204",
+          "Assists": "124",
+          "Steals": "44",
+          "Blocks": "30",
+          "Turnovers": "75"
+        }
+      },
+      "team_2": {
+        "week": "2",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "229/491",
+          "Field Goal Percentage (FG%)": ".466",
+          "Free Throws Made/Attempted (FTM/FTA)": "109/142",
+          "Free Throw Percentage (FT%)": ".768",
+          "3-Point Field Goals Made (3PTM)": "77",
+          "Points": "644",
+          "Rebounds": "211",
+          "Assists": "132",
+          "Steals": "42",
+          "Blocks": "20",
+          "Turnovers": "100"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "4"
+    },
+    {
+      "week": "2",
+      "team_1": {
+        "week": "2",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "255/516",
+          "Field Goal Percentage (FG%)": ".494",
+          "Free Throws Made/Attempted (FTM/FTA)": "118/150",
+          "Free Throw Percentage (FT%)": ".787",
+          "3-Point Field Goals Made (3PTM)": "62",
+          "Points": "690",
+          "Rebounds": "299",
+          "Assists": "160",
+          "Steals": "41",
+          "Blocks": "38",
+          "Turnovers": "77"
+        }
+      },
+      "team_2": {
+        "week": "2",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "315/697",
+          "Field Goal Percentage (FG%)": ".452",
+          "Free Throws Made/Attempted (FTM/FTA)": "153/197",
+          "Free Throw Percentage (FT%)": ".777",
+          "3-Point Field Goals Made (3PTM)": "86",
+          "Points": "869",
+          "Rebounds": "266",
+          "Assists": "222",
+          "Steals": "42",
+          "Blocks": "37",
+          "Turnovers": "102"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "5"
+    },
+    {
+      "week": "2",
+      "team_1": {
+        "week": "2",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "250/501",
+          "Field Goal Percentage (FG%)": ".499",
+          "Free Throws Made/Attempted (FTM/FTA)": "107/132",
+          "Free Throw Percentage (FT%)": ".811",
+          "3-Point Field Goals Made (3PTM)": "73",
+          "Points": "680",
+          "Rebounds": "240",
+          "Assists": "109",
+          "Steals": "29",
+          "Blocks": "32",
+          "Turnovers": "70"
+        }
+      },
+      "team_2": {
+        "week": "2",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "229/446",
+          "Field Goal Percentage (FG%)": ".513",
+          "Free Throws Made/Attempted (FTM/FTA)": "99/129",
+          "Free Throw Percentage (FT%)": ".767",
+          "3-Point Field Goals Made (3PTM)": "59",
+          "Points": "616",
+          "Rebounds": "268",
+          "Assists": "133",
+          "Steals": "36",
+          "Blocks": "34",
+          "Turnovers": "73"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "4"
+    },
+    {
+      "week": "2",
+      "team_1": {
+        "week": "2",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "262/579",
+          "Field Goal Percentage (FG%)": ".453",
+          "Free Throws Made/Attempted (FTM/FTA)": "100/126",
+          "Free Throw Percentage (FT%)": ".794",
+          "3-Point Field Goals Made (3PTM)": "86",
+          "Points": "710",
+          "Rebounds": "204",
+          "Assists": "189",
+          "Steals": "38",
+          "Blocks": "37",
+          "Turnovers": "81"
+        }
+      },
+      "team_2": {
+        "week": "2",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "311/633",
+          "Field Goal Percentage (FG%)": ".491",
+          "Free Throws Made/Attempted (FTM/FTA)": "137/164",
+          "Free Throw Percentage (FT%)": ".835",
+          "3-Point Field Goals Made (3PTM)": "71",
+          "Points": "830",
+          "Rebounds": "287",
+          "Assists": "122",
+          "Steals": "46",
+          "Blocks": "32",
+          "Turnovers": "96"
+        }
+      },
+      "team_win_name": "The Wall",
+      "team_win_score": "4"
+    }
+  ],
+  [
+    {
+      "week": "3",
+      "team_1": {
+        "week": "3",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "210/446",
+          "Field Goal Percentage (FG%)": ".471",
+          "Free Throws Made/Attempted (FTM/FTA)": "63/80",
+          "Free Throw Percentage (FT%)": ".788",
+          "3-Point Field Goals Made (3PTM)": "63",
+          "Points": "546",
+          "Rebounds": "237",
+          "Assists": "155",
+          "Steals": "41",
+          "Blocks": "20",
+          "Turnovers": "64"
+        }
+      },
+      "team_2": {
+        "week": "3",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "238/521",
+          "Field Goal Percentage (FG%)": ".457",
+          "Free Throws Made/Attempted (FTM/FTA)": "162/212",
+          "Free Throw Percentage (FT%)": ".764",
+          "3-Point Field Goals Made (3PTM)": "70",
+          "Points": "708",
+          "Rebounds": "280",
+          "Assists": "147",
+          "Steals": "43",
+          "Blocks": "32",
+          "Turnovers": "107"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "4"
+    },
+    {
+      "week": "3",
+      "team_1": {
+        "week": "3",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "238/512",
+          "Field Goal Percentage (FG%)": ".465",
+          "Free Throws Made/Attempted (FTM/FTA)": "102/128",
+          "Free Throw Percentage (FT%)": ".797",
+          "3-Point Field Goals Made (3PTM)": "55",
+          "Points": "633",
+          "Rebounds": "194",
+          "Assists": "141",
+          "Steals": "34",
+          "Blocks": "24",
+          "Turnovers": "80"
+        }
+      },
+      "team_2": {
+        "week": "3",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "233/496",
+          "Field Goal Percentage (FG%)": ".470",
+          "Free Throws Made/Attempted (FTM/FTA)": "124/145",
+          "Free Throw Percentage (FT%)": ".855",
+          "3-Point Field Goals Made (3PTM)": "48",
+          "Points": "638",
+          "Rebounds": "277",
+          "Assists": "130",
+          "Steals": "35",
+          "Blocks": "30",
+          "Turnovers": "76"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "2"
+    },
+    {
+      "week": "3",
+      "team_1": {
+        "week": "3",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "215/453",
+          "Field Goal Percentage (FG%)": ".475",
+          "Free Throws Made/Attempted (FTM/FTA)": "111/138",
+          "Free Throw Percentage (FT%)": ".804",
+          "3-Point Field Goals Made (3PTM)": "47",
+          "Points": "588",
+          "Rebounds": "212",
+          "Assists": "136",
+          "Steals": "30",
+          "Blocks": "26",
+          "Turnovers": "62"
+        }
+      },
+      "team_2": {
+        "week": "3",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "236/511",
+          "Field Goal Percentage (FG%)": ".462",
+          "Free Throws Made/Attempted (FTM/FTA)": "138/167",
+          "Free Throw Percentage (FT%)": ".826",
+          "3-Point Field Goals Made (3PTM)": "79",
+          "Points": "689",
+          "Rebounds": "237",
+          "Assists": "145",
+          "Steals": "34",
+          "Blocks": "26",
+          "Turnovers": "90"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "2"
+    },
+    {
+      "week": "3",
+      "team_1": {
+        "week": "3",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "202/434",
+          "Field Goal Percentage (FG%)": ".465",
+          "Free Throws Made/Attempted (FTM/FTA)": "106/135",
+          "Free Throw Percentage (FT%)": ".785",
+          "3-Point Field Goals Made (3PTM)": "51",
+          "Points": "561",
+          "Rebounds": "211",
+          "Assists": "62",
+          "Steals": "34",
+          "Blocks": "21",
+          "Turnovers": "48"
+        }
+      },
+      "team_2": {
+        "week": "3",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "254/499",
+          "Field Goal Percentage (FG%)": ".509",
+          "Free Throws Made/Attempted (FTM/FTA)": "128/171",
+          "Free Throw Percentage (FT%)": ".749",
+          "3-Point Field Goals Made (3PTM)": "43",
+          "Points": "679",
+          "Rebounds": "282",
+          "Assists": "135",
+          "Steals": "33",
+          "Blocks": "28",
+          "Turnovers": "80"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "4"
+    },
+    {
+      "week": "3",
+      "team_1": {
+        "week": "3",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "253/532",
+          "Field Goal Percentage (FG%)": ".476",
+          "Free Throws Made/Attempted (FTM/FTA)": "136/174",
+          "Free Throw Percentage (FT%)": ".782",
+          "3-Point Field Goals Made (3PTM)": "56",
+          "Points": "698",
+          "Rebounds": "271",
+          "Assists": "176",
+          "Steals": "46",
+          "Blocks": "31",
+          "Turnovers": "82"
+        }
+      },
+      "team_2": {
+        "week": "3",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "291/618",
+          "Field Goal Percentage (FG%)": ".471",
+          "Free Throws Made/Attempted (FTM/FTA)": "147/172",
+          "Free Throw Percentage (FT%)": ".855",
+          "3-Point Field Goals Made (3PTM)": "72",
+          "Points": "801",
+          "Rebounds": "265",
+          "Assists": "159",
+          "Steals": "37",
+          "Blocks": "37",
+          "Turnovers": "82"
+        }
+      },
+      "team_win_name": "Finshed In a Draw",
+      "team_win_score": "4"
+    },
+    {
+      "week": "3",
+      "team_1": {
+        "week": "3",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "8",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "269/549",
+          "Field Goal Percentage (FG%)": ".490",
+          "Free Throws Made/Attempted (FTM/FTA)": "96/122",
+          "Free Throw Percentage (FT%)": ".787",
+          "3-Point Field Goals Made (3PTM)": "80",
+          "Points": "714",
+          "Rebounds": "228",
+          "Assists": "201",
+          "Steals": "36",
+          "Blocks": "29",
+          "Turnovers": "85"
+        }
+      },
+      "team_2": {
+        "week": "3",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "0",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "245/555",
+          "Field Goal Percentage (FG%)": ".441",
+          "Free Throws Made/Attempted (FTM/FTA)": "101/130",
+          "Free Throw Percentage (FT%)": ".777",
+          "3-Point Field Goals Made (3PTM)": "61",
+          "Points": "652",
+          "Rebounds": "209",
+          "Assists": "146",
+          "Steals": "32",
+          "Blocks": "29",
+          "Turnovers": "97"
+        }
+      },
+      "team_win_name": "The Wall",
+      "team_win_score": "8"
+    }
+  ],
+  [
+    {
+      "week": "4",
+      "team_1": {
+        "week": "4",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "216/470",
+          "Field Goal Percentage (FG%)": ".460",
+          "Free Throws Made/Attempted (FTM/FTA)": "80/94",
+          "Free Throw Percentage (FT%)": ".851",
+          "3-Point Field Goals Made (3PTM)": "59",
+          "Points": "571",
+          "Rebounds": "216",
+          "Assists": "183",
+          "Steals": "45",
+          "Blocks": "26",
+          "Turnovers": "82"
+        }
+      },
+      "team_2": {
+        "week": "4",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "237/467",
+          "Field Goal Percentage (FG%)": ".507",
+          "Free Throws Made/Attempted (FTM/FTA)": "120/138",
+          "Free Throw Percentage (FT%)": ".870",
+          "3-Point Field Goals Made (3PTM)": "74",
+          "Points": "668",
+          "Rebounds": "212",
+          "Assists": "160",
+          "Steals": "34",
+          "Blocks": "31",
+          "Turnovers": "60"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "3"
+    },
+    {
+      "week": "4",
+      "team_1": {
+        "week": "4",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "230/484",
+          "Field Goal Percentage (FG%)": ".475",
+          "Free Throws Made/Attempted (FTM/FTA)": "70/88",
+          "Free Throw Percentage (FT%)": ".795",
+          "3-Point Field Goals Made (3PTM)": "75",
+          "Points": "605",
+          "Rebounds": "178",
+          "Assists": "126",
+          "Steals": "41",
+          "Blocks": "12",
+          "Turnovers": "69"
+        }
+      },
+      "team_2": {
+        "week": "4",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "288/612",
+          "Field Goal Percentage (FG%)": ".471",
+          "Free Throws Made/Attempted (FTM/FTA)": "147/169",
+          "Free Throw Percentage (FT%)": ".870",
+          "3-Point Field Goals Made (3PTM)": "84",
+          "Points": "807",
+          "Rebounds": "254",
+          "Assists": "167",
+          "Steals": "39",
+          "Blocks": "23",
+          "Turnovers": "83"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "3"
+    },
+    {
+      "week": "4",
+      "team_1": {
+        "week": "4",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "215/455",
+          "Field Goal Percentage (FG%)": ".473",
+          "Free Throws Made/Attempted (FTM/FTA)": "130/148",
+          "Free Throw Percentage (FT%)": ".878",
+          "3-Point Field Goals Made (3PTM)": "62",
+          "Points": "622",
+          "Rebounds": "242",
+          "Assists": "155",
+          "Steals": "50",
+          "Blocks": "27",
+          "Turnovers": "88"
+        }
+      },
+      "team_2": {
+        "week": "4",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "273/490",
+          "Field Goal Percentage (FG%)": ".557",
+          "Free Throws Made/Attempted (FTM/FTA)": "135/185",
+          "Free Throw Percentage (FT%)": ".730",
+          "3-Point Field Goals Made (3PTM)": "81",
+          "Points": "762",
+          "Rebounds": "240",
+          "Assists": "136",
+          "Steals": "43",
+          "Blocks": "19",
+          "Turnovers": "68"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "5"
+    },
+    {
+      "week": "4",
+      "team_1": {
+        "week": "4",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "248/524",
+          "Field Goal Percentage (FG%)": ".473",
+          "Free Throws Made/Attempted (FTM/FTA)": "108/135",
+          "Free Throw Percentage (FT%)": ".800",
+          "3-Point Field Goals Made (3PTM)": "56",
+          "Points": "660",
+          "Rebounds": "311",
+          "Assists": "145",
+          "Steals": "39",
+          "Blocks": "31",
+          "Turnovers": "83"
+        }
+      },
+      "team_2": {
+        "week": "4",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "151/290",
+          "Field Goal Percentage (FG%)": ".521",
+          "Free Throws Made/Attempted (FTM/FTA)": "72/92",
+          "Free Throw Percentage (FT%)": ".783",
+          "3-Point Field Goals Made (3PTM)": "40",
+          "Points": "414",
+          "Rebounds": "184",
+          "Assists": "56",
+          "Steals": "28",
+          "Blocks": "30",
+          "Turnovers": "39"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "7"
+    },
+    {
+      "week": "4",
+      "team_1": {
+        "week": "4",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "298/582",
+          "Field Goal Percentage (FG%)": ".512",
+          "Free Throws Made/Attempted (FTM/FTA)": "144/195",
+          "Free Throw Percentage (FT%)": ".738",
+          "3-Point Field Goals Made (3PTM)": "87",
+          "Points": "827",
+          "Rebounds": "249",
+          "Assists": "214",
+          "Steals": "33",
+          "Blocks": "19",
+          "Turnovers": "109"
+        }
+      },
+      "team_2": {
+        "week": "4",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "220/482",
+          "Field Goal Percentage (FG%)": ".456",
+          "Free Throws Made/Attempted (FTM/FTA)": "97/126",
+          "Free Throw Percentage (FT%)": ".770",
+          "3-Point Field Goals Made (3PTM)": "72",
+          "Points": "609",
+          "Rebounds": "218",
+          "Assists": "147",
+          "Steals": "39",
+          "Blocks": "36",
+          "Turnovers": "90"
+        }
+      },
+      "team_win_name": "Uri's Unmatched Team",
+      "team_win_score": "5"
+    },
+    {
+      "week": "4",
+      "team_1": {
+        "week": "4",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "256/557",
+          "Field Goal Percentage (FG%)": ".460",
+          "Free Throws Made/Attempted (FTM/FTA)": "97/120",
+          "Free Throw Percentage (FT%)": ".808",
+          "3-Point Field Goals Made (3PTM)": "73",
+          "Points": "682",
+          "Rebounds": "238",
+          "Assists": "183",
+          "Steals": "41",
+          "Blocks": "26",
+          "Turnovers": "102"
+        }
+      },
+      "team_2": {
+        "week": "4",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "241/502",
+          "Field Goal Percentage (FG%)": ".480",
+          "Free Throws Made/Attempted (FTM/FTA)": "98/122",
+          "Free Throw Percentage (FT%)": ".803",
+          "3-Point Field Goals Made (3PTM)": "66",
+          "Points": "646",
+          "Rebounds": "220",
+          "Assists": "141",
+          "Steals": "38",
+          "Blocks": "27",
+          "Turnovers": "73"
+        }
+      },
+      "team_win_name": "Ugly Kid Joe",
+      "team_win_score": "6"
+    }
+  ],
+  [
+    {
+      "week": "5",
+      "team_1": {
+        "week": "5",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "251/527",
+          "Field Goal Percentage (FG%)": ".476",
+          "Free Throws Made/Attempted (FTM/FTA)": "93/107",
+          "Free Throw Percentage (FT%)": ".869",
+          "3-Point Field Goals Made (3PTM)": "64",
+          "Points": "659",
+          "Rebounds": "277",
+          "Assists": "211",
+          "Steals": "49",
+          "Blocks": "23",
+          "Turnovers": "72"
+        }
+      },
+      "team_2": {
+        "week": "5",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "229/483",
+          "Field Goal Percentage (FG%)": ".474",
+          "Free Throws Made/Attempted (FTM/FTA)": "125/172",
+          "Free Throw Percentage (FT%)": ".727",
+          "3-Point Field Goals Made (3PTM)": "37",
+          "Points": "620",
+          "Rebounds": "261",
+          "Assists": "152",
+          "Steals": "32",
+          "Blocks": "28",
+          "Turnovers": "58"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "7"
+    },
+    {
+      "week": "5",
+      "team_1": {
+        "week": "5",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "275/585",
+          "Field Goal Percentage (FG%)": ".470",
+          "Free Throws Made/Attempted (FTM/FTA)": "131/151",
+          "Free Throw Percentage (FT%)": ".868",
+          "3-Point Field Goals Made (3PTM)": "86",
+          "Points": "767",
+          "Rebounds": "265",
+          "Assists": "175",
+          "Steals": "41",
+          "Blocks": "25",
+          "Turnovers": "91"
+        }
+      },
+      "team_2": {
+        "week": "5",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "235/518",
+          "Field Goal Percentage (FG%)": ".454",
+          "Free Throws Made/Attempted (FTM/FTA)": "152/183",
+          "Free Throw Percentage (FT%)": ".831",
+          "3-Point Field Goals Made (3PTM)": "53",
+          "Points": "675",
+          "Rebounds": "222",
+          "Assists": "199",
+          "Steals": "42",
+          "Blocks": "31",
+          "Turnovers": "86"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "5"
+    },
+    {
+      "week": "5",
+      "team_1": {
+        "week": "5",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "257/521",
+          "Field Goal Percentage (FG%)": ".493",
+          "Free Throws Made/Attempted (FTM/FTA)": "147/178",
+          "Free Throw Percentage (FT%)": ".826",
+          "3-Point Field Goals Made (3PTM)": "69",
+          "Points": "730",
+          "Rebounds": "209",
+          "Assists": "170",
+          "Steals": "40",
+          "Blocks": "41",
+          "Turnovers": "64"
+        }
+      },
+      "team_2": {
+        "week": "5",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "241/500",
+          "Field Goal Percentage (FG%)": ".482",
+          "Free Throws Made/Attempted (FTM/FTA)": "114/144",
+          "Free Throw Percentage (FT%)": ".792",
+          "3-Point Field Goals Made (3PTM)": "65",
+          "Points": "661",
+          "Rebounds": "258",
+          "Assists": "135",
+          "Steals": "44",
+          "Blocks": "34",
+          "Turnovers": "95"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "7"
+    },
+    {
+      "week": "5",
+      "team_1": {
+        "week": "5",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "1",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "142/276",
+          "Field Goal Percentage (FG%)": ".514",
+          "Free Throws Made/Attempted (FTM/FTA)": "57/75",
+          "Free Throw Percentage (FT%)": ".760",
+          "3-Point Field Goals Made (3PTM)": "26",
+          "Points": "367",
+          "Rebounds": "162",
+          "Assists": "61",
+          "Steals": "24",
+          "Blocks": "14",
+          "Turnovers": "43"
+        }
+      },
+      "team_2": {
+        "week": "5",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "8",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "260/504",
+          "Field Goal Percentage (FG%)": ".516",
+          "Free Throws Made/Attempted (FTM/FTA)": "108/138",
+          "Free Throw Percentage (FT%)": ".783",
+          "3-Point Field Goals Made (3PTM)": "62",
+          "Points": "690",
+          "Rebounds": "220",
+          "Assists": "139",
+          "Steals": "37",
+          "Blocks": "30",
+          "Turnovers": "68"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "1"
+    },
+    {
+      "week": "5",
+      "team_1": {
+        "week": "5",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "288/605",
+          "Field Goal Percentage (FG%)": ".476",
+          "Free Throws Made/Attempted (FTM/FTA)": "120/154",
+          "Free Throw Percentage (FT%)": ".779",
+          "3-Point Field Goals Made (3PTM)": "98",
+          "Points": "794",
+          "Rebounds": "217",
+          "Assists": "154",
+          "Steals": "38",
+          "Blocks": "19",
+          "Turnovers": "75"
+        }
+      },
+      "team_2": {
+        "week": "5",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "249/550",
+          "Field Goal Percentage (FG%)": ".453",
+          "Free Throws Made/Attempted (FTM/FTA)": "133/158",
+          "Free Throw Percentage (FT%)": ".842",
+          "3-Point Field Goals Made (3PTM)": "68",
+          "Points": "699",
+          "Rebounds": "223",
+          "Assists": "157",
+          "Steals": "31",
+          "Blocks": "25",
+          "Turnovers": "75"
+        }
+      },
+      "team_win_name": "Finshed In a Draw",
+      "team_win_score": "4"
+    },
+    {
+      "week": "5",
+      "team_1": {
+        "week": "5",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "9",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "303/607",
+          "Field Goal Percentage (FG%)": ".499",
+          "Free Throws Made/Attempted (FTM/FTA)": "111/137",
+          "Free Throw Percentage (FT%)": ".810",
+          "3-Point Field Goals Made (3PTM)": "99",
+          "Points": "816",
+          "Rebounds": "246",
+          "Assists": "192",
+          "Steals": "48",
+          "Blocks": "41",
+          "Turnovers": "81"
+        }
+      },
+      "team_2": {
+        "week": "5",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "0",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "225/464",
+          "Field Goal Percentage (FG%)": ".485",
+          "Free Throws Made/Attempted (FTM/FTA)": "119/158",
+          "Free Throw Percentage (FT%)": ".753",
+          "3-Point Field Goals Made (3PTM)": "68",
+          "Points": "637",
+          "Rebounds": "241",
+          "Assists": "138",
+          "Steals": "36",
+          "Blocks": "35",
+          "Turnovers": "83"
+        }
+      },
+      "team_win_name": "The Wall",
+      "team_win_score": "9"
+    }
+  ],
+  [
+    {
+      "week": "6",
+      "team_1": {
+        "week": "6",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "216/438",
+          "Field Goal Percentage (FG%)": ".493",
+          "Free Throws Made/Attempted (FTM/FTA)": "71/98",
+          "Free Throw Percentage (FT%)": ".724",
+          "3-Point Field Goals Made (3PTM)": "53",
+          "Points": "556",
+          "Rebounds": "207",
+          "Assists": "139",
+          "Steals": "49",
+          "Blocks": "23",
+          "Turnovers": "54"
+        }
+      },
+      "team_2": {
+        "week": "6",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "250/523",
+          "Field Goal Percentage (FG%)": ".478",
+          "Free Throws Made/Attempted (FTM/FTA)": "105/129",
+          "Free Throw Percentage (FT%)": ".814",
+          "3-Point Field Goals Made (3PTM)": "75",
+          "Points": "680",
+          "Rebounds": "249",
+          "Assists": "176",
+          "Steals": "33",
+          "Blocks": "18",
+          "Turnovers": "63"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "4"
+    },
+    {
+      "week": "6",
+      "team_1": {
+        "week": "6",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "256/537",
+          "Field Goal Percentage (FG%)": ".477",
+          "Free Throws Made/Attempted (FTM/FTA)": "121/146",
+          "Free Throw Percentage (FT%)": ".829",
+          "3-Point Field Goals Made (3PTM)": "81",
+          "Points": "714",
+          "Rebounds": "218",
+          "Assists": "139",
+          "Steals": "37",
+          "Blocks": "21",
+          "Turnovers": "86"
+        }
+      },
+      "team_2": {
+        "week": "6",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "230/458",
+          "Field Goal Percentage (FG%)": ".502",
+          "Free Throws Made/Attempted (FTM/FTA)": "108/132",
+          "Free Throw Percentage (FT%)": ".818",
+          "3-Point Field Goals Made (3PTM)": "69",
+          "Points": "637",
+          "Rebounds": "185",
+          "Assists": "138",
+          "Steals": "35",
+          "Blocks": "22",
+          "Turnovers": "52"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "6"
+    },
+    {
+      "week": "6",
+      "team_1": {
+        "week": "6",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "210/457",
+          "Field Goal Percentage (FG%)": ".460",
+          "Free Throws Made/Attempted (FTM/FTA)": "117/135",
+          "Free Throw Percentage (FT%)": ".867",
+          "3-Point Field Goals Made (3PTM)": "62",
+          "Points": "599",
+          "Rebounds": "222",
+          "Assists": "156",
+          "Steals": "44",
+          "Blocks": "34",
+          "Turnovers": "68"
+        }
+      },
+      "team_2": {
+        "week": "6",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "239/501",
+          "Field Goal Percentage (FG%)": ".477",
+          "Free Throws Made/Attempted (FTM/FTA)": "104/134",
+          "Free Throw Percentage (FT%)": ".776",
+          "3-Point Field Goals Made (3PTM)": "64",
+          "Points": "646",
+          "Rebounds": "209",
+          "Assists": "125",
+          "Steals": "29",
+          "Blocks": "25",
+          "Turnovers": "58"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "5"
+    },
+    {
+      "week": "6",
+      "team_1": {
+        "week": "6",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "176/332",
+          "Field Goal Percentage (FG%)": ".530",
+          "Free Throws Made/Attempted (FTM/FTA)": "73/97",
+          "Free Throw Percentage (FT%)": ".753",
+          "3-Point Field Goals Made (3PTM)": "31",
+          "Points": "456",
+          "Rebounds": "182",
+          "Assists": "93",
+          "Steals": "26",
+          "Blocks": "30",
+          "Turnovers": "51"
+        }
+      },
+      "team_2": {
+        "week": "6",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "250/520",
+          "Field Goal Percentage (FG%)": ".481",
+          "Free Throws Made/Attempted (FTM/FTA)": "119/137",
+          "Free Throw Percentage (FT%)": ".869",
+          "3-Point Field Goals Made (3PTM)": "61",
+          "Points": "680",
+          "Rebounds": "218",
+          "Assists": "176",
+          "Steals": "33",
+          "Blocks": "19",
+          "Turnovers": "61"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "3"
+    },
+    {
+      "week": "6",
+      "team_1": {
+        "week": "6",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "243/459",
+          "Field Goal Percentage (FG%)": ".529",
+          "Free Throws Made/Attempted (FTM/FTA)": "132/172",
+          "Free Throw Percentage (FT%)": ".767",
+          "3-Point Field Goals Made (3PTM)": "41",
+          "Points": "659",
+          "Rebounds": "276",
+          "Assists": "140",
+          "Steals": "29",
+          "Blocks": "36",
+          "Turnovers": "72"
+        }
+      },
+      "team_2": {
+        "week": "6",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "250/561",
+          "Field Goal Percentage (FG%)": ".446",
+          "Free Throws Made/Attempted (FTM/FTA)": "105/124",
+          "Free Throw Percentage (FT%)": ".847",
+          "3-Point Field Goals Made (3PTM)": "62",
+          "Points": "667",
+          "Rebounds": "228",
+          "Assists": "168",
+          "Steals": "49",
+          "Blocks": "33",
+          "Turnovers": "79"
+        }
+      },
+      "team_win_name": "king douchebag",
+      "team_win_score": "4"
+    },
+    {
+      "week": "6",
+      "team_1": {
+        "week": "6",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "212/484",
+          "Field Goal Percentage (FG%)": ".438",
+          "Free Throws Made/Attempted (FTM/FTA)": "94/114",
+          "Free Throw Percentage (FT%)": ".825",
+          "3-Point Field Goals Made (3PTM)": "59",
+          "Points": "577",
+          "Rebounds": "195",
+          "Assists": "149",
+          "Steals": "29",
+          "Blocks": "31",
+          "Turnovers": "68"
+        }
+      },
+      "team_2": {
+        "week": "6",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "210/431",
+          "Field Goal Percentage (FG%)": ".487",
+          "Free Throws Made/Attempted (FTM/FTA)": "127/146",
+          "Free Throw Percentage (FT%)": ".870",
+          "3-Point Field Goals Made (3PTM)": "65",
+          "Points": "612",
+          "Rebounds": "214",
+          "Assists": "148",
+          "Steals": "27",
+          "Blocks": "32",
+          "Turnovers": "79"
+        }
+      },
+      "team_win_name": "The Boorkini youth movement",
+      "team_win_score": "3"
+    }
+  ],
+  [
+    {
+      "week": "7",
+      "team_1": {
+        "week": "7",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "116/281",
+          "Field Goal Percentage (FG%)": ".413",
+          "Free Throws Made/Attempted (FTM/FTA)": "35/40",
+          "Free Throw Percentage (FT%)": ".875",
+          "3-Point Field Goals Made (3PTM)": "33",
+          "Points": "300",
+          "Rebounds": "166",
+          "Assists": "97",
+          "Steals": "22",
+          "Blocks": "12",
+          "Turnovers": "31"
+        }
+      },
+      "team_2": {
+        "week": "7",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "160/348",
+          "Field Goal Percentage (FG%)": ".460",
+          "Free Throws Made/Attempted (FTM/FTA)": "71/90",
+          "Free Throw Percentage (FT%)": ".789",
+          "3-Point Field Goals Made (3PTM)": "40",
+          "Points": "431",
+          "Rebounds": "137",
+          "Assists": "74",
+          "Steals": "18",
+          "Blocks": "18",
+          "Turnovers": "33"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "5"
+    },
+    {
+      "week": "7",
+      "team_1": {
+        "week": "7",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "156/312",
+          "Field Goal Percentage (FG%)": ".500",
+          "Free Throws Made/Attempted (FTM/FTA)": "57/67",
+          "Free Throw Percentage (FT%)": ".851",
+          "3-Point Field Goals Made (3PTM)": "47",
+          "Points": "416",
+          "Rebounds": "134",
+          "Assists": "89",
+          "Steals": "19",
+          "Blocks": "13",
+          "Turnovers": "51"
+        }
+      },
+      "team_2": {
+        "week": "7",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "136/279",
+          "Field Goal Percentage (FG%)": ".487",
+          "Free Throws Made/Attempted (FTM/FTA)": "48/62",
+          "Free Throw Percentage (FT%)": ".774",
+          "3-Point Field Goals Made (3PTM)": "44",
+          "Points": "364",
+          "Rebounds": "125",
+          "Assists": "71",
+          "Steals": "22",
+          "Blocks": "10",
+          "Turnovers": "41"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "7"
+    },
+    {
+      "week": "7",
+      "team_1": {
+        "week": "7",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "144/272",
+          "Field Goal Percentage (FG%)": ".529",
+          "Free Throws Made/Attempted (FTM/FTA)": "70/81",
+          "Free Throw Percentage (FT%)": ".864",
+          "3-Point Field Goals Made (3PTM)": "35",
+          "Points": "393",
+          "Rebounds": "140",
+          "Assists": "96",
+          "Steals": "30",
+          "Blocks": "20",
+          "Turnovers": "34"
+        }
+      },
+      "team_2": {
+        "week": "7",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "146/314",
+          "Field Goal Percentage (FG%)": ".465",
+          "Free Throws Made/Attempted (FTM/FTA)": "79/97",
+          "Free Throw Percentage (FT%)": ".814",
+          "3-Point Field Goals Made (3PTM)": "36",
+          "Points": "407",
+          "Rebounds": "105",
+          "Assists": "102",
+          "Steals": "23",
+          "Blocks": "11",
+          "Turnovers": "52"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "6"
+    },
+    {
+      "week": "7",
+      "team_1": {
+        "week": "7",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "169/360",
+          "Field Goal Percentage (FG%)": ".469",
+          "Free Throws Made/Attempted (FTM/FTA)": "92/112",
+          "Free Throw Percentage (FT%)": ".821",
+          "3-Point Field Goals Made (3PTM)": "42",
+          "Points": "472",
+          "Rebounds": "160",
+          "Assists": "82",
+          "Steals": "19",
+          "Blocks": "21",
+          "Turnovers": "41"
+        }
+      },
+      "team_2": {
+        "week": "7",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "121/278",
+          "Field Goal Percentage (FG%)": ".435",
+          "Free Throws Made/Attempted (FTM/FTA)": "62/78",
+          "Free Throw Percentage (FT%)": ".795",
+          "3-Point Field Goals Made (3PTM)": "35",
+          "Points": "339",
+          "Rebounds": "103",
+          "Assists": "97",
+          "Steals": "17",
+          "Blocks": "24",
+          "Turnovers": "40"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "6"
+    },
+    {
+      "week": "7",
+      "team_1": {
+        "week": "7",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "163/316",
+          "Field Goal Percentage (FG%)": ".516",
+          "Free Throws Made/Attempted (FTM/FTA)": "89/118",
+          "Free Throw Percentage (FT%)": ".754",
+          "3-Point Field Goals Made (3PTM)": "34",
+          "Points": "449",
+          "Rebounds": "171",
+          "Assists": "106",
+          "Steals": "22",
+          "Blocks": "19",
+          "Turnovers": "46"
+        }
+      },
+      "team_2": {
+        "week": "7",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "136/275",
+          "Field Goal Percentage (FG%)": ".495",
+          "Free Throws Made/Attempted (FTM/FTA)": "69/88",
+          "Free Throw Percentage (FT%)": ".784",
+          "3-Point Field Goals Made (3PTM)": "41",
+          "Points": "382",
+          "Rebounds": "148",
+          "Assists": "77",
+          "Steals": "20",
+          "Blocks": "21",
+          "Turnovers": "38"
+        }
+      },
+      "team_win_name": "king douchebag",
+      "team_win_score": "5"
+    },
+    {
+      "week": "7",
+      "team_1": {
+        "week": "7",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "165/324",
+          "Field Goal Percentage (FG%)": ".509",
+          "Free Throws Made/Attempted (FTM/FTA)": "54/63",
+          "Free Throw Percentage (FT%)": ".857",
+          "3-Point Field Goals Made (3PTM)": "44",
+          "Points": "428",
+          "Rebounds": "150",
+          "Assists": "74",
+          "Steals": "25",
+          "Blocks": "24",
+          "Turnovers": "59"
+        }
+      },
+      "team_2": {
+        "week": "7",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "156/323",
+          "Field Goal Percentage (FG%)": ".483",
+          "Free Throws Made/Attempted (FTM/FTA)": "63/84",
+          "Free Throw Percentage (FT%)": ".750",
+          "3-Point Field Goals Made (3PTM)": "46",
+          "Points": "421",
+          "Rebounds": "168",
+          "Assists": "100",
+          "Steals": "20",
+          "Blocks": "23",
+          "Turnovers": "39"
+        }
+      },
+      "team_win_name": "The Boorkini youth movement",
+      "team_win_score": "5"
+    }
+  ],
+  [
+    {
+      "week": "8",
+      "team_1": {
+        "week": "8",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "236/502",
+          "Field Goal Percentage (FG%)": ".470",
+          "Free Throws Made/Attempted (FTM/FTA)": "82/103",
+          "Free Throw Percentage (FT%)": ".796",
+          "3-Point Field Goals Made (3PTM)": "60",
+          "Points": "614",
+          "Rebounds": "332",
+          "Assists": "218",
+          "Steals": "47",
+          "Blocks": "29",
+          "Turnovers": "65"
+        }
+      },
+      "team_2": {
+        "week": "8",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "346/695",
+          "Field Goal Percentage (FG%)": ".498",
+          "Free Throws Made/Attempted (FTM/FTA)": "163/202",
+          "Free Throw Percentage (FT%)": ".807",
+          "3-Point Field Goals Made (3PTM)": "85",
+          "Points": "940",
+          "Rebounds": "303",
+          "Assists": "249",
+          "Steals": "55",
+          "Blocks": "27",
+          "Turnovers": "94"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "3"
+    },
+    {
+      "week": "8",
+      "team_1": {
+        "week": "8",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "293/616",
+          "Field Goal Percentage (FG%)": ".476",
+          "Free Throws Made/Attempted (FTM/FTA)": "122/152",
+          "Free Throw Percentage (FT%)": ".803",
+          "3-Point Field Goals Made (3PTM)": "87",
+          "Points": "795",
+          "Rebounds": "236",
+          "Assists": "167",
+          "Steals": "37",
+          "Blocks": "13",
+          "Turnovers": "89"
+        }
+      },
+      "team_2": {
+        "week": "8",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "249/488",
+          "Field Goal Percentage (FG%)": ".510",
+          "Free Throws Made/Attempted (FTM/FTA)": "131/164",
+          "Free Throw Percentage (FT%)": ".799",
+          "3-Point Field Goals Made (3PTM)": "61",
+          "Points": "690",
+          "Rebounds": "246",
+          "Assists": "196",
+          "Steals": "53",
+          "Blocks": "25",
+          "Turnovers": "80"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "3"
+    },
+    {
+      "week": "8",
+      "team_1": {
+        "week": "8",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "340/673",
+          "Field Goal Percentage (FG%)": ".505",
+          "Free Throws Made/Attempted (FTM/FTA)": "150/183",
+          "Free Throw Percentage (FT%)": ".820",
+          "3-Point Field Goals Made (3PTM)": "111",
+          "Points": "941",
+          "Rebounds": "256",
+          "Assists": "148",
+          "Steals": "53",
+          "Blocks": "22",
+          "Turnovers": "96"
+        }
+      },
+      "team_2": {
+        "week": "8",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "291/608",
+          "Field Goal Percentage (FG%)": ".479",
+          "Free Throws Made/Attempted (FTM/FTA)": "151/186",
+          "Free Throw Percentage (FT%)": ".812",
+          "3-Point Field Goals Made (3PTM)": "100",
+          "Points": "833",
+          "Rebounds": "299",
+          "Assists": "200",
+          "Steals": "34",
+          "Blocks": "43",
+          "Turnovers": "93"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "5"
+    },
+    {
+      "week": "8",
+      "team_1": {
+        "week": "8",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "248/536",
+          "Field Goal Percentage (FG%)": ".463",
+          "Free Throws Made/Attempted (FTM/FTA)": "104/125",
+          "Free Throw Percentage (FT%)": ".832",
+          "3-Point Field Goals Made (3PTM)": "76",
+          "Points": "676",
+          "Rebounds": "195",
+          "Assists": "151",
+          "Steals": "43",
+          "Blocks": "24",
+          "Turnovers": "81"
+        }
+      },
+      "team_2": {
+        "week": "8",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "236/519",
+          "Field Goal Percentage (FG%)": ".455",
+          "Free Throws Made/Attempted (FTM/FTA)": "102/139",
+          "Free Throw Percentage (FT%)": ".734",
+          "3-Point Field Goals Made (3PTM)": "75",
+          "Points": "649",
+          "Rebounds": "282",
+          "Assists": "149",
+          "Steals": "38",
+          "Blocks": "44",
+          "Turnovers": "73"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "6"
+    },
+    {
+      "week": "8",
+      "team_1": {
+        "week": "8",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "255/488",
+          "Field Goal Percentage (FG%)": ".523",
+          "Free Throws Made/Attempted (FTM/FTA)": "143/187",
+          "Free Throw Percentage (FT%)": ".765",
+          "3-Point Field Goals Made (3PTM)": "48",
+          "Points": "701",
+          "Rebounds": "260",
+          "Assists": "147",
+          "Steals": "44",
+          "Blocks": "29",
+          "Turnovers": "84"
+        }
+      },
+      "team_2": {
+        "week": "8",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "345/699",
+          "Field Goal Percentage (FG%)": ".494",
+          "Free Throws Made/Attempted (FTM/FTA)": "145/163",
+          "Free Throw Percentage (FT%)": ".890",
+          "3-Point Field Goals Made (3PTM)": "97",
+          "Points": "932",
+          "Rebounds": "256",
+          "Assists": "184",
+          "Steals": "45",
+          "Blocks": "34",
+          "Turnovers": "107"
+        }
+      },
+      "team_win_name": "king douchebag",
+      "team_win_score": "3"
+    },
+    {
+      "week": "8",
+      "team_1": {
+        "week": "8",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "275/559",
+          "Field Goal Percentage (FG%)": ".492",
+          "Free Throws Made/Attempted (FTM/FTA)": "130/155",
+          "Free Throw Percentage (FT%)": ".839",
+          "3-Point Field Goals Made (3PTM)": "84",
+          "Points": "764",
+          "Rebounds": "210",
+          "Assists": "160",
+          "Steals": "39",
+          "Blocks": "34",
+          "Turnovers": "92"
+        }
+      },
+      "team_2": {
+        "week": "8",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "238/484",
+          "Field Goal Percentage (FG%)": ".492",
+          "Free Throws Made/Attempted (FTM/FTA)": "134/166",
+          "Free Throw Percentage (FT%)": ".807",
+          "3-Point Field Goals Made (3PTM)": "79",
+          "Points": "689",
+          "Rebounds": "234",
+          "Assists": "154",
+          "Steals": "39",
+          "Blocks": "25",
+          "Turnovers": "67"
+        }
+      },
+      "team_win_name": "Ugly Kid Joe",
+      "team_win_score": "6"
+    }
+  ],
+  [
+    {
+      "week": "9",
+      "team_1": {
+        "week": "9",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "234/465",
+          "Field Goal Percentage (FG%)": ".503",
+          "Free Throws Made/Attempted (FTM/FTA)": "80/94",
+          "Free Throw Percentage (FT%)": ".851",
+          "3-Point Field Goals Made (3PTM)": "72",
+          "Points": "620",
+          "Rebounds": "263",
+          "Assists": "180",
+          "Steals": "38",
+          "Blocks": "23",
+          "Turnovers": "70"
+        }
+      },
+      "team_2": {
+        "week": "9",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "299/652",
+          "Field Goal Percentage (FG%)": ".459",
+          "Free Throws Made/Attempted (FTM/FTA)": "129/148",
+          "Free Throw Percentage (FT%)": ".872",
+          "3-Point Field Goals Made (3PTM)": "73",
+          "Points": "800",
+          "Rebounds": "266",
+          "Assists": "170",
+          "Steals": "38",
+          "Blocks": "36",
+          "Turnovers": "93"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "3"
+    },
+    {
+      "week": "9",
+      "team_1": {
+        "week": "9",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "233/490",
+          "Field Goal Percentage (FG%)": ".476",
+          "Free Throws Made/Attempted (FTM/FTA)": "136/163",
+          "Free Throw Percentage (FT%)": ".834",
+          "3-Point Field Goals Made (3PTM)": "62",
+          "Points": "664",
+          "Rebounds": "240",
+          "Assists": "210",
+          "Steals": "51",
+          "Blocks": "28",
+          "Turnovers": "62"
+        }
+      },
+      "team_2": {
+        "week": "9",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "264/527",
+          "Field Goal Percentage (FG%)": ".501",
+          "Free Throws Made/Attempted (FTM/FTA)": "92/116",
+          "Free Throw Percentage (FT%)": ".793",
+          "3-Point Field Goals Made (3PTM)": "79",
+          "Points": "699",
+          "Rebounds": "250",
+          "Assists": "140",
+          "Steals": "35",
+          "Blocks": "28",
+          "Turnovers": "55"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "3"
+    },
+    {
+      "week": "9",
+      "team_1": {
+        "week": "9",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "273/558",
+          "Field Goal Percentage (FG%)": ".489",
+          "Free Throws Made/Attempted (FTM/FTA)": "141/172",
+          "Free Throw Percentage (FT%)": ".820",
+          "3-Point Field Goals Made (3PTM)": "65",
+          "Points": "752",
+          "Rebounds": "260",
+          "Assists": "160",
+          "Steals": "44",
+          "Blocks": "24",
+          "Turnovers": "71"
+        }
+      },
+      "team_2": {
+        "week": "9",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "267/536",
+          "Field Goal Percentage (FG%)": ".498",
+          "Free Throws Made/Attempted (FTM/FTA)": "117/133",
+          "Free Throw Percentage (FT%)": ".880",
+          "3-Point Field Goals Made (3PTM)": "81",
+          "Points": "732",
+          "Rebounds": "189",
+          "Assists": "154",
+          "Steals": "25",
+          "Blocks": "31",
+          "Turnovers": "66"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "4"
+    },
+    {
+      "week": "9",
+      "team_1": {
+        "week": "9",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "249/531",
+          "Field Goal Percentage (FG%)": ".469",
+          "Free Throws Made/Attempted (FTM/FTA)": "126/159",
+          "Free Throw Percentage (FT%)": ".792",
+          "3-Point Field Goals Made (3PTM)": "63",
+          "Points": "687",
+          "Rebounds": "215",
+          "Assists": "168",
+          "Steals": "37",
+          "Blocks": "28",
+          "Turnovers": "74"
+        }
+      },
+      "team_2": {
+        "week": "9",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "243/480",
+          "Field Goal Percentage (FG%)": ".506",
+          "Free Throws Made/Attempted (FTM/FTA)": "110/135",
+          "Free Throw Percentage (FT%)": ".815",
+          "3-Point Field Goals Made (3PTM)": "75",
+          "Points": "671",
+          "Rebounds": "174",
+          "Assists": "150",
+          "Steals": "39",
+          "Blocks": "31",
+          "Turnovers": "57"
+        }
+      },
+      "team_win_name": "Uri's Unmatched Team",
+      "team_win_score": "3"
+    },
+    {
+      "week": "9",
+      "team_1": {
+        "week": "9",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "242/477",
+          "Field Goal Percentage (FG%)": ".507",
+          "Free Throws Made/Attempted (FTM/FTA)": "131/166",
+          "Free Throw Percentage (FT%)": ".789",
+          "3-Point Field Goals Made (3PTM)": "35",
+          "Points": "650",
+          "Rebounds": "270",
+          "Assists": "166",
+          "Steals": "34",
+          "Blocks": "36",
+          "Turnovers": "82"
+        }
+      },
+      "team_2": {
+        "week": "9",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "228/478",
+          "Field Goal Percentage (FG%)": ".477",
+          "Free Throws Made/Attempted (FTM/FTA)": "81/101",
+          "Free Throw Percentage (FT%)": ".802",
+          "3-Point Field Goals Made (3PTM)": "73",
+          "Points": "610",
+          "Rebounds": "180",
+          "Assists": "170",
+          "Steals": "34",
+          "Blocks": "21",
+          "Turnovers": "65"
+        }
+      },
+      "team_win_name": "Finshed In a Draw",
+      "team_win_score": "4"
+    },
+    {
+      "week": "9",
+      "team_1": {
+        "week": "9",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "266/550",
+          "Field Goal Percentage (FG%)": ".484",
+          "Free Throws Made/Attempted (FTM/FTA)": "123/149",
+          "Free Throw Percentage (FT%)": ".826",
+          "3-Point Field Goals Made (3PTM)": "98",
+          "Points": "753",
+          "Rebounds": "240",
+          "Assists": "144",
+          "Steals": "45",
+          "Blocks": "39",
+          "Turnovers": "71"
+        }
+      },
+      "team_2": {
+        "week": "9",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "294/580",
+          "Field Goal Percentage (FG%)": ".507",
+          "Free Throws Made/Attempted (FTM/FTA)": "115/137",
+          "Free Throw Percentage (FT%)": ".839",
+          "3-Point Field Goals Made (3PTM)": "80",
+          "Points": "783",
+          "Rebounds": "221",
+          "Assists": "153",
+          "Steals": "35",
+          "Blocks": "37",
+          "Turnovers": "81"
+        }
+      },
+      "team_win_name": "yoav's Champion Team",
+      "team_win_score": "5"
+    }
+  ],
+  [
+    {
+      "week": "10",
+      "team_1": {
+        "week": "10",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "224/457",
+          "Field Goal Percentage (FG%)": ".490",
+          "Free Throws Made/Attempted (FTM/FTA)": "78/103",
+          "Free Throw Percentage (FT%)": ".757",
+          "3-Point Field Goals Made (3PTM)": "61",
+          "Points": "587",
+          "Rebounds": "243",
+          "Assists": "149",
+          "Steals": "52",
+          "Blocks": "25",
+          "Turnovers": "74"
+        }
+      },
+      "team_2": {
+        "week": "10",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "276/510",
+          "Field Goal Percentage (FG%)": ".541",
+          "Free Throws Made/Attempted (FTM/FTA)": "85/115",
+          "Free Throw Percentage (FT%)": ".739",
+          "3-Point Field Goals Made (3PTM)": "77",
+          "Points": "714",
+          "Rebounds": "273",
+          "Assists": "143",
+          "Steals": "37",
+          "Blocks": "28",
+          "Turnovers": "61"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "3"
+    },
+    {
+      "week": "10",
+      "team_1": {
+        "week": "10",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "274/617",
+          "Field Goal Percentage (FG%)": ".444",
+          "Free Throws Made/Attempted (FTM/FTA)": "136/168",
+          "Free Throw Percentage (FT%)": ".810",
+          "3-Point Field Goals Made (3PTM)": "93",
+          "Points": "777",
+          "Rebounds": "229",
+          "Assists": "172",
+          "Steals": "31",
+          "Blocks": "24",
+          "Turnovers": "102"
+        }
+      },
+      "team_2": {
+        "week": "10",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "255/529",
+          "Field Goal Percentage (FG%)": ".482",
+          "Free Throws Made/Attempted (FTM/FTA)": "114/138",
+          "Free Throw Percentage (FT%)": ".826",
+          "3-Point Field Goals Made (3PTM)": "83",
+          "Points": "707",
+          "Rebounds": "167",
+          "Assists": "158",
+          "Steals": "37",
+          "Blocks": "36",
+          "Turnovers": "62"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "4"
+    },
+    {
+      "week": "10",
+      "team_1": {
+        "week": "10",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "240/447",
+          "Field Goal Percentage (FG%)": ".537",
+          "Free Throws Made/Attempted (FTM/FTA)": "105/125",
+          "Free Throw Percentage (FT%)": ".840",
+          "3-Point Field Goals Made (3PTM)": "51",
+          "Points": "636",
+          "Rebounds": "205",
+          "Assists": "180",
+          "Steals": "42",
+          "Blocks": "24",
+          "Turnovers": "58"
+        }
+      },
+      "team_2": {
+        "week": "10",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "258/515",
+          "Field Goal Percentage (FG%)": ".501",
+          "Free Throws Made/Attempted (FTM/FTA)": "113/136",
+          "Free Throw Percentage (FT%)": ".831",
+          "3-Point Field Goals Made (3PTM)": "88",
+          "Points": "717",
+          "Rebounds": "223",
+          "Assists": "172",
+          "Steals": "39",
+          "Blocks": "41",
+          "Turnovers": "58"
+        }
+      },
+      "team_win_name": "Finshed In a Draw",
+      "team_win_score": "4"
+    },
+    {
+      "week": "10",
+      "team_1": {
+        "week": "10",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "234/484",
+          "Field Goal Percentage (FG%)": ".483",
+          "Free Throws Made/Attempted (FTM/FTA)": "102/133",
+          "Free Throw Percentage (FT%)": ".767",
+          "3-Point Field Goals Made (3PTM)": "59",
+          "Points": "629",
+          "Rebounds": "205",
+          "Assists": "135",
+          "Steals": "29",
+          "Blocks": "29",
+          "Turnovers": "65"
+        }
+      },
+      "team_2": {
+        "week": "10",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "265/533",
+          "Field Goal Percentage (FG%)": ".497",
+          "Free Throws Made/Attempted (FTM/FTA)": "136/184",
+          "Free Throw Percentage (FT%)": ".739",
+          "3-Point Field Goals Made (3PTM)": "68",
+          "Points": "734",
+          "Rebounds": "251",
+          "Assists": "174",
+          "Steals": "33",
+          "Blocks": "27",
+          "Turnovers": "78"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "3"
+    },
+    {
+      "week": "10",
+      "team_1": {
+        "week": "10",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "277/567",
+          "Field Goal Percentage (FG%)": ".489",
+          "Free Throws Made/Attempted (FTM/FTA)": "153/190",
+          "Free Throw Percentage (FT%)": ".805",
+          "3-Point Field Goals Made (3PTM)": "77",
+          "Points": "784",
+          "Rebounds": "208",
+          "Assists": "211",
+          "Steals": "41",
+          "Blocks": "29",
+          "Turnovers": "80"
+        }
+      },
+      "team_2": {
+        "week": "10",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "245/530",
+          "Field Goal Percentage (FG%)": ".462",
+          "Free Throws Made/Attempted (FTM/FTA)": "128/160",
+          "Free Throw Percentage (FT%)": ".800",
+          "3-Point Field Goals Made (3PTM)": "79",
+          "Points": "697",
+          "Rebounds": "246",
+          "Assists": "162",
+          "Steals": "37",
+          "Blocks": "29",
+          "Turnovers": "83"
+        }
+      },
+      "team_win_name": "Uri's Unmatched Team",
+      "team_win_score": "6"
+    },
+    {
+      "week": "10",
+      "team_1": {
+        "week": "10",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "284/569",
+          "Field Goal Percentage (FG%)": ".499",
+          "Free Throws Made/Attempted (FTM/FTA)": "133/185",
+          "Free Throw Percentage (FT%)": ".719",
+          "3-Point Field Goals Made (3PTM)": "88",
+          "Points": "789",
+          "Rebounds": "272",
+          "Assists": "161",
+          "Steals": "54",
+          "Blocks": "23",
+          "Turnovers": "84"
+        }
+      },
+      "team_2": {
+        "week": "10",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "280/591",
+          "Field Goal Percentage (FG%)": ".474",
+          "Free Throws Made/Attempted (FTM/FTA)": "153/194",
+          "Free Throw Percentage (FT%)": ".789",
+          "3-Point Field Goals Made (3PTM)": "70",
+          "Points": "783",
+          "Rebounds": "270",
+          "Assists": "158",
+          "Steals": "39",
+          "Blocks": "38",
+          "Turnovers": "73"
+        }
+      },
+      "team_win_name": "The Boorkini youth movement",
+      "team_win_score": "6"
+    }
+  ],
+  [
+    {
+      "week": "11",
+      "team_1": {
+        "week": "11",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "242/492",
+          "Field Goal Percentage (FG%)": ".492",
+          "Free Throws Made/Attempted (FTM/FTA)": "65/92",
+          "Free Throw Percentage (FT%)": ".707",
+          "3-Point Field Goals Made (3PTM)": "81",
+          "Points": "630",
+          "Rebounds": "291",
+          "Assists": "157",
+          "Steals": "35",
+          "Blocks": "14",
+          "Turnovers": "101"
+        }
+      },
+      "team_2": {
+        "week": "11",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "228/443",
+          "Field Goal Percentage (FG%)": ".515",
+          "Free Throws Made/Attempted (FTM/FTA)": "113/144",
+          "Free Throw Percentage (FT%)": ".785",
+          "3-Point Field Goals Made (3PTM)": "46",
+          "Points": "615",
+          "Rebounds": "243",
+          "Assists": "179",
+          "Steals": "58",
+          "Blocks": "36",
+          "Turnovers": "66"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "3"
+    },
+    {
+      "week": "11",
+      "team_1": {
+        "week": "11",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "329/662",
+          "Field Goal Percentage (FG%)": ".497",
+          "Free Throws Made/Attempted (FTM/FTA)": "140/168",
+          "Free Throw Percentage (FT%)": ".833",
+          "3-Point Field Goals Made (3PTM)": "98",
+          "Points": "896",
+          "Rebounds": "192",
+          "Assists": "180",
+          "Steals": "39",
+          "Blocks": "26",
+          "Turnovers": "112"
+        }
+      },
+      "team_2": {
+        "week": "11",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "271/595",
+          "Field Goal Percentage (FG%)": ".455",
+          "Free Throws Made/Attempted (FTM/FTA)": "150/188",
+          "Free Throw Percentage (FT%)": ".798",
+          "3-Point Field Goals Made (3PTM)": "100",
+          "Points": "792",
+          "Rebounds": "263",
+          "Assists": "199",
+          "Steals": "43",
+          "Blocks": "28",
+          "Turnovers": "93"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "3"
+    },
+    {
+      "week": "11",
+      "team_1": {
+        "week": "11",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "271/575",
+          "Field Goal Percentage (FG%)": ".471",
+          "Free Throws Made/Attempted (FTM/FTA)": "165/207",
+          "Free Throw Percentage (FT%)": ".797",
+          "3-Point Field Goals Made (3PTM)": "73",
+          "Points": "780",
+          "Rebounds": "250",
+          "Assists": "151",
+          "Steals": "41",
+          "Blocks": "22",
+          "Turnovers": "91"
+        }
+      },
+      "team_2": {
+        "week": "11",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "265/544",
+          "Field Goal Percentage (FG%)": ".487",
+          "Free Throws Made/Attempted (FTM/FTA)": "120/143",
+          "Free Throw Percentage (FT%)": ".839",
+          "3-Point Field Goals Made (3PTM)": "80",
+          "Points": "730",
+          "Rebounds": "230",
+          "Assists": "188",
+          "Steals": "39",
+          "Blocks": "37",
+          "Turnovers": "63"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "3"
+    },
+    {
+      "week": "11",
+      "team_1": {
+        "week": "11",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "284/591",
+          "Field Goal Percentage (FG%)": ".481",
+          "Free Throws Made/Attempted (FTM/FTA)": "115/152",
+          "Free Throw Percentage (FT%)": ".757",
+          "3-Point Field Goals Made (3PTM)": "84",
+          "Points": "767",
+          "Rebounds": "289",
+          "Assists": "163",
+          "Steals": "44",
+          "Blocks": "34",
+          "Turnovers": "71"
+        }
+      },
+      "team_2": {
+        "week": "11",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "197/448",
+          "Field Goal Percentage (FG%)": ".440",
+          "Free Throws Made/Attempted (FTM/FTA)": "83/97",
+          "Free Throw Percentage (FT%)": ".856",
+          "3-Point Field Goals Made (3PTM)": "75",
+          "Points": "552",
+          "Rebounds": "140",
+          "Assists": "152",
+          "Steals": "32",
+          "Blocks": "29",
+          "Turnovers": "61"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "7"
+    },
+    {
+      "week": "11",
+      "team_1": {
+        "week": "11",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "261/510",
+          "Field Goal Percentage (FG%)": ".512",
+          "Free Throws Made/Attempted (FTM/FTA)": "130/166",
+          "Free Throw Percentage (FT%)": ".783",
+          "3-Point Field Goals Made (3PTM)": "80",
+          "Points": "732",
+          "Rebounds": "234",
+          "Assists": "166",
+          "Steals": "37",
+          "Blocks": "30",
+          "Turnovers": "76"
+        }
+      },
+      "team_2": {
+        "week": "11",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "246/507",
+          "Field Goal Percentage (FG%)": ".485",
+          "Free Throws Made/Attempted (FTM/FTA)": "134/167",
+          "Free Throw Percentage (FT%)": ".802",
+          "3-Point Field Goals Made (3PTM)": "68",
+          "Points": "694",
+          "Rebounds": "241",
+          "Assists": "141",
+          "Steals": "47",
+          "Blocks": "36",
+          "Turnovers": "84"
+        }
+      },
+      "team_win_name": "Uri's Unmatched Team",
+      "team_win_score": "5"
+    },
+    {
+      "week": "11",
+      "team_1": {
+        "week": "11",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "260/532",
+          "Field Goal Percentage (FG%)": ".489",
+          "Free Throws Made/Attempted (FTM/FTA)": "109/156",
+          "Free Throw Percentage (FT%)": ".699",
+          "3-Point Field Goals Made (3PTM)": "47",
+          "Points": "676",
+          "Rebounds": "279",
+          "Assists": "160",
+          "Steals": "37",
+          "Blocks": "29",
+          "Turnovers": "81"
+        }
+      },
+      "team_2": {
+        "week": "11",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "260/512",
+          "Field Goal Percentage (FG%)": ".508",
+          "Free Throws Made/Attempted (FTM/FTA)": "117/143",
+          "Free Throw Percentage (FT%)": ".818",
+          "3-Point Field Goals Made (3PTM)": "67",
+          "Points": "704",
+          "Rebounds": "210",
+          "Assists": "163",
+          "Steals": "30",
+          "Blocks": "37",
+          "Turnovers": "57"
+        }
+      },
+      "team_win_name": "king douchebag",
+      "team_win_score": "2"
+    }
+  ],
+  [
+    {
+      "week": "12",
+      "team_1": {
+        "week": "12",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "250/476",
+          "Field Goal Percentage (FG%)": ".525",
+          "Free Throws Made/Attempted (FTM/FTA)": "90/104",
+          "Free Throw Percentage (FT%)": ".865",
+          "3-Point Field Goals Made (3PTM)": "61",
+          "Points": "651",
+          "Rebounds": "270",
+          "Assists": "167",
+          "Steals": "37",
+          "Blocks": "23",
+          "Turnovers": "62"
+        }
+      },
+      "team_2": {
+        "week": "12",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "216/448",
+          "Field Goal Percentage (FG%)": ".482",
+          "Free Throws Made/Attempted (FTM/FTA)": "110/137",
+          "Free Throw Percentage (FT%)": ".803",
+          "3-Point Field Goals Made (3PTM)": "73",
+          "Points": "615",
+          "Rebounds": "211",
+          "Assists": "161",
+          "Steals": "49",
+          "Blocks": "16",
+          "Turnovers": "66"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "7"
+    },
+    {
+      "week": "12",
+      "team_1": {
+        "week": "12",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "300/610",
+          "Field Goal Percentage (FG%)": ".492",
+          "Free Throws Made/Attempted (FTM/FTA)": "141/177",
+          "Free Throw Percentage (FT%)": ".797",
+          "3-Point Field Goals Made (3PTM)": "87",
+          "Points": "828",
+          "Rebounds": "245",
+          "Assists": "194",
+          "Steals": "36",
+          "Blocks": "23",
+          "Turnovers": "104"
+        }
+      },
+      "team_2": {
+        "week": "12",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "292/583",
+          "Field Goal Percentage (FG%)": ".501",
+          "Free Throws Made/Attempted (FTM/FTA)": "120/153",
+          "Free Throw Percentage (FT%)": ".784",
+          "3-Point Field Goals Made (3PTM)": "83",
+          "Points": "787",
+          "Rebounds": "240",
+          "Assists": "159",
+          "Steals": "64",
+          "Blocks": "38",
+          "Turnovers": "73"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "5"
+    },
+    {
+      "week": "12",
+      "team_1": {
+        "week": "12",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "8",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "253/445",
+          "Field Goal Percentage (FG%)": ".569",
+          "Free Throws Made/Attempted (FTM/FTA)": "127/146",
+          "Free Throw Percentage (FT%)": ".870",
+          "3-Point Field Goals Made (3PTM)": "71",
+          "Points": "704",
+          "Rebounds": "260",
+          "Assists": "177",
+          "Steals": "43",
+          "Blocks": "28",
+          "Turnovers": "66"
+        }
+      },
+      "team_2": {
+        "week": "12",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "1",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "167/373",
+          "Field Goal Percentage (FG%)": ".448",
+          "Free Throws Made/Attempted (FTM/FTA)": "53/68",
+          "Free Throw Percentage (FT%)": ".779",
+          "3-Point Field Goals Made (3PTM)": "59",
+          "Points": "446",
+          "Rebounds": "128",
+          "Assists": "114",
+          "Steals": "29",
+          "Blocks": "18",
+          "Turnovers": "45"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "8"
+    },
+    {
+      "week": "12",
+      "team_1": {
+        "week": "12",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "263/552",
+          "Field Goal Percentage (FG%)": ".476",
+          "Free Throws Made/Attempted (FTM/FTA)": "95/116",
+          "Free Throw Percentage (FT%)": ".819",
+          "3-Point Field Goals Made (3PTM)": "77",
+          "Points": "698",
+          "Rebounds": "200",
+          "Assists": "138",
+          "Steals": "36",
+          "Blocks": "38",
+          "Turnovers": "78"
+        }
+      },
+      "team_2": {
+        "week": "12",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "221/482",
+          "Field Goal Percentage (FG%)": ".459",
+          "Free Throws Made/Attempted (FTM/FTA)": "124/146",
+          "Free Throw Percentage (FT%)": ".849",
+          "3-Point Field Goals Made (3PTM)": "55",
+          "Points": "621",
+          "Rebounds": "231",
+          "Assists": "162",
+          "Steals": "31",
+          "Blocks": "30",
+          "Turnovers": "70"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "5"
+    },
+    {
+      "week": "12",
+      "team_1": {
+        "week": "12",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "219/455",
+          "Field Goal Percentage (FG%)": ".481",
+          "Free Throws Made/Attempted (FTM/FTA)": "124/153",
+          "Free Throw Percentage (FT%)": ".810",
+          "3-Point Field Goals Made (3PTM)": "82",
+          "Points": "644",
+          "Rebounds": "224",
+          "Assists": "125",
+          "Steals": "38",
+          "Blocks": "28",
+          "Turnovers": "57"
+        }
+      },
+      "team_2": {
+        "week": "12",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "247/491",
+          "Field Goal Percentage (FG%)": ".503",
+          "Free Throws Made/Attempted (FTM/FTA)": "130/162",
+          "Free Throw Percentage (FT%)": ".802",
+          "3-Point Field Goals Made (3PTM)": "74",
+          "Points": "698",
+          "Rebounds": "215",
+          "Assists": "148",
+          "Steals": "26",
+          "Blocks": "33",
+          "Turnovers": "59"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "5"
+    },
+    {
+      "week": "12",
+      "team_1": {
+        "week": "12",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "227/477",
+          "Field Goal Percentage (FG%)": ".476",
+          "Free Throws Made/Attempted (FTM/FTA)": "100/125",
+          "Free Throw Percentage (FT%)": ".800",
+          "3-Point Field Goals Made (3PTM)": "60",
+          "Points": "614",
+          "Rebounds": "201",
+          "Assists": "153",
+          "Steals": "37",
+          "Blocks": "18",
+          "Turnovers": "62"
+        }
+      },
+      "team_2": {
+        "week": "12",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "238/503",
+          "Field Goal Percentage (FG%)": ".473",
+          "Free Throws Made/Attempted (FTM/FTA)": "122/172",
+          "Free Throw Percentage (FT%)": ".709",
+          "3-Point Field Goals Made (3PTM)": "58",
+          "Points": "656",
+          "Rebounds": "218",
+          "Assists": "160",
+          "Steals": "39",
+          "Blocks": "17",
+          "Turnovers": "86"
+        }
+      },
+      "team_win_name": "Uri's Unmatched Team",
+      "team_win_score": "5"
+    }
+  ],
+  [
+    {
+      "week": "13",
+      "team_1": {
+        "week": "13",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "216/467",
+          "Field Goal Percentage (FG%)": ".463",
+          "Free Throws Made/Attempted (FTM/FTA)": "80/98",
+          "Free Throw Percentage (FT%)": ".816",
+          "3-Point Field Goals Made (3PTM)": "45",
+          "Points": "557",
+          "Rebounds": "272",
+          "Assists": "173",
+          "Steals": "22",
+          "Blocks": "15",
+          "Turnovers": "61"
+        }
+      },
+      "team_2": {
+        "week": "13",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "207/450",
+          "Field Goal Percentage (FG%)": ".460",
+          "Free Throws Made/Attempted (FTM/FTA)": "107/129",
+          "Free Throw Percentage (FT%)": ".829",
+          "3-Point Field Goals Made (3PTM)": "79",
+          "Points": "600",
+          "Rebounds": "158",
+          "Assists": "132",
+          "Steals": "34",
+          "Blocks": "31",
+          "Turnovers": "64"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "4"
+    },
+    {
+      "week": "13",
+      "team_1": {
+        "week": "13",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "293/618",
+          "Field Goal Percentage (FG%)": ".474",
+          "Free Throws Made/Attempted (FTM/FTA)": "106/137",
+          "Free Throw Percentage (FT%)": ".774",
+          "3-Point Field Goals Made (3PTM)": "85",
+          "Points": "777",
+          "Rebounds": "248",
+          "Assists": "179",
+          "Steals": "30",
+          "Blocks": "35",
+          "Turnovers": "89"
+        }
+      },
+      "team_2": {
+        "week": "13",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "261/515",
+          "Field Goal Percentage (FG%)": ".507",
+          "Free Throws Made/Attempted (FTM/FTA)": "142/192",
+          "Free Throw Percentage (FT%)": ".740",
+          "3-Point Field Goals Made (3PTM)": "65",
+          "Points": "729",
+          "Rebounds": "235",
+          "Assists": "121",
+          "Steals": "41",
+          "Blocks": "18",
+          "Turnovers": "74"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "6"
+    },
+    {
+      "week": "13",
+      "team_1": {
+        "week": "13",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "228/458",
+          "Field Goal Percentage (FG%)": ".498",
+          "Free Throws Made/Attempted (FTM/FTA)": "112/134",
+          "Free Throw Percentage (FT%)": ".836",
+          "3-Point Field Goals Made (3PTM)": "36",
+          "Points": "604",
+          "Rebounds": "231",
+          "Assists": "184",
+          "Steals": "47",
+          "Blocks": "21",
+          "Turnovers": "68"
+        }
+      },
+      "team_2": {
+        "week": "13",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "234/515",
+          "Field Goal Percentage (FG%)": ".454",
+          "Free Throws Made/Attempted (FTM/FTA)": "117/154",
+          "Free Throw Percentage (FT%)": ".760",
+          "3-Point Field Goals Made (3PTM)": "57",
+          "Points": "642",
+          "Rebounds": "256",
+          "Assists": "135",
+          "Steals": "25",
+          "Blocks": "37",
+          "Turnovers": "64"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "4"
+    },
+    {
+      "week": "13",
+      "team_1": {
+        "week": "13",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "300/616",
+          "Field Goal Percentage (FG%)": ".487",
+          "Free Throws Made/Attempted (FTM/FTA)": "177/215",
+          "Free Throw Percentage (FT%)": ".823",
+          "3-Point Field Goals Made (3PTM)": "74",
+          "Points": "851",
+          "Rebounds": "247",
+          "Assists": "169",
+          "Steals": "42",
+          "Blocks": "34",
+          "Turnovers": "66"
+        }
+      },
+      "team_2": {
+        "week": "13",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "250/509",
+          "Field Goal Percentage (FG%)": ".491",
+          "Free Throws Made/Attempted (FTM/FTA)": "80/99",
+          "Free Throw Percentage (FT%)": ".808",
+          "3-Point Field Goals Made (3PTM)": "84",
+          "Points": "664",
+          "Rebounds": "239",
+          "Assists": "153",
+          "Steals": "33",
+          "Blocks": "32",
+          "Turnovers": "79"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "7"
+    },
+    {
+      "week": "13",
+      "team_1": {
+        "week": "13",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "263/541",
+          "Field Goal Percentage (FG%)": ".486",
+          "Free Throws Made/Attempted (FTM/FTA)": "92/119",
+          "Free Throw Percentage (FT%)": ".773",
+          "3-Point Field Goals Made (3PTM)": "76",
+          "Points": "694",
+          "Rebounds": "239",
+          "Assists": "164",
+          "Steals": "37",
+          "Blocks": "28",
+          "Turnovers": "70"
+        }
+      },
+      "team_2": {
+        "week": "13",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "248/508",
+          "Field Goal Percentage (FG%)": ".488",
+          "Free Throws Made/Attempted (FTM/FTA)": "111/142",
+          "Free Throw Percentage (FT%)": ".782",
+          "3-Point Field Goals Made (3PTM)": "79",
+          "Points": "686",
+          "Rebounds": "267",
+          "Assists": "154",
+          "Steals": "39",
+          "Blocks": "36",
+          "Turnovers": "79"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "3"
+    },
+    {
+      "week": "13",
+      "team_1": {
+        "week": "13",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "235/499",
+          "Field Goal Percentage (FG%)": ".471",
+          "Free Throws Made/Attempted (FTM/FTA)": "100/130",
+          "Free Throw Percentage (FT%)": ".769",
+          "3-Point Field Goals Made (3PTM)": "63",
+          "Points": "633",
+          "Rebounds": "204",
+          "Assists": "178",
+          "Steals": "36",
+          "Blocks": "31",
+          "Turnovers": "80"
+        }
+      },
+      "team_2": {
+        "week": "13",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "230/513",
+          "Field Goal Percentage (FG%)": ".448",
+          "Free Throws Made/Attempted (FTM/FTA)": "118/145",
+          "Free Throw Percentage (FT%)": ".814",
+          "3-Point Field Goals Made (3PTM)": "62",
+          "Points": "640",
+          "Rebounds": "230",
+          "Assists": "140",
+          "Steals": "37",
+          "Blocks": "22",
+          "Turnovers": "71"
+        }
+      },
+      "team_win_name": "The Wall",
+      "team_win_score": "4"
+    }
+  ],
+  [
+    {
+      "week": "14",
+      "team_1": {
+        "week": "14",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "183/385",
+          "Field Goal Percentage (FG%)": ".475",
+          "Free Throws Made/Attempted (FTM/FTA)": "53/63",
+          "Free Throw Percentage (FT%)": ".841",
+          "3-Point Field Goals Made (3PTM)": "47",
+          "Points": "466",
+          "Rebounds": "253",
+          "Assists": "163",
+          "Steals": "25",
+          "Blocks": "16",
+          "Turnovers": "55"
+        }
+      },
+      "team_2": {
+        "week": "14",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "269/522",
+          "Field Goal Percentage (FG%)": ".515",
+          "Free Throws Made/Attempted (FTM/FTA)": "152/187",
+          "Free Throw Percentage (FT%)": ".813",
+          "3-Point Field Goals Made (3PTM)": "66",
+          "Points": "756",
+          "Rebounds": "247",
+          "Assists": "144",
+          "Steals": "29",
+          "Blocks": "29",
+          "Turnovers": "56"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "4"
+    },
+    {
+      "week": "14",
+      "team_1": {
+        "week": "14",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "341/699",
+          "Field Goal Percentage (FG%)": ".488",
+          "Free Throws Made/Attempted (FTM/FTA)": "142/178",
+          "Free Throw Percentage (FT%)": ".798",
+          "3-Point Field Goals Made (3PTM)": "102",
+          "Points": "926",
+          "Rebounds": "272",
+          "Assists": "191",
+          "Steals": "33",
+          "Blocks": "25",
+          "Turnovers": "104"
+        }
+      },
+      "team_2": {
+        "week": "14",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "273/551",
+          "Field Goal Percentage (FG%)": ".495",
+          "Free Throws Made/Attempted (FTM/FTA)": "112/147",
+          "Free Throw Percentage (FT%)": ".762",
+          "3-Point Field Goals Made (3PTM)": "64",
+          "Points": "722",
+          "Rebounds": "237",
+          "Assists": "133",
+          "Steals": "39",
+          "Blocks": "27",
+          "Turnovers": "64"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "5"
+    },
+    {
+      "week": "14",
+      "team_1": {
+        "week": "14",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "249/476",
+          "Field Goal Percentage (FG%)": ".523",
+          "Free Throws Made/Attempted (FTM/FTA)": "137/166",
+          "Free Throw Percentage (FT%)": ".825",
+          "3-Point Field Goals Made (3PTM)": "59",
+          "Points": "694",
+          "Rebounds": "249",
+          "Assists": "182",
+          "Steals": "42",
+          "Blocks": "24",
+          "Turnovers": "74"
+        }
+      },
+      "team_2": {
+        "week": "14",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "323/579",
+          "Field Goal Percentage (FG%)": ".558",
+          "Free Throws Made/Attempted (FTM/FTA)": "134/169",
+          "Free Throw Percentage (FT%)": ".793",
+          "3-Point Field Goals Made (3PTM)": "80",
+          "Points": "860",
+          "Rebounds": "321",
+          "Assists": "144",
+          "Steals": "45",
+          "Blocks": "45",
+          "Turnovers": "74"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "2"
+    },
+    {
+      "week": "14",
+      "team_1": {
+        "week": "14",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "286/617",
+          "Field Goal Percentage (FG%)": ".464",
+          "Free Throws Made/Attempted (FTM/FTA)": "76/105",
+          "Free Throw Percentage (FT%)": ".724",
+          "3-Point Field Goals Made (3PTM)": "94",
+          "Points": "742",
+          "Rebounds": "229",
+          "Assists": "198",
+          "Steals": "37",
+          "Blocks": "23",
+          "Turnovers": "92"
+        }
+      },
+      "team_2": {
+        "week": "14",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "269/537",
+          "Field Goal Percentage (FG%)": ".501",
+          "Free Throws Made/Attempted (FTM/FTA)": "107/140",
+          "Free Throw Percentage (FT%)": ".764",
+          "3-Point Field Goals Made (3PTM)": "57",
+          "Points": "702",
+          "Rebounds": "269",
+          "Assists": "150",
+          "Steals": "49",
+          "Blocks": "31",
+          "Turnovers": "64"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "3"
+    },
+    {
+      "week": "14",
+      "team_1": {
+        "week": "14",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "289/592",
+          "Field Goal Percentage (FG%)": ".488",
+          "Free Throws Made/Attempted (FTM/FTA)": "136/175",
+          "Free Throw Percentage (FT%)": ".777",
+          "3-Point Field Goals Made (3PTM)": "82",
+          "Points": "796",
+          "Rebounds": "242",
+          "Assists": "220",
+          "Steals": "36",
+          "Blocks": "35",
+          "Turnovers": "88"
+        }
+      },
+      "team_2": {
+        "week": "14",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "189/424",
+          "Field Goal Percentage (FG%)": ".446",
+          "Free Throws Made/Attempted (FTM/FTA)": "87/105",
+          "Free Throw Percentage (FT%)": ".829",
+          "3-Point Field Goals Made (3PTM)": "47",
+          "Points": "512",
+          "Rebounds": "174",
+          "Assists": "108",
+          "Steals": "26",
+          "Blocks": "24",
+          "Turnovers": "52"
+        }
+      },
+      "team_win_name": "Uri's Unmatched Team",
+      "team_win_score": "7"
+    },
+    {
+      "week": "14",
+      "team_1": {
+        "week": "14",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "237/482",
+          "Field Goal Percentage (FG%)": ".492",
+          "Free Throws Made/Attempted (FTM/FTA)": "113/137",
+          "Free Throw Percentage (FT%)": ".825",
+          "3-Point Field Goals Made (3PTM)": "63",
+          "Points": "650",
+          "Rebounds": "216",
+          "Assists": "165",
+          "Steals": "31",
+          "Blocks": "26",
+          "Turnovers": "79"
+        }
+      },
+      "team_2": {
+        "week": "14",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "233/511",
+          "Field Goal Percentage (FG%)": ".456",
+          "Free Throws Made/Attempted (FTM/FTA)": "86/109",
+          "Free Throw Percentage (FT%)": ".789",
+          "3-Point Field Goals Made (3PTM)": "73",
+          "Points": "625",
+          "Rebounds": "185",
+          "Assists": "136",
+          "Steals": "44",
+          "Blocks": "32",
+          "Turnovers": "67"
+        }
+      },
+      "team_win_name": "The Wall",
+      "team_win_score": "5"
+    }
+  ],
+  [
+    {
+      "week": "15",
+      "team_1": {
+        "week": "15",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "235/509",
+          "Field Goal Percentage (FG%)": ".462",
+          "Free Throws Made/Attempted (FTM/FTA)": "82/107",
+          "Free Throw Percentage (FT%)": ".766",
+          "3-Point Field Goals Made (3PTM)": "41",
+          "Points": "593",
+          "Rebounds": "327",
+          "Assists": "192",
+          "Steals": "44",
+          "Blocks": "23",
+          "Turnovers": "83"
+        }
+      },
+      "team_2": {
+        "week": "15",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "305/597",
+          "Field Goal Percentage (FG%)": ".511",
+          "Free Throws Made/Attempted (FTM/FTA)": "104/134",
+          "Free Throw Percentage (FT%)": ".776",
+          "3-Point Field Goals Made (3PTM)": "89",
+          "Points": "803",
+          "Rebounds": "268",
+          "Assists": "157",
+          "Steals": "54",
+          "Blocks": "35",
+          "Turnovers": "77"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "2"
+    },
+    {
+      "week": "15",
+      "team_1": {
+        "week": "15",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "312/653",
+          "Field Goal Percentage (FG%)": ".478",
+          "Free Throws Made/Attempted (FTM/FTA)": "114/145",
+          "Free Throw Percentage (FT%)": ".786",
+          "3-Point Field Goals Made (3PTM)": "94",
+          "Points": "832",
+          "Rebounds": "241",
+          "Assists": "175",
+          "Steals": "29",
+          "Blocks": "31",
+          "Turnovers": "93"
+        }
+      },
+      "team_2": {
+        "week": "15",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "295/590",
+          "Field Goal Percentage (FG%)": ".500",
+          "Free Throws Made/Attempted (FTM/FTA)": "93/115",
+          "Free Throw Percentage (FT%)": ".809",
+          "3-Point Field Goals Made (3PTM)": "58",
+          "Points": "741",
+          "Rebounds": "241",
+          "Assists": "114",
+          "Steals": "37",
+          "Blocks": "26",
+          "Turnovers": "48"
+        }
+      },
+      "team_win_name": "Finshed In a Draw",
+      "team_win_score": "4"
+    },
+    {
+      "week": "15",
+      "team_1": {
+        "week": "15",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "234/484",
+          "Field Goal Percentage (FG%)": ".483",
+          "Free Throws Made/Attempted (FTM/FTA)": "116/133",
+          "Free Throw Percentage (FT%)": ".872",
+          "3-Point Field Goals Made (3PTM)": "58",
+          "Points": "642",
+          "Rebounds": "298",
+          "Assists": "185",
+          "Steals": "40",
+          "Blocks": "40",
+          "Turnovers": "85"
+        }
+      },
+      "team_2": {
+        "week": "15",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "289/567",
+          "Field Goal Percentage (FG%)": ".510",
+          "Free Throws Made/Attempted (FTM/FTA)": "167/233",
+          "Free Throw Percentage (FT%)": ".717",
+          "3-Point Field Goals Made (3PTM)": "59",
+          "Points": "804",
+          "Rebounds": "246",
+          "Assists": "188",
+          "Steals": "52",
+          "Blocks": "21",
+          "Turnovers": "83"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "3"
+    },
+    {
+      "week": "15",
+      "team_1": {
+        "week": "15",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "264/529",
+          "Field Goal Percentage (FG%)": ".499",
+          "Free Throws Made/Attempted (FTM/FTA)": "106/131",
+          "Free Throw Percentage (FT%)": ".809",
+          "3-Point Field Goals Made (3PTM)": "67",
+          "Points": "701",
+          "Rebounds": "257",
+          "Assists": "165",
+          "Steals": "44",
+          "Blocks": "28",
+          "Turnovers": "68"
+        }
+      },
+      "team_2": {
+        "week": "15",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "300/627",
+          "Field Goal Percentage (FG%)": ".478",
+          "Free Throws Made/Attempted (FTM/FTA)": "130/152",
+          "Free Throw Percentage (FT%)": ".855",
+          "3-Point Field Goals Made (3PTM)": "87",
+          "Points": "817",
+          "Rebounds": "260",
+          "Assists": "183",
+          "Steals": "36",
+          "Blocks": "34",
+          "Turnovers": "80"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "3"
+    },
+    {
+      "week": "15",
+      "team_1": {
+        "week": "15",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "289/601",
+          "Field Goal Percentage (FG%)": ".481",
+          "Free Throws Made/Attempted (FTM/FTA)": "143/177",
+          "Free Throw Percentage (FT%)": ".808",
+          "3-Point Field Goals Made (3PTM)": "76",
+          "Points": "797",
+          "Rebounds": "224",
+          "Assists": "204",
+          "Steals": "49",
+          "Blocks": "36",
+          "Turnovers": "82"
+        }
+      },
+      "team_2": {
+        "week": "15",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "267/566",
+          "Field Goal Percentage (FG%)": ".472",
+          "Free Throws Made/Attempted (FTM/FTA)": "101/129",
+          "Free Throw Percentage (FT%)": ".783",
+          "3-Point Field Goals Made (3PTM)": "81",
+          "Points": "716",
+          "Rebounds": "231",
+          "Assists": "156",
+          "Steals": "39",
+          "Blocks": "38",
+          "Turnovers": "76"
+        }
+      },
+      "team_win_name": "Uri's Unmatched Team",
+      "team_win_score": "5"
+    },
+    {
+      "week": "15",
+      "team_1": {
+        "week": "15",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "286/614",
+          "Field Goal Percentage (FG%)": ".466",
+          "Free Throws Made/Attempted (FTM/FTA)": "94/119",
+          "Free Throw Percentage (FT%)": ".790",
+          "3-Point Field Goals Made (3PTM)": "85",
+          "Points": "751",
+          "Rebounds": "234",
+          "Assists": "167",
+          "Steals": "49",
+          "Blocks": "37",
+          "Turnovers": "81"
+        }
+      },
+      "team_2": {
+        "week": "15",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "294/562",
+          "Field Goal Percentage (FG%)": ".523",
+          "Free Throws Made/Attempted (FTM/FTA)": "133/169",
+          "Free Throw Percentage (FT%)": ".787",
+          "3-Point Field Goals Made (3PTM)": "85",
+          "Points": "806",
+          "Rebounds": "335",
+          "Assists": "192",
+          "Steals": "41",
+          "Blocks": "40",
+          "Turnovers": "86"
+        }
+      },
+      "team_win_name": "Ugly Kid Joe",
+      "team_win_score": "3"
+    }
+  ],
+  [
+    {
+      "week": "16",
+      "team_1": {
+        "week": "16",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "246/479",
+          "Field Goal Percentage (FG%)": ".514",
+          "Free Throws Made/Attempted (FTM/FTA)": "66/86",
+          "Free Throw Percentage (FT%)": ".767",
+          "3-Point Field Goals Made (3PTM)": "72",
+          "Points": "630",
+          "Rebounds": "289",
+          "Assists": "197",
+          "Steals": "29",
+          "Blocks": "21",
+          "Turnovers": "64"
+        }
+      },
+      "team_2": {
+        "week": "16",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "219/471",
+          "Field Goal Percentage (FG%)": ".465",
+          "Free Throws Made/Attempted (FTM/FTA)": "64/97",
+          "Free Throw Percentage (FT%)": ".660",
+          "3-Point Field Goals Made (3PTM)": "54",
+          "Points": "556",
+          "Rebounds": "182",
+          "Assists": "129",
+          "Steals": "33",
+          "Blocks": "28",
+          "Turnovers": "71"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "7"
+    },
+    {
+      "week": "16",
+      "team_1": {
+        "week": "16",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "289/598",
+          "Field Goal Percentage (FG%)": ".483",
+          "Free Throws Made/Attempted (FTM/FTA)": "110/136",
+          "Free Throw Percentage (FT%)": ".809",
+          "3-Point Field Goals Made (3PTM)": "107",
+          "Points": "795",
+          "Rebounds": "191",
+          "Assists": "159",
+          "Steals": "28",
+          "Blocks": "20",
+          "Turnovers": "77"
+        }
+      },
+      "team_2": {
+        "week": "16",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "269/551",
+          "Field Goal Percentage (FG%)": ".488",
+          "Free Throws Made/Attempted (FTM/FTA)": "105/140",
+          "Free Throw Percentage (FT%)": ".750",
+          "3-Point Field Goals Made (3PTM)": "84",
+          "Points": "727",
+          "Rebounds": "220",
+          "Assists": "155",
+          "Steals": "44",
+          "Blocks": "20",
+          "Turnovers": "67"
+        }
+      },
+      "team_win_name": "Finshed In a Draw",
+      "team_win_score": "4"
+    },
+    {
+      "week": "16",
+      "team_1": {
+        "week": "16",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "179/327",
+          "Field Goal Percentage (FG%)": ".547",
+          "Free Throws Made/Attempted (FTM/FTA)": "73/99",
+          "Free Throw Percentage (FT%)": ".737",
+          "3-Point Field Goals Made (3PTM)": "32",
+          "Points": "463",
+          "Rebounds": "200",
+          "Assists": "118",
+          "Steals": "37",
+          "Blocks": "28",
+          "Turnovers": "56"
+        }
+      },
+      "team_2": {
+        "week": "16",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "216/425",
+          "Field Goal Percentage (FG%)": ".508",
+          "Free Throws Made/Attempted (FTM/FTA)": "91/122",
+          "Free Throw Percentage (FT%)": ".746",
+          "3-Point Field Goals Made (3PTM)": "60",
+          "Points": "583",
+          "Rebounds": "199",
+          "Assists": "151",
+          "Steals": "34",
+          "Blocks": "28",
+          "Turnovers": "52"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "3"
+    },
+    {
+      "week": "16",
+      "team_1": {
+        "week": "16",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "268/545",
+          "Field Goal Percentage (FG%)": ".492",
+          "Free Throws Made/Attempted (FTM/FTA)": "87/99",
+          "Free Throw Percentage (FT%)": ".879",
+          "3-Point Field Goals Made (3PTM)": "76",
+          "Points": "699",
+          "Rebounds": "235",
+          "Assists": "157",
+          "Steals": "36",
+          "Blocks": "28",
+          "Turnovers": "68"
+        }
+      },
+      "team_2": {
+        "week": "16",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "276/535",
+          "Field Goal Percentage (FG%)": ".516",
+          "Free Throws Made/Attempted (FTM/FTA)": "97/129",
+          "Free Throw Percentage (FT%)": ".752",
+          "3-Point Field Goals Made (3PTM)": "65",
+          "Points": "714",
+          "Rebounds": "264",
+          "Assists": "129",
+          "Steals": "37",
+          "Blocks": "42",
+          "Turnovers": "65"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "3"
+    },
+    {
+      "week": "16",
+      "team_1": {
+        "week": "16",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "297/595",
+          "Field Goal Percentage (FG%)": ".499",
+          "Free Throws Made/Attempted (FTM/FTA)": "136/170",
+          "Free Throw Percentage (FT%)": ".800",
+          "3-Point Field Goals Made (3PTM)": "73",
+          "Points": "803",
+          "Rebounds": "232",
+          "Assists": "167",
+          "Steals": "47",
+          "Blocks": "28",
+          "Turnovers": "94"
+        }
+      },
+      "team_2": {
+        "week": "16",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "257/516",
+          "Field Goal Percentage (FG%)": ".498",
+          "Free Throws Made/Attempted (FTM/FTA)": "65/87",
+          "Free Throw Percentage (FT%)": ".747",
+          "3-Point Field Goals Made (3PTM)": "70",
+          "Points": "649",
+          "Rebounds": "203",
+          "Assists": "157",
+          "Steals": "31",
+          "Blocks": "39",
+          "Turnovers": "76"
+        }
+      },
+      "team_win_name": "The Boorkini youth movement",
+      "team_win_score": "7"
+    },
+    {
+      "week": "16",
+      "team_1": {
+        "week": "16",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "193/386",
+          "Field Goal Percentage (FG%)": ".500",
+          "Free Throws Made/Attempted (FTM/FTA)": "70/90",
+          "Free Throw Percentage (FT%)": ".778",
+          "3-Point Field Goals Made (3PTM)": "63",
+          "Points": "519",
+          "Rebounds": "151",
+          "Assists": "136",
+          "Steals": "20",
+          "Blocks": "22",
+          "Turnovers": "44"
+        }
+      },
+      "team_2": {
+        "week": "16",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "241/497",
+          "Field Goal Percentage (FG%)": ".485",
+          "Free Throws Made/Attempted (FTM/FTA)": "99/124",
+          "Free Throw Percentage (FT%)": ".798",
+          "3-Point Field Goals Made (3PTM)": "85",
+          "Points": "666",
+          "Rebounds": "238",
+          "Assists": "165",
+          "Steals": "37",
+          "Blocks": "26",
+          "Turnovers": "77"
+        }
+      },
+      "team_win_name": "The Wall",
+      "team_win_score": "2"
+    }
+  ],
+  [
+    {
+      "week": "17",
+      "team_1": {
+        "week": "17",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "299/593",
+          "Field Goal Percentage (FG%)": ".504",
+          "Free Throws Made/Attempted (FTM/FTA)": "94/122",
+          "Free Throw Percentage (FT%)": ".770",
+          "3-Point Field Goals Made (3PTM)": "66",
+          "Points": "758",
+          "Rebounds": "366",
+          "Assists": "211",
+          "Steals": "41",
+          "Blocks": "25",
+          "Turnovers": "90"
+        }
+      },
+      "team_2": {
+        "week": "17",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "376/688",
+          "Field Goal Percentage (FG%)": ".547",
+          "Free Throws Made/Attempted (FTM/FTA)": "119/158",
+          "Free Throw Percentage (FT%)": ".753",
+          "3-Point Field Goals Made (3PTM)": "82",
+          "Points": "953",
+          "Rebounds": "367",
+          "Assists": "223",
+          "Steals": "57",
+          "Blocks": "43",
+          "Turnovers": "101"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "2"
+    },
+    {
+      "week": "17",
+      "team_1": {
+        "week": "17",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "372/814",
+          "Field Goal Percentage (FG%)": ".457",
+          "Free Throws Made/Attempted (FTM/FTA)": "149/183",
+          "Free Throw Percentage (FT%)": ".814",
+          "3-Point Field Goals Made (3PTM)": "108",
+          "Points": "1001",
+          "Rebounds": "341",
+          "Assists": "198",
+          "Steals": "54",
+          "Blocks": "32",
+          "Turnovers": "115"
+        }
+      },
+      "team_2": {
+        "week": "17",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "334/715",
+          "Field Goal Percentage (FG%)": ".467",
+          "Free Throws Made/Attempted (FTM/FTA)": "125/158",
+          "Free Throw Percentage (FT%)": ".791",
+          "3-Point Field Goals Made (3PTM)": "105",
+          "Points": "898",
+          "Rebounds": "326",
+          "Assists": "249",
+          "Steals": "67",
+          "Blocks": "67",
+          "Turnovers": "109"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "4"
+    },
+    {
+      "week": "17",
+      "team_1": {
+        "week": "17",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "272/497",
+          "Field Goal Percentage (FG%)": ".547",
+          "Free Throws Made/Attempted (FTM/FTA)": "111/146",
+          "Free Throw Percentage (FT%)": ".760",
+          "3-Point Field Goals Made (3PTM)": "53",
+          "Points": "708",
+          "Rebounds": "370",
+          "Assists": "169",
+          "Steals": "55",
+          "Blocks": "47",
+          "Turnovers": "72"
+        }
+      },
+      "team_2": {
+        "week": "17",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "340/744",
+          "Field Goal Percentage (FG%)": ".457",
+          "Free Throws Made/Attempted (FTM/FTA)": "130/156",
+          "Free Throw Percentage (FT%)": ".833",
+          "3-Point Field Goals Made (3PTM)": "95",
+          "Points": "905",
+          "Rebounds": "311",
+          "Assists": "187",
+          "Steals": "57",
+          "Blocks": "37",
+          "Turnovers": "86"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "4"
+    },
+    {
+      "week": "17",
+      "team_1": {
+        "week": "17",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "283/609",
+          "Field Goal Percentage (FG%)": ".465",
+          "Free Throws Made/Attempted (FTM/FTA)": "118/152",
+          "Free Throw Percentage (FT%)": ".776",
+          "3-Point Field Goals Made (3PTM)": "63",
+          "Points": "747",
+          "Rebounds": "322",
+          "Assists": "140",
+          "Steals": "36",
+          "Blocks": "36",
+          "Turnovers": "73"
+        }
+      },
+      "team_2": {
+        "week": "17",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "330/667",
+          "Field Goal Percentage (FG%)": ".495",
+          "Free Throws Made/Attempted (FTM/FTA)": "160/203",
+          "Free Throw Percentage (FT%)": ".788",
+          "3-Point Field Goals Made (3PTM)": "89",
+          "Points": "909",
+          "Rebounds": "308",
+          "Assists": "240",
+          "Steals": "59",
+          "Blocks": "30",
+          "Turnovers": "99"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "3"
+    },
+    {
+      "week": "17",
+      "team_1": {
+        "week": "17",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "351/747",
+          "Field Goal Percentage (FG%)": ".470",
+          "Free Throws Made/Attempted (FTM/FTA)": "166/220",
+          "Free Throw Percentage (FT%)": ".755",
+          "3-Point Field Goals Made (3PTM)": "78",
+          "Points": "946",
+          "Rebounds": "320",
+          "Assists": "248",
+          "Steals": "47",
+          "Blocks": "28",
+          "Turnovers": "119"
+        }
+      },
+      "team_2": {
+        "week": "17",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "322/668",
+          "Field Goal Percentage (FG%)": ".482",
+          "Free Throws Made/Attempted (FTM/FTA)": "93/127",
+          "Free Throw Percentage (FT%)": ".732",
+          "3-Point Field Goals Made (3PTM)": "118",
+          "Points": "855",
+          "Rebounds": "257",
+          "Assists": "224",
+          "Steals": "67",
+          "Blocks": "42",
+          "Turnovers": "128"
+        }
+      },
+      "team_win_name": "king douchebag",
+      "team_win_score": "5"
+    },
+    {
+      "week": "17",
+      "team_1": {
+        "week": "17",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "280/622",
+          "Field Goal Percentage (FG%)": ".450",
+          "Free Throws Made/Attempted (FTM/FTA)": "139/167",
+          "Free Throw Percentage (FT%)": ".832",
+          "3-Point Field Goals Made (3PTM)": "71",
+          "Points": "770",
+          "Rebounds": "257",
+          "Assists": "216",
+          "Steals": "50",
+          "Blocks": "30",
+          "Turnovers": "97"
+        }
+      },
+      "team_2": {
+        "week": "17",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "328/697",
+          "Field Goal Percentage (FG%)": ".471",
+          "Free Throws Made/Attempted (FTM/FTA)": "133/169",
+          "Free Throw Percentage (FT%)": ".787",
+          "3-Point Field Goals Made (3PTM)": "104",
+          "Points": "893",
+          "Rebounds": "328",
+          "Assists": "223",
+          "Steals": "50",
+          "Blocks": "37",
+          "Turnovers": "108"
+        }
+      },
+      "team_win_name": "The Boorkini youth movement",
+      "team_win_score": "2"
+    }
+  ],
+  [
+    {
+      "week": "18",
+      "team_1": {
+        "week": "18",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "219/502",
+          "Field Goal Percentage (FG%)": ".436",
+          "Free Throws Made/Attempted (FTM/FTA)": "70/101",
+          "Free Throw Percentage (FT%)": ".693",
+          "3-Point Field Goals Made (3PTM)": "69",
+          "Points": "577",
+          "Rebounds": "273",
+          "Assists": "185",
+          "Steals": "35",
+          "Blocks": "26",
+          "Turnovers": "70"
+        }
+      },
+      "team_2": {
+        "week": "18",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "259/531",
+          "Field Goal Percentage (FG%)": ".488",
+          "Free Throws Made/Attempted (FTM/FTA)": "93/118",
+          "Free Throw Percentage (FT%)": ".788",
+          "3-Point Field Goals Made (3PTM)": "77",
+          "Points": "688",
+          "Rebounds": "236",
+          "Assists": "125",
+          "Steals": "31",
+          "Blocks": "25",
+          "Turnovers": "70"
+        }
+      },
+      "team_win_name": "Finshed In a Draw",
+      "team_win_score": "4"
+    },
+    {
+      "week": "18",
+      "team_1": {
+        "week": "18",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "261/591",
+          "Field Goal Percentage (FG%)": ".442",
+          "Free Throws Made/Attempted (FTM/FTA)": "125/141",
+          "Free Throw Percentage (FT%)": ".887",
+          "3-Point Field Goals Made (3PTM)": "69",
+          "Points": "716",
+          "Rebounds": "260",
+          "Assists": "137",
+          "Steals": "33",
+          "Blocks": "27",
+          "Turnovers": "92"
+        }
+      },
+      "team_2": {
+        "week": "18",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "219/440",
+          "Field Goal Percentage (FG%)": ".498",
+          "Free Throws Made/Attempted (FTM/FTA)": "91/116",
+          "Free Throw Percentage (FT%)": ".784",
+          "3-Point Field Goals Made (3PTM)": "59",
+          "Points": "588",
+          "Rebounds": "188",
+          "Assists": "108",
+          "Steals": "26",
+          "Blocks": "27",
+          "Turnovers": "70"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "6"
+    },
+    {
+      "week": "18",
+      "team_1": {
+        "week": "18",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "181/340",
+          "Field Goal Percentage (FG%)": ".532",
+          "Free Throws Made/Attempted (FTM/FTA)": "82/102",
+          "Free Throw Percentage (FT%)": ".804",
+          "3-Point Field Goals Made (3PTM)": "32",
+          "Points": "476",
+          "Rebounds": "223",
+          "Assists": "127",
+          "Steals": "32",
+          "Blocks": "29",
+          "Turnovers": "49"
+        }
+      },
+      "team_2": {
+        "week": "18",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "261/537",
+          "Field Goal Percentage (FG%)": ".486",
+          "Free Throws Made/Attempted (FTM/FTA)": "125/159",
+          "Free Throw Percentage (FT%)": ".786",
+          "3-Point Field Goals Made (3PTM)": "60",
+          "Points": "707",
+          "Rebounds": "252",
+          "Assists": "177",
+          "Steals": "35",
+          "Blocks": "31",
+          "Turnovers": "75"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "3"
+    },
+    {
+      "week": "18",
+      "team_1": {
+        "week": "18",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "274/508",
+          "Field Goal Percentage (FG%)": ".539",
+          "Free Throws Made/Attempted (FTM/FTA)": "111/149",
+          "Free Throw Percentage (FT%)": ".745",
+          "3-Point Field Goals Made (3PTM)": "59",
+          "Points": "718",
+          "Rebounds": "254",
+          "Assists": "158",
+          "Steals": "58",
+          "Blocks": "32",
+          "Turnovers": "77"
+        }
+      },
+      "team_2": {
+        "week": "18",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "262/569",
+          "Field Goal Percentage (FG%)": ".460",
+          "Free Throws Made/Attempted (FTM/FTA)": "124/152",
+          "Free Throw Percentage (FT%)": ".816",
+          "3-Point Field Goals Made (3PTM)": "90",
+          "Points": "738",
+          "Rebounds": "249",
+          "Assists": "167",
+          "Steals": "32",
+          "Blocks": "34",
+          "Turnovers": "80"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "4"
+    },
+    {
+      "week": "18",
+      "team_1": {
+        "week": "18",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "251/531",
+          "Field Goal Percentage (FG%)": ".473",
+          "Free Throws Made/Attempted (FTM/FTA)": "98/123",
+          "Free Throw Percentage (FT%)": ".797",
+          "3-Point Field Goals Made (3PTM)": "81",
+          "Points": "681",
+          "Rebounds": "229",
+          "Assists": "142",
+          "Steals": "45",
+          "Blocks": "21",
+          "Turnovers": "66"
+        }
+      },
+      "team_2": {
+        "week": "18",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "232/506",
+          "Field Goal Percentage (FG%)": ".458",
+          "Free Throws Made/Attempted (FTM/FTA)": "82/102",
+          "Free Throw Percentage (FT%)": ".804",
+          "3-Point Field Goals Made (3PTM)": "81",
+          "Points": "627",
+          "Rebounds": "252",
+          "Assists": "165",
+          "Steals": "36",
+          "Blocks": "28",
+          "Turnovers": "68"
+        }
+      },
+      "team_win_name": "Finshed In a Draw",
+      "team_win_score": "4"
+    },
+    {
+      "week": "18",
+      "team_1": {
+        "week": "18",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "297/621",
+          "Field Goal Percentage (FG%)": ".478",
+          "Free Throws Made/Attempted (FTM/FTA)": "119/146",
+          "Free Throw Percentage (FT%)": ".815",
+          "3-Point Field Goals Made (3PTM)": "84",
+          "Points": "797",
+          "Rebounds": "262",
+          "Assists": "150",
+          "Steals": "51",
+          "Blocks": "38",
+          "Turnovers": "93"
+        }
+      },
+      "team_2": {
+        "week": "18",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "266/569",
+          "Field Goal Percentage (FG%)": ".467",
+          "Free Throws Made/Attempted (FTM/FTA)": "104/133",
+          "Free Throw Percentage (FT%)": ".782",
+          "3-Point Field Goals Made (3PTM)": "91",
+          "Points": "727",
+          "Rebounds": "268",
+          "Assists": "220",
+          "Steals": "43",
+          "Blocks": "52",
+          "Turnovers": "82"
+        }
+      },
+      "team_win_name": "The Boorkini youth movement",
+      "team_win_score": "4"
+    }
+  ],
+  [
+    {
+      "week": "19",
+      "team_1": {
+        "week": "19",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "252/505",
+          "Field Goal Percentage (FG%)": ".499",
+          "Free Throws Made/Attempted (FTM/FTA)": "59/70",
+          "Free Throw Percentage (FT%)": ".843",
+          "3-Point Field Goals Made (3PTM)": "81",
+          "Points": "644",
+          "Rebounds": "306",
+          "Assists": "210",
+          "Steals": "43",
+          "Blocks": "19",
+          "Turnovers": "92"
+        }
+      },
+      "team_2": {
+        "week": "19",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "177/377",
+          "Field Goal Percentage (FG%)": ".469",
+          "Free Throws Made/Attempted (FTM/FTA)": "68/82",
+          "Free Throw Percentage (FT%)": ".829",
+          "3-Point Field Goals Made (3PTM)": "47",
+          "Points": "469",
+          "Rebounds": "168",
+          "Assists": "116",
+          "Steals": "33",
+          "Blocks": "22",
+          "Turnovers": "52"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "7"
+    },
+    {
+      "week": "19",
+      "team_1": {
+        "week": "19",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "337/704",
+          "Field Goal Percentage (FG%)": ".479",
+          "Free Throws Made/Attempted (FTM/FTA)": "134/188",
+          "Free Throw Percentage (FT%)": ".713",
+          "3-Point Field Goals Made (3PTM)": "93",
+          "Points": "901",
+          "Rebounds": "263",
+          "Assists": "200",
+          "Steals": "47",
+          "Blocks": "36",
+          "Turnovers": "93"
+        }
+      },
+      "team_2": {
+        "week": "19",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "246/497",
+          "Field Goal Percentage (FG%)": ".495",
+          "Free Throws Made/Attempted (FTM/FTA)": "116/140",
+          "Free Throw Percentage (FT%)": ".829",
+          "3-Point Field Goals Made (3PTM)": "74",
+          "Points": "682",
+          "Rebounds": "274",
+          "Assists": "182",
+          "Steals": "39",
+          "Blocks": "46",
+          "Turnovers": "66"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "4"
+    },
+    {
+      "week": "19",
+      "team_1": {
+        "week": "19",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "267/574",
+          "Field Goal Percentage (FG%)": ".465",
+          "Free Throws Made/Attempted (FTM/FTA)": "125/156",
+          "Free Throw Percentage (FT%)": ".801",
+          "3-Point Field Goals Made (3PTM)": "68",
+          "Points": "727",
+          "Rebounds": "293",
+          "Assists": "157",
+          "Steals": "44",
+          "Blocks": "37",
+          "Turnovers": "84"
+        }
+      },
+      "team_2": {
+        "week": "19",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "266/577",
+          "Field Goal Percentage (FG%)": ".461",
+          "Free Throws Made/Attempted (FTM/FTA)": "101/133",
+          "Free Throw Percentage (FT%)": ".759",
+          "3-Point Field Goals Made (3PTM)": "81",
+          "Points": "714",
+          "Rebounds": "299",
+          "Assists": "162",
+          "Steals": "46",
+          "Blocks": "29",
+          "Turnovers": "85"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "5"
+    },
+    {
+      "week": "19",
+      "team_1": {
+        "week": "19",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "373/729",
+          "Field Goal Percentage (FG%)": ".512",
+          "Free Throws Made/Attempted (FTM/FTA)": "146/181",
+          "Free Throw Percentage (FT%)": ".807",
+          "3-Point Field Goals Made (3PTM)": "115",
+          "Points": "1007",
+          "Rebounds": "257",
+          "Assists": "196",
+          "Steals": "44",
+          "Blocks": "30",
+          "Turnovers": "82"
+        }
+      },
+      "team_2": {
+        "week": "19",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "251/562",
+          "Field Goal Percentage (FG%)": ".447",
+          "Free Throws Made/Attempted (FTM/FTA)": "105/122",
+          "Free Throw Percentage (FT%)": ".861",
+          "3-Point Field Goals Made (3PTM)": "95",
+          "Points": "702",
+          "Rebounds": "191",
+          "Assists": "218",
+          "Steals": "36",
+          "Blocks": "29",
+          "Turnovers": "88"
+        }
+      },
+      "team_win_name": "king douchebag",
+      "team_win_score": "7"
+    }
+  ],
+  [
+    {
+      "week": "20",
+      "team_1": {
+        "week": "20",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "141/295",
+          "Field Goal Percentage (FG%)": ".478",
+          "Free Throws Made/Attempted (FTM/FTA)": "51/60",
+          "Free Throw Percentage (FT%)": ".850",
+          "3-Point Field Goals Made (3PTM)": "43",
+          "Points": "376",
+          "Rebounds": "174",
+          "Assists": "115",
+          "Steals": "30",
+          "Blocks": "8",
+          "Turnovers": "45"
+        }
+      },
+      "team_2": {
+        "week": "20",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "148/304",
+          "Field Goal Percentage (FG%)": ".487",
+          "Free Throws Made/Attempted (FTM/FTA)": "44/60",
+          "Free Throw Percentage (FT%)": ".733",
+          "3-Point Field Goals Made (3PTM)": "58",
+          "Points": "398",
+          "Rebounds": "162",
+          "Assists": "90",
+          "Steals": "19",
+          "Blocks": "28",
+          "Turnovers": "43"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "4"
+    },
+    {
+      "week": "20",
+      "team_1": {
+        "week": "20",
+        "team_name": "Scottie Doesn't Know",
+        "team_key": "428.l.41083.t.2",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "239/526",
+          "Field Goal Percentage (FG%)": ".454",
+          "Free Throws Made/Attempted (FTM/FTA)": "109/138",
+          "Free Throw Percentage (FT%)": ".790",
+          "3-Point Field Goals Made (3PTM)": "55",
+          "Points": "642",
+          "Rebounds": "198",
+          "Assists": "144",
+          "Steals": "37",
+          "Blocks": "19",
+          "Turnovers": "88"
+        }
+      },
+      "team_2": {
+        "week": "20",
+        "team_name": "yoav's Champion Team",
+        "team_key": "428.l.41083.t.11",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "190/383",
+          "Field Goal Percentage (FG%)": ".496",
+          "Free Throws Made/Attempted (FTM/FTA)": "75/92",
+          "Free Throw Percentage (FT%)": ".815",
+          "3-Point Field Goals Made (3PTM)": "47",
+          "Points": "502",
+          "Rebounds": "197",
+          "Assists": "128",
+          "Steals": "32",
+          "Blocks": "22",
+          "Turnovers": "53"
+        }
+      },
+      "team_win_name": "Scottie Doesn't Know",
+      "team_win_score": "5"
+    },
+    {
+      "week": "20",
+      "team_1": {
+        "week": "20",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "241/451",
+          "Field Goal Percentage (FG%)": ".534",
+          "Free Throws Made/Attempted (FTM/FTA)": "108/131",
+          "Free Throw Percentage (FT%)": ".824",
+          "3-Point Field Goals Made (3PTM)": "67",
+          "Points": "657",
+          "Rebounds": "250",
+          "Assists": "122",
+          "Steals": "47",
+          "Blocks": "29",
+          "Turnovers": "65"
+        }
+      },
+      "team_2": {
+        "week": "20",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "314/596",
+          "Field Goal Percentage (FG%)": ".527",
+          "Free Throws Made/Attempted (FTM/FTA)": "122/157",
+          "Free Throw Percentage (FT%)": ".777",
+          "3-Point Field Goals Made (3PTM)": "84",
+          "Points": "834",
+          "Rebounds": "301",
+          "Assists": "174",
+          "Steals": "52",
+          "Blocks": "29",
+          "Turnovers": "90"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "3"
+    },
+    {
+      "week": "20",
+      "team_1": {
+        "week": "20",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "294/545",
+          "Field Goal Percentage (FG%)": ".539",
+          "Free Throws Made/Attempted (FTM/FTA)": "104/131",
+          "Free Throw Percentage (FT%)": ".794",
+          "3-Point Field Goals Made (3PTM)": "75",
+          "Points": "767",
+          "Rebounds": "286",
+          "Assists": "188",
+          "Steals": "48",
+          "Blocks": "33",
+          "Turnovers": "77"
+        }
+      },
+      "team_2": {
+        "week": "20",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "286/622",
+          "Field Goal Percentage (FG%)": ".460",
+          "Free Throws Made/Attempted (FTM/FTA)": "135/176",
+          "Free Throw Percentage (FT%)": ".767",
+          "3-Point Field Goals Made (3PTM)": "70",
+          "Points": "777",
+          "Rebounds": "292",
+          "Assists": "201",
+          "Steals": "55",
+          "Blocks": "38",
+          "Turnovers": "113"
+        }
+      },
+      "team_win_name": "2Tall2Miss",
+      "team_win_score": "4"
+    },
+    {
+      "week": "20",
+      "team_1": {
+        "week": "20",
+        "team_name": "Arul minion's",
+        "team_key": "428.l.41083.t.5",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "136/282",
+          "Field Goal Percentage (FG%)": ".482",
+          "Free Throws Made/Attempted (FTM/FTA)": "47/57",
+          "Free Throw Percentage (FT%)": ".825",
+          "3-Point Field Goals Made (3PTM)": "27",
+          "Points": "346",
+          "Rebounds": "129",
+          "Assists": "84",
+          "Steals": "22",
+          "Blocks": "18",
+          "Turnovers": "39"
+        }
+      },
+      "team_2": {
+        "week": "20",
+        "team_name": "Ugly Kid Joe",
+        "team_key": "428.l.41083.t.10",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "258/559",
+          "Field Goal Percentage (FG%)": ".462",
+          "Free Throws Made/Attempted (FTM/FTA)": "60/77",
+          "Free Throw Percentage (FT%)": ".779",
+          "3-Point Field Goals Made (3PTM)": "83",
+          "Points": "659",
+          "Rebounds": "226",
+          "Assists": "192",
+          "Steals": "40",
+          "Blocks": "37",
+          "Turnovers": "66"
+        }
+      },
+      "team_win_name": "Arul minion's",
+      "team_win_score": "3"
+    },
+    {
+      "week": "20",
+      "team_1": {
+        "week": "20",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "234/482",
+          "Field Goal Percentage (FG%)": ".485",
+          "Free Throws Made/Attempted (FTM/FTA)": "104/132",
+          "Free Throw Percentage (FT%)": ".788",
+          "3-Point Field Goals Made (3PTM)": "65",
+          "Points": "637",
+          "Rebounds": "234",
+          "Assists": "153",
+          "Steals": "41",
+          "Blocks": "25",
+          "Turnovers": "68"
+        }
+      },
+      "team_2": {
+        "week": "20",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "192/383",
+          "Field Goal Percentage (FG%)": ".501",
+          "Free Throws Made/Attempted (FTM/FTA)": "75/96",
+          "Free Throw Percentage (FT%)": ".781",
+          "3-Point Field Goals Made (3PTM)": "62",
+          "Points": "521",
+          "Rebounds": "141",
+          "Assists": "87",
+          "Steals": "25",
+          "Blocks": "17",
+          "Turnovers": "42"
+        }
+      },
+      "team_win_name": "king douchebag",
+      "team_win_score": "7"
+    }
+  ],
+  [
+    {
+      "week": "21",
+      "team_1": {
+        "week": "21",
+        "team_name": "Maccabi Secret",
+        "team_key": "428.l.41083.t.1",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "125/271",
+          "Field Goal Percentage (FG%)": ".461",
+          "Free Throws Made/Attempted (FTM/FTA)": "50/63",
+          "Free Throw Percentage (FT%)": ".794",
+          "3-Point Field Goals Made (3PTM)": "31",
+          "Points": "331",
+          "Rebounds": "201",
+          "Assists": "127",
+          "Steals": "22",
+          "Blocks": "12",
+          "Turnovers": "39"
+        }
+      },
+      "team_2": {
+        "week": "21",
+        "team_name": "Grimes for MVP",
+        "team_key": "428.l.41083.t.12",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "188/426",
+          "Field Goal Percentage (FG%)": ".441",
+          "Free Throws Made/Attempted (FTM/FTA)": "68/84",
+          "Free Throw Percentage (FT%)": ".810",
+          "3-Point Field Goals Made (3PTM)": "58",
+          "Points": "502",
+          "Rebounds": "152",
+          "Assists": "111",
+          "Steals": "25",
+          "Blocks": "22",
+          "Turnovers": "36"
+        }
+      },
+      "team_win_name": "Maccabi Secret",
+      "team_win_score": "3"
+    },
+    {
+      "week": "21",
+      "team_1": {
+        "week": "21",
+        "team_name": "DraCaris LeVert",
+        "team_key": "428.l.41083.t.3",
+        "score": "6",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "237/436",
+          "Field Goal Percentage (FG%)": ".544",
+          "Free Throws Made/Attempted (FTM/FTA)": "102/124",
+          "Free Throw Percentage (FT%)": ".823",
+          "3-Point Field Goals Made (3PTM)": "62",
+          "Points": "638",
+          "Rebounds": "237",
+          "Assists": "147",
+          "Steals": "65",
+          "Blocks": "46",
+          "Turnovers": "78"
+        }
+      },
+      "team_2": {
+        "week": "21",
+        "team_name": "2Tall2Miss",
+        "team_key": "428.l.41083.t.4",
+        "score": "3",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "252/500",
+          "Field Goal Percentage (FG%)": ".504",
+          "Free Throws Made/Attempted (FTM/FTA)": "77/102",
+          "Free Throw Percentage (FT%)": ".755",
+          "3-Point Field Goals Made (3PTM)": "47",
+          "Points": "628",
+          "Rebounds": "271",
+          "Assists": "160",
+          "Steals": "29",
+          "Blocks": "17",
+          "Turnovers": "64"
+        }
+      },
+      "team_win_name": "DraCaris LeVert",
+      "team_win_score": "6"
+    },
+    {
+      "week": "21",
+      "team_1": {
+        "week": "21",
+        "team_name": "Uri's Unmatched Team",
+        "team_key": "428.l.41083.t.6",
+        "score": "7",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "319/683",
+          "Field Goal Percentage (FG%)": ".467",
+          "Free Throws Made/Attempted (FTM/FTA)": "108/145",
+          "Free Throw Percentage (FT%)": ".745",
+          "3-Point Field Goals Made (3PTM)": "101",
+          "Points": "847",
+          "Rebounds": "264",
+          "Assists": "217",
+          "Steals": "54",
+          "Blocks": "36",
+          "Turnovers": "86"
+        }
+      },
+      "team_2": {
+        "week": "21",
+        "team_name": "The Boorkini youth movement",
+        "team_key": "428.l.41083.t.8",
+        "score": "2",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "291/582",
+          "Field Goal Percentage (FG%)": ".500",
+          "Free Throws Made/Attempted (FTM/FTA)": "108/146",
+          "Free Throw Percentage (FT%)": ".740",
+          "3-Point Field Goals Made (3PTM)": "76",
+          "Points": "766",
+          "Rebounds": "259",
+          "Assists": "129",
+          "Steals": "53",
+          "Blocks": "25",
+          "Turnovers": "75"
+        }
+      },
+      "team_win_name": "Uri's Unmatched Team",
+      "team_win_score": "7"
+    },
+    {
+      "week": "21",
+      "team_1": {
+        "week": "21",
+        "team_name": "king douchebag",
+        "team_key": "428.l.41083.t.7",
+        "score": "5",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "242/500",
+          "Field Goal Percentage (FG%)": ".484",
+          "Free Throws Made/Attempted (FTM/FTA)": "98/120",
+          "Free Throw Percentage (FT%)": ".817",
+          "3-Point Field Goals Made (3PTM)": "71",
+          "Points": "653",
+          "Rebounds": "225",
+          "Assists": "134",
+          "Steals": "38",
+          "Blocks": "30",
+          "Turnovers": "78"
+        }
+      },
+      "team_2": {
+        "week": "21",
+        "team_name": "The Wall",
+        "team_key": "428.l.41083.t.9",
+        "score": "4",
+        "stats": {
+          "Field Goals Made/Attempted (FGM/FGA)": "188/371",
+          "Field Goal Percentage (FG%)": ".507",
+          "Free Throws Made/Attempted (FTM/FTA)": "90/109",
+          "Free Throw Percentage (FT%)": ".826",
+          "3-Point Field Goals Made (3PTM)": "52",
+          "Points": "518",
+          "Rebounds": "198",
+          "Assists": "129",
+          "Steals": "29",
+          "Blocks": "32",
+          "Turnovers": "66"
+        }
+      },
+      "team_win_name": "king douchebag",
+      "team_win_score": "5"
+    }
+  ]
+]

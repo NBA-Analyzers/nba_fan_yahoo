@@ -217,7 +217,72 @@ def test_stuff_todo_organize():
     # print(specific_categories_points(find_current_year(), player, ['AST', 'REB', 'PTS', 'TOV']))
     # print(get_best_player_overall_in_categories(find_current_year(),'Util',['FGM','FGA','FTM','FTA','FG3M','PTS','AST', 'REB', 'STL','BLK', 'TOV']))
     print('a')
-    
+ 
+STAT_ID_TO_NAME = {
+    "5": "Field Goal Percentage (FG%)",
+    "8": "Free Throw Percentage (FT%)",
+    "10": "3-Point Field Goals Made (3PTM)",
+    "12": "Points",
+    "15": "Rebounds",
+    "16": "Assists",
+    "17": "Steals",
+    "18": "Blocks",
+    "19": "Turnovers",
+    "9004003": "Field Goals Made/Attempted (FGM/FGA)",
+    "9007006": "Free Throws Made/Attempted (FTM/FTA)"
+}  
+# Extract key fantasy matchup data
+def extract_matchup_info(parsed):
+    matchups = []
+
+    for key, matchup_wrap in parsed.items():
+        if key == "count":
+            continue
+        matchup = matchup_wrap.get("matchup", {})
+        week = matchup.get("week")
+        team_data = []
+
+        for team_index in ["0", "1"]:
+            team_info = matchup.get("0", {}).get("teams", {}).get(team_index, {}).get("team", [])
+            if not team_info:
+                continue
+
+            metadata = team_info[0]
+            stats = team_info[1].get("team_stats", {}).get("stats", [])
+            team_points = team_info[1].get("team_points", {}).get("total", None)
+
+            team = {
+                "week": week,
+                "team_name": next((d.get("name") for d in metadata if "name" in d), None),
+                "team_key": next((d.get("team_key") for d in metadata if "team_key" in d), None),
+                "score": team_points,
+                "stats": {STAT_ID_TO_NAME[s["stat"]["stat_id"]]: s["stat"]["value"] for s in stats}
+            }
+            team_data.append(team)
+        
+        team_0_score = team_data[0]['score']
+        team_1_score = team_data[1]['score']
+        if team_0_score > team_1_score:
+            team_win_name = team_data[0]['team_name']
+            team_win_score = team_data[0]['score']
+        elif team_1_score>team_0_score:
+            team_win_name = team_data[0]['team_name']
+            team_win_score = team_data[0]['score']
+        else: 
+            team_win_name = "Finshed In a Draw"
+            team_win_score = team_data[0]['score']
+            
+        stat_winners =0
+        if len(team_data) == 2:
+            matchups.append({
+                "week": week,
+                "team_1": team_data[0],
+                "team_2": team_data[1],
+                "team_win_name": team_win_name,
+                "team_win_score": team_win_score
+            })
+
+    return matchups   
     
 if __name__ == '__main__':
     URI_FANTAZY_ID_2024 = '41083'
@@ -234,7 +299,7 @@ if __name__ == '__main__':
     from nba_api.stats.static import players
     import pandas as pd
     from nba_api.stats.endpoints import playercareerstats
-
+    import json 
 
 
     sc = OAuth2(None, None, from_file='./pythonProject2/oauth22.json')
@@ -307,16 +372,19 @@ if __name__ == '__main__':
 
     # Collect all matchups
     matchup_data = []
-
+    
     for week in range(start_week, end_week + 1):
         matchups = league_yahoo.matchups(week)
         week_matchups = matchups['fantasy_content']['league'][1]['scoreboard']['0']
-        matchup_data.append(week_matchups)
+        matchup = extract_matchup_info(week_matchups['matchups'])
+        matchup_data.append(matchup)
 
     
     # Convert to DataFrame
-    df_matchups = pd.DataFrame(matchup_data)
-    df_matchups.to_csv("league_matchups.csv", index=False)
+    matchup_data_json = json.dumps(matchup_data, indent=2)
+    with open("league_matchups.json", "w") as f:
+        f.write(matchup_data_json)
+
     
     # 5. Sync Games Scoreboard, Standings
     # 6. Sync FA players
@@ -334,4 +402,3 @@ if __name__ == '__main__':
     # 10. Check if he knows that the team is going to play a bad team so the stat inflates. 
     
 
-    
