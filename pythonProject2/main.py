@@ -300,6 +300,7 @@ if __name__ == '__main__':
     import pandas as pd
     from nba_api.stats.endpoints import playercareerstats
     import json 
+    from collections import defaultdict
 
 
     sc = OAuth2(None, None, from_file='./pythonProject2/oauth22.json')
@@ -327,11 +328,17 @@ if __name__ == '__main__':
     # 2. Sync all Teams with Roster
     # ################   DONE   ##################
 
-    # league_yahoo.teams().values
     # team_rosters = {team_data['name']: league_yahoo.to_team(team_data['team_key']).roster() for team_data in league_yahoo.teams().values()}
     # team_rosters_formatted = [{"Team": team, **player} for team, roster in team_rosters.items() for player in roster]
-    # pd.DataFrame(team_rosters_formatted).to_csv("team_rosters.csv", index=False)
-    
+    # team_rosters_formatted = [{**p, "status": p["status"] if p.get("status") else "active"} for p in team_rosters_formatted]
+    # team_dict= defaultdict(list)
+    # for player in team_rosters_formatted:
+    #     team_dict[player['Team']].append(player)
+    # team_rosters_formatted_json =json.dumps(team_dict,indent=2)
+    # with open("team_roster.json", "w") as f:
+    #     f.write(team_rosters_formatted_json) 
+        
+           
     # 3. Sync Players Stat (TODO)
     # player_data = players.get_active_players()
     # data = []
