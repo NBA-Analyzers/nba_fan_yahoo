@@ -56,10 +56,10 @@ def find_last_year():
 
 
 class DataBase:
-    connection = pyodbc.connect('Driver={SQL Server};'
-                                'Server=PC-URI;'
-                                'Database=NBA_API;'
-                                'Trusted_Connection=yes;')
+    connection = pyodbc.connect(r'Driver={SQL Server};'
+                                r'Server=localhost\SQLEXPRESS;'
+                                r'Database=NBA_API;'
+                                r'Trusted_Connection=yes;')
     cursor = connection.cursor()
     sc = OAuth2(None, None, from_file='oauth22.json')
     yahoo_game = yfa.Game(sc, 'nba')

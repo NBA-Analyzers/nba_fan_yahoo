@@ -1,21 +1,22 @@
-
-
 # from Leagues.leagueAccessor import LeagueAccessor
-# from Leagues.league import League
+#from Leagues.league import League
+# from Leagues.leagueAnalyzer import analyze_matchup
+
+#from YahooLeague import YahooLeague
 
 
 
 
+#import time
 
+#import requests
 
-import time
-
-import requests
-
+#from Teams.team import Team
+#from Teams.teamAnalyzer import get_matchup_of_team
 
 def test_team():
     ### class Team
-    # team = Team('428.l.144401.t.1', 'Uri\'s Game-Changing Team', 'IFSL - Robinson League', '428.l.144401')
+    #team = Team('428.l.144401.t.1', 'Uri\'s Game-Changing Team', 'IFSL - Robinson League', '428.l.144401')
     # print(get_team_roster(team))
     # print(team_size(team,True))
     # print(team_size(team))
@@ -47,8 +48,9 @@ def test_team():
 def test_league():
     ## class League
     # sync_leagues_to_database()
-    # league = League('428.l.144401', 'Victorious Secret')
-    # print(analyze_matchup(league))
+    league = League('428.l.144401', 'Test League')
+    print(f"Successfully created League object with ID: {league.league_id}")
+    print(f"draft results: {league.draft_results()}")
     ### class League
     # sync_leagues_to_database()
     # print(sync_team_player_to_database())
@@ -60,10 +62,10 @@ def test_league():
     # print(league_stats(find_current_year(), league))
     # print(league_ranking(find_current_year(), league))
     # print(matchup_analyzer(8, league))
-    print('a')
+    #print('a')
     
 def test_stuff_todo_organize():
-    # update_players_db()
+    update_players_db()
     # update_league_teams_db()
     # update
     # team_player_to_database(True)
@@ -83,8 +85,15 @@ def test_stuff_todo_organize():
     # print(my_count_games_in_matchup[0][0])
     # print(sub_player_effect(['Luka Doncic', 'Kevin Durant'], ['Lebron James', 'Chris Paul'], 'Uri\'s Unmatched Team',find_current_year()))
 
-    ### class YahooLeague
-    # uri = YahooLeague('428.l.41083')
+
+def test_yahoo_league():
+    uri = YahooLeague('428.l.41083')
+    print(uri.league_id)
+    print(uri.league_name())
+    print(uri.league_teams_id())
+    print(uri.get_teamkey('king douchebag'))
+    print(uri.get_matchup(3))
+        
     # print(uri.team_key())## current user team key
     # #print(uri.is_injuerd('D\'Angelo Russell'))
     # print(uri.is_injuerd('Kevin Durant'))
@@ -217,84 +226,118 @@ def test_stuff_todo_organize():
     # print(specific_categories_points(find_current_year(), player, ['AST', 'REB', 'PTS', 'TOV']))
     # print(get_best_player_overall_in_categories(find_current_year(),'Util',['FGM','FGA','FTM','FTA','FG3M','PTS','AST', 'REB', 'STL','BLK', 'TOV']))
     print('a')
-    
-    
+from yahoo_oauth import OAuth2
+import yahoo_fantasy_api as yfa
+
+
+# Your existing setup
+
+
+from dailyRoster import print_players_for_day, print_players_entire_season, print_all_teams_custom_range, export_to_csv_pivot
 if __name__ == '__main__':
     URI_FANTAZY_ID_2024 = '41083'
+    week = 21
+    sc = OAuth2(None, None, from_file='pythonProject2/oauth22.json')
+    yahoo_game = yfa.Game(sc, 'nba')
+    lg = yahoo_game.to_league('428.l.41083')
 
-    # test_team()
+    custom_data = print_all_teams_custom_range(lg, "2023-10-24", "2024-03-24")
+    pivot_file = export_to_csv_pivot(custom_data, "pivot_with_positions")
+    # # 1. Print the league name
+    # print(f"League Name: {lg.settings()['name']}\n")
+    # print(lg.matchups())
+    # # 2. Get and print the league standings
+    # print("--- League Standings ---")
+    # standings = lg.standings()
+    # for team in standings:
+    #     outcomes = team['outcome_totals']
+    #     print(f"Rank: {team['rank']}, Team: {team['name']}, Record: {outcomes['wins']}-{outcomes['losses']}-{outcomes['ties']}")
+    # print("") # Add a newline for spacing
+
+    # # 3. Get and print the list of teams
+    # print("--- All Teams in League ---")
+    # teams = lg.teams()
+    # for team_key, team_data in teams.items():
+    #     print(f"- {team_data['name']}")
+
+    # # test_stuff_todo_organize() 
     
-    # test_league()
+    # # 4. Sync Players Stat
+    # player_data = players.get_active_players()
+    # data = []
     
-    # test_stuff_todo_organize() 
-    
-    # Initial Configurations
-    import yahoo_fantasy_api as yfa
-    from yahoo_oauth import OAuth2
-    from nba_api.stats.static import players
-    import pandas as pd
-    from nba_api.stats.endpoints import playercareerstats
+    # # Check if we have a partial save to resume from
+    # try:
+    #     partial_df = pd.read_csv("players_stats2_partial.csv")
+    #     data = partial_df.to_dict('records')
+    #     start_index = len(data) + 92  # Resume from where we left off
+    #     print(f"📂 Resuming from player {start_index} (found {len(data)} players already processed)")
+    # except FileNotFoundError:
+    #     start_index = 92
+    #     print("🆕 Starting fresh player data collection")
 
-
-
-    # sc = OAuth2(None, None, from_file='./pythonProject2/oauth22.json')
-    # yahoo_game = yfa.Game(sc, 'nba')
-    
-    #Test League
-    URI_FANTAZY_ID_2024 = '41083'
-    NBA_SPORT_CODE = '428'
-    # league_yahoo = yahoo_game.to_league(f"{NBA_SPORT_CODE}.l.{URI_FANTAZY_ID_2024}")
-    
-    # Specific Team
-    # team_key = yahoo_fantazy_league.get_team_key_by_name('king douchebag')
-    # team_roster = yahoo_fantazy_league.get_team_roster(team_key)
-
-
-
-
-    # TODO - Data Plan
-    # 1. Sync League Details and Settings (How many teams? How many weeks? Playoff structure)
-    # ################   DONE   ##################
-    
-    # league_settings_df = pd.DataFrame([league_yahoo.settings()])
-    # league_settings_df.to_csv("league_settings.csv", index=True)
-    
-    # 2. Sync all Teams with Roster
-    # ################   DONE   ##################
-
-    # league_yahoo.teams().values
-    # team_rosters = {team_data['name']: league_yahoo.to_team(team_data['team_key']).roster() for team_data in league_yahoo.teams().values()}
-    # team_rosters_formatted = [{"Team": team, **player} for team, roster in team_rosters.items() for player in roster]
-    # pd.DataFrame(team_rosters_formatted).to_csv("team_rosters.csv", index=False)
-    
-    # 4. Sync Players Stat
-    player_data = players.get_active_players()
-    data = []
-
-    # Loop through all players and fetch stats safely
-    for i, player in enumerate(player_data):
-        if i<92:
-            continue
-        try:
-            print(f"[{i+1}/{len(player_data)}] Fetching {player['full_name']}")
-            stats_obj = playercareerstats.PlayerCareerStats(player_id=player["id"], timeout=10)
-            stats = {
-                'name': player['full_name'],
-                'stats_legend': stats_obj.season_totals_regular_season.data['headers'],
-                'full_stats_according_to_legend': [only_stats for only_stats in stats_obj.season_totals_regular_season.data['data']]
-                }
-            data.append(stats)
-        except requests.exceptions.ReadTimeout as ex:
-            print(f"Timeout for player {player['full_name']}: {ex}")
-            # time.sleep(5)
-
-        except Exception as e:
-            print(f"Error with player {player['full_name']}: {e}")
+    # # Loop through all players and fetch stats safely
+    # for i, player in enumerate(player_data):
+    #     if i < start_index:
+    #         continue
         
-    pd.DataFrame(data).to_csv("players_stats2.csv", index=False)
+    #     max_retries = 3
+    #     retry_count = 0
+        
+    #     while retry_count < max_retries:
+    #         try:
+    #             print(f"[{i+1}/{len(player_data)}] Fetching {player['full_name']}")
+                
+    #             # Add delay between requests to avoid rate limiting
+    #             if i > 92:  # Skip delay for first request
+    #                 time.sleep(1.5)  # 1.5 second delay between requests
+                
+    #             # Increase timeout and add retry logic
+    #             stats_obj = playercareerstats.PlayerCareerStats(
+    #                 player_id=player["id"], 
+    #                 timeout=30  # Increased timeout from 10 to 30 seconds
+    #             )
+                
+    #             stats = {
+    #                 'name': player['full_name'],
+    #                 'stats_legend': stats_obj.season_totals_regular_season.data['headers'],
+    #                 'full_stats_according_to_legend': [only_stats for only_stats in stats_obj.season_totals_regular_season.data['data']]
+    #             }
+    #             data.append(stats)
+    #             break  # Success, exit retry loop
+                
+    #         except requests.exceptions.ReadTimeout as ex:
+    #             retry_count += 1
+    #             print(f"Timeout for player {player['full_name']} (attempt {retry_count}/{max_retries}): {ex}")
+    #             if retry_count < max_retries:
+    #                 print(f"Retrying in {retry_count * 2} seconds...")
+    #                 time.sleep(retry_count * 2)  # Exponential backoff
+    #             else:
+    #                 print(f"Failed to fetch {player['full_name']} after {max_retries} attempts")
+                    
+    #         except requests.exceptions.ConnectionError as ex:
+    #             retry_count += 1
+    #             print(f"Connection error for player {player['full_name']} (attempt {retry_count}/{max_retries}): {ex}")
+    #             if retry_count < max_retries:
+    #                 print(f"Retrying in {retry_count * 3} seconds...")
+    #                 time.sleep(retry_count * 3)  # Longer delay for connection errors
+    #             else:
+    #                 print(f"Failed to fetch {player['full_name']} after {max_retries} attempts")
+                    
+    #         except Exception as e:
+    #             print(f"Unexpected error with player {player['full_name']}: {e}")
+    #             break  # Don't retry for unexpected errors
+        
+    #     # Save progress every 50 players to avoid losing data
+    #     if (i + 1) % 50 == 0:
+    #         print(f"💾 Saving progress... ({i + 1} players processed)")
+    #         pd.DataFrame(data).to_csv("players_stats2_partial.csv", index=False)
+    
+    # # Save final results
+    # pd.DataFrame(data).to_csv("players_stats2.csv", index=False)
    
 
-    print("✅ Finished fetching all stats.")
+    # print("✅ Finished fetching all stats.")
     
     # 3. Sync Schedule, Matchups, Playoff Starts 
     # 5. Sync Games Scoreboard

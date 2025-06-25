@@ -1,8 +1,8 @@
 class League(object):
 
-    def __init__(self, league_id,league_name):
+    def __init__(self, league_id):
         self.league_id = league_id
-        self.league_name = league_name
+       
         #self.num_teams = league_info['num_teams']
 
     # def __len__(self):
