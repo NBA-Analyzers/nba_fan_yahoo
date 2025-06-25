@@ -227,6 +227,7 @@ def test_yahoo_league():
     # print(get_best_player_overall_in_categories(find_current_year(),'Util',['FGM','FGA','FTM','FTA','FG3M','PTS','AST', 'REB', 'STL','BLK', 'TOV']))
     print('a')
 
+from multiprocessing.spawn import import_main_path
 from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 
@@ -309,21 +310,42 @@ if __name__ == '__main__':
     import yahoo_fantasy_api as yfa
     from yahoo_oauth import OAuth2
     from nba_api.stats.static import players
-    import pandas as pd
+    
     from nba_api.stats.endpoints import playercareerstats
     import json 
     from collections import defaultdict
 
 # Your existing setup
 
-from dailyRoster import print_players_for_day, print_players_entire_season, print_all_teams_custom_range, export_to_csv_pivot, export_to_json_pivot
+from dailyRoster import print_players_for_day, print_players_entire_season, print_all_teams_custom_range, export_to_csv_pivot, export_to_json_pivot,export_to_json_simple
+from boxScore import collect_and_export_nba_boxscores
+
 if __name__ == '__main__':
     URI_FANTAZY_ID_2024 = '41083'
     week = 21
     sc = OAuth2(None, None, from_file='pythonProject2/oauth22.json')
     yahoo_game = yfa.Game(sc, 'nba')
     lg = yahoo_game.to_league('428.l.41083')
-
+    print("=== NBA Box Scores Collector ===")
+    
+    # Test with a more recent date that likely has games
+    print("Testing with different dates...")
+    
+    # Option 1: Try a few different dates
+    test_dates = ["2024-02-14", "2024-03-15"]
+    
+    for test_date in test_dates:
+        print(f"\n--- Testing {test_date} ---")
+        try:
+            filename = collect_and_export_nba_boxscores(test_date)
+            if filename:
+                print(f"✅ Success with {test_date}")
+                break
+            else:
+                print(f"❌ No data for {test_date}")
+        except Exception as e:
+            print(f"❌ Error with {test_date}: {e}")
+            continue
 
     # # 1. Print the league name
     # print(f"League Name: {lg.settings()['name']}\n")
@@ -422,7 +444,7 @@ if __name__ == '__main__':
     # # print("✅ Finished fetching all stats.")
     # # 5. Get daily roser for each team 
     # #custom_data = print_all_teams_custom_range(lg, "2023-10-24", "2024-03-24")
-    # #pivot_file = export_to_json_pivot(custom_data, "my_pivot")
+    # #pivot_file = export_to_json_simple(custom_data, "my_pivot")
     
     
     
