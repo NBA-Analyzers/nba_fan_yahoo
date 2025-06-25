@@ -1,7 +1,7 @@
 from Leagues.leagueAccessor import *
 from Players.player import Player
 from Players.playerAccessor import *
-from Teams.teamAccessor import get_team_object_by_key, get_team_roster
+from Teams.teamAccessor import TeamAccessor, get_team_object_by_key, get_team_roster
 from YahooLeague import YahooLeague
 from DataBase import DataBase as db
 
@@ -56,7 +56,7 @@ def matchup_analyzer(week_num, league: League):
     my_team = league.team_key()
     my_count = 0
     my_total_games = 0
-    team = Team(*get_team_object_by_key(my_team))
+    team = Team(TeamAccessor.get_team_object_by_key(my_team))
     my_roster = get_team_roster(team)
 
     my_team_df = pd.DataFrame(columns=columns_name)

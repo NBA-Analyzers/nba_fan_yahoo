@@ -61,7 +61,7 @@ class DataBase:
                                 r'Database=NBA_API;'
                                 r'Trusted_Connection=yes;')
     cursor = connection.cursor()
-    sc = OAuth2(None, None, from_file='oauth22.json')
+    sc = OAuth2(None, None, from_file='./pythonProject2/oauth22.json')
     yahoo_game = yfa.Game(sc, 'nba')
 
     ALL_FANTASY_CAT = "current_FGM,current_FGA,current_FG_PCT,current_FTM,current_FTA,current_FT_PCT,current_FG3M," \
@@ -75,3 +75,10 @@ class DataBase:
                               "last_PTS,last_REB,last_AST,last_STL,last_BLK,last_TOV"
     STATS_FOR_MATCHUP = 'NAME,FGM/A,current_FG_PCT,FTM/A,current_FT_PCT,current_FG3M,current_PTS,current_REB,' \
                         'current_AST,current_STL,current_BLK,current_TOV'
+
+    def connect_to_db():
+        connection = pyodbc.connect('Driver={SQL Server};'
+                                'Server=PC-URI;'
+                                'Database=NBA_API;'
+                                'Trusted_Connection=yes;')
+        cursor = connection.cursor()
