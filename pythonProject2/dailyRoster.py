@@ -2,6 +2,7 @@ from datetime import datetime,timedelta
 import csv
 import os
 import time
+import json
 
 def print_players_for_day(league, team_key, date):
     """
@@ -296,4 +297,120 @@ def export_to_csv_pivot(data, filename_prefix="yahoo_fantasy_pivot"):
         
     except Exception as e:
         print(f"❌ Error exporting pivot CSV: {e}")
+        return None
+
+
+def export_to_json_pivot(data, filename_prefix="yahoo_fantasy_pivot"):
+    """
+    Export fantasy data to JSON in pivot format:
+    {
+        "2024-03-18": {
+            "Maccabi Secret": [
+                {"name": "Jalen Suggs", "position": "PG"},
+                {"name": "Kevin Durant", "position": "SF"}
+            ],
+            "Grimes for MVP": [...]
+        },
+        "2024-03-19": {...}
+    }
+    
+    Args:
+        data: Dictionary containing team and player data
+        filename_prefix: Prefix for the JSON filename
+    """
+    try:
+        # Create timestamp for unique filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{filename_prefix}_{timestamp}.json"
+        
+        # Collect all dates and teams
+        all_dates = set()
+        team_info = {}
+        
+        # Process data to extract dates and team info
+        for team_key, team_data in data.items():
+            team_name = team_data.get('team_name', 'Unknown')
+            team_info[team_key] = team_name
+            
+            # Handle different data structures
+            if 'season_data' in team_data:
+                daily_data = team_data['season_data']
+            elif 'daily_data' in team_data:
+                daily_data = team_data['daily_data']
+            else:
+                daily_data = team_data
+            
+            # Collect all dates
+            all_dates.update(daily_data.keys())
+        
+        # Sort dates and teams
+        sorted_dates = sorted(all_dates)
+        sorted_teams = sorted(team_info.items(), key=lambda x: x[1])  # Sort by team name
+        
+        print(f"Creating pivot JSON with:")
+        print(f"  📅 Dates: {len(sorted_dates)}")
+        print(f"  🏀 Teams: {len(sorted_teams)}")
+        
+        # Build JSON structure
+        json_data = {}
+        
+        # Process each date
+        for date_str in sorted_dates:
+            json_data[date_str] = {}
+            
+            # For each team
+            for team_key, team_name in sorted_teams:
+                players_list = []
+                
+                # Get team data
+                team_data = data.get(team_key, {})
+                
+                # Handle different data structures
+                if 'season_data' in team_data:
+                    daily_data = team_data['season_data']
+                elif 'daily_data' in team_data:
+                    daily_data = team_data['daily_data']
+                else:
+                    daily_data = team_data
+                
+                # Get players for this date
+                players = daily_data.get(date_str, [])
+                
+                if players:
+                    for player_data in players:
+                        if isinstance(player_data, tuple):
+                            # Format: (player_name, position)
+                            player_name, position = player_data
+                            players_list.append({
+                                "name": player_name,
+                                "position": position
+                            })
+                        elif isinstance(player_data, dict):
+                            # Format: {'name': ..., 'position': ...}
+                            player_name = player_data.get('name', 'Unknown')
+                            position = player_data.get('position', '')
+                            players_list.append({
+                                "name": player_name,
+                                "position": position
+                            })
+                        else:
+                            # Fallback
+                            players_list.append({
+                                "name": str(player_data),
+                                "position": ""
+                            })
+                
+                json_data[date_str][team_name] = players_list
+        
+        # Write JSON file
+        with open(filename, 'w', encoding='utf-8') as jsonfile:
+            json.dump(json_data, jsonfile, indent=2, ensure_ascii=False)
+        
+        print(f"✅ Pivot JSON exported to: {filename}")
+        print(f"📊 Structure: {len(sorted_dates)} dates × {len(sorted_teams)} teams")
+        
+        return filename
+        
+    except Exception as e:
+        print(f"❌ Error exporting pivot JSON: {e}")
         return None

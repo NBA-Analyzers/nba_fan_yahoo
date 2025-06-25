@@ -316,7 +316,7 @@ if __name__ == '__main__':
 
 # Your existing setup
 
-from dailyRoster import print_players_for_day, print_players_entire_season, print_all_teams_custom_range, export_to_csv_pivot
+from dailyRoster import print_players_for_day, print_players_entire_season, print_all_teams_custom_range, export_to_csv_pivot, export_to_json_pivot
 if __name__ == '__main__':
     URI_FANTAZY_ID_2024 = '41083'
     week = 21
@@ -324,8 +324,7 @@ if __name__ == '__main__':
     yahoo_game = yfa.Game(sc, 'nba')
     lg = yahoo_game.to_league('428.l.41083')
 
-    custom_data = print_all_teams_custom_range(lg, "2023-10-24", "2024-03-24")
-    pivot_file = export_to_csv_pivot(custom_data, "pivot_with_positions")
+
     # # 1. Print the league name
     # print(f"League Name: {lg.settings()['name']}\n")
     # print(lg.matchups())
@@ -421,8 +420,13 @@ if __name__ == '__main__':
    
 
     # # print("✅ Finished fetching all stats.")
+    # # 5. Get daily roser for each team 
+    # #custom_data = print_all_teams_custom_range(lg, "2023-10-24", "2024-03-24")
+    # #pivot_file = export_to_json_pivot(custom_data, "my_pivot")
     
-    # # 5. Sync Schedule, Matchups
+    
+    
+    # # 6. Sync Schedule, Matchups
     # # Collect all matchups
     # # matchup_data = []
     
@@ -440,6 +444,8 @@ if __name__ == '__main__':
 
     # # 6. Sync Games Scoreboard, Standings
     # # 7. Sync FA players
+ 
+    
     
     
     # # TODO - Test Plan
