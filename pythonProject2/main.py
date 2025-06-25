@@ -326,30 +326,27 @@ if __name__ == '__main__':
     sc = OAuth2(None, None, from_file='pythonProject2/oauth22.json')
     yahoo_game = yfa.Game(sc, 'nba')
     lg = yahoo_game.to_league('428.l.41083')
-    print("=== NBA Box Scores Collector ===")
+    # print("=== NBA Box Scores Collector ===")
     
-    # Test with a more recent date that likely has games
-    print("Testing with different dates...")
+    # # Test with a more recent date that likely has games
+    # print("Testing with different dates...")
     
-    # Option 1: Try a few different dates
-    test_dates = ["2024-02-14", "2024-03-15"]
+    # # Option 1: Try a few different dates
+    # test_dates = ["2024-02-14", "2024-03-15"]
     
-    for test_date in test_dates:
-        print(f"\n--- Testing {test_date} ---")
-        try:
-            filename = collect_and_export_nba_boxscores(test_date)
-            if filename:
-                print(f"✅ Success with {test_date}")
-                break
-            else:
-                print(f"❌ No data for {test_date}")
-        except Exception as e:
-            print(f"❌ Error with {test_date}: {e}")
-            continue
+    # for test_date in test_dates:
+    #     print(f"\n--- Testing {test_date} ---")
+    #     try:
+    #         filename = collect_and_export_nba_boxscores(test_date)
+    #         if filename:
+    #             print(f"✅ Success with {test_date}")
+    #             break
+    #         else:
+    #             print(f"❌ No data for {test_date}")
+    #     except Exception as e:
+    #         print(f"❌ Error with {test_date}: {e}")
+    #         continue
 
-    # # 1. Print the league name
-    # print(f"League Name: {lg.settings()['name']}\n")
-    # print(lg.matchups())
     # # 2. Get and print the league standings
     # print("--- League Standings ---")
     # standings = lg.standings()
@@ -440,8 +437,9 @@ if __name__ == '__main__':
     # # # Save final results
     # # pd.DataFrame(data).to_csv("players_stats2.csv", index=False)
    
-
     # # print("✅ Finished fetching all stats.")
+    
+    
     # # 5. Get daily roser for each team 
     # #custom_data = print_all_teams_custom_range(lg, "2023-10-24", "2024-03-24")
     # #pivot_file = export_to_json_simple(custom_data, "my_pivot")
@@ -465,7 +463,14 @@ if __name__ == '__main__':
     # #     f.write(matchup_data_json)
 
     # # 6. Sync Games Scoreboard, Standings
+    
     # # 7. Sync FA players
+    
+    # free_agents = lg.free_agents('Util')
+    # free_agents_json = json.dumps(free_agents, indent=2)
+    # with open("free_agents.json", "w") as f:
+    #     f.write(free_agents_json)
+
  
     
     
