@@ -327,7 +327,8 @@ if __name__ == '__main__':
     yahoo_game = yfa.Game(sc, 'nba')
     lg = yahoo_game.to_league('428.l.41083')
     
-    ######### 1. Box Score        
+    ######### 1. Box Score  #########
+           
     # print("Testing with different dates...")
     # print("=== NBA Box Scores Collector ===")
     # test_dates = ["2024-02-14", "2024-03-15"]
@@ -345,8 +346,9 @@ if __name__ == '__main__':
     #         print(f"❌ Error with {test_date}: {e}")
     #         continue
     
-    # print('a')
-    ######### 2. Get and print the league standings
+    
+    ######### 2. Get and print the league standings #########
+    
     # print("--- League Standings ---")
     # standings = lg.standings()
     # for team in standings:
@@ -354,7 +356,7 @@ if __name__ == '__main__':
     #     print(f"Rank: {team['rank']}, Team: {team['name']}, Record: {outcomes['wins']}-{outcomes['losses']}-{outcomes['ties']}")
     # print("") # Add a newline for spacing
 
-    ######### 3. Get and print the list of teams
+    ######### 3. Get and print the list of teams #########
     # print("--- All Teams in League ---")
     # teams = lg.teams()
     # for team_key, team_data in teams.items():
@@ -362,7 +364,8 @@ if __name__ == '__main__':
 
     # # test_stuff_todo_organize() 
     
-    ######### 4. Sync Players Stat
+    ######### 4. Sync Players Stat #########
+    
     # # player_data = players.get_active_players()
     # # data = []
     
@@ -439,13 +442,15 @@ if __name__ == '__main__':
     # # print("✅ Finished fetching all stats.")
     
     
-    ######### 5. Get daily roser for each team 
+    ######### 5. Get daily roser for each team #########
+    
     # #custom_data = print_all_teams_custom_range(lg, "2023-10-24", "2024-03-24")
     # #pivot_file = export_to_json_simple(custom_data, "my_pivot")
     
     
     
-    ######### 6. Sync Schedule, Matchups
+    ######### 6. Matchups #########
+    
     # # Collect all matchups
     # # matchup_data = []
     
@@ -461,14 +466,14 @@ if __name__ == '__main__':
     # # with open("league_matchups.json", "w") as f:
     # #     f.write(matchup_data_json)
 
-    ######### 7. Standings
+    ######### 7. Standings #########
     
     # standings = json.dumps(lg.standings(),indent=2)
     # with open("standings.json", "w") as f:
     #     f.write(standings)
     
     
-    ######### 8. Sync FA players
+    ######### 8. Sync FA players #########
     
     # free_agents = lg.free_agents('Util')
     # free_agents_json = json.dumps(free_agents, indent=2)
