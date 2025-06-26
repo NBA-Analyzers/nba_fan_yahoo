@@ -1,0 +1,158 @@
+[
+  {
+    "team_key": "428.l.41083.t.6",
+    "name": "Uri's Unmatched Team",
+    "rank": 1,
+    "playoff_seed": "2",
+    "outcome_totals": {
+      "wins": "88",
+      "losses": "71",
+      "ties": "3",
+      "percentage": ".552"
+    },
+    "games_back": "2.5"
+  },
+  {
+    "team_key": "428.l.41083.t.8",
+    "name": "The Boorkini youth movement",
+    "rank": 2,
+    "playoff_seed": "1",
+    "outcome_totals": {
+      "wins": "90",
+      "losses": "68",
+      "ties": "4",
+      "percentage": ".568"
+    },
+    "games_back": "-"
+  },
+  {
+    "team_key": "428.l.41083.t.3",
+    "name": "DraCaris LeVert",
+    "rank": 3,
+    "playoff_seed": "5",
+    "outcome_totals": {
+      "wins": "81",
+      "losses": "75",
+      "ties": "6",
+      "percentage": ".519"
+    },
+    "games_back": "8"
+  },
+  {
+    "team_key": "428.l.41083.t.4",
+    "name": "2Tall2Miss",
+    "rank": 4,
+    "playoff_seed": "3",
+    "outcome_totals": {
+      "wins": "87",
+      "losses": "74",
+      "ties": "1",
+      "percentage": ".540"
+    },
+    "games_back": "4.5"
+  },
+  {
+    "team_key": "428.l.41083.t.2",
+    "name": "Scottie Doesn't Know",
+    "rank": 5,
+    "playoff_seed": "4",
+    "outcome_totals": {
+      "wins": "82",
+      "losses": "76",
+      "ties": "4",
+      "percentage": ".519"
+    },
+    "games_back": "8"
+  },
+  {
+    "team_key": "428.l.41083.t.11",
+    "name": "yoav's Champion Team",
+    "rank": 6,
+    "playoff_seed": "6",
+    "outcome_totals": {
+      "wins": "81",
+      "losses": "76",
+      "ties": "5",
+      "percentage": ".515"
+    },
+    "games_back": "8.5"
+  },
+  {
+    "team_key": "428.l.41083.t.7",
+    "name": "king douchebag",
+    "rank": 7,
+    "playoff_seed": "10",
+    "outcome_totals": {
+      "wins": "71",
+      "losses": "89",
+      "ties": "2",
+      "percentage": ".444"
+    },
+    "games_back": "20"
+  },
+  {
+    "team_key": "428.l.41083.t.9",
+    "name": "The Wall",
+    "rank": 8,
+    "playoff_seed": "8",
+    "outcome_totals": {
+      "wins": "80",
+      "losses": "79",
+      "ties": "3",
+      "percentage": ".503"
+    },
+    "games_back": "10.5"
+  },
+  {
+    "team_key": "428.l.41083.t.12",
+    "name": "Grimes for MVP",
+    "rank": 9,
+    "playoff_seed": "7",
+    "outcome_totals": {
+      "wins": "81",
+      "losses": "77",
+      "ties": "4",
+      "percentage": ".512"
+    },
+    "games_back": "9"
+  },
+  {
+    "team_key": "428.l.41083.t.1",
+    "name": "Maccabi Secret",
+    "rank": 10,
+    "playoff_seed": "9",
+    "outcome_totals": {
+      "wins": "75",
+      "losses": "85",
+      "ties": "2",
+      "percentage": ".469"
+    },
+    "games_back": "16"
+  },
+  {
+    "team_key": "428.l.41083.t.10",
+    "name": "Ugly Kid Joe",
+    "rank": 11,
+    "playoff_seed": "11",
+    "outcome_totals": {
+      "wins": "67",
+      "losses": "90",
+      "ties": "5",
+      "percentage": ".429"
+    },
+    "games_back": "22.5"
+  },
+  {
+    "team_key": "428.l.41083.t.5",
+    "name": "Arul minion's",
+    "rank": 12,
+    "playoff_seed": "12",
+    "outcome_totals": {
+      "wins": "68",
+      "losses": "91",
+      "ties": "3",
+      "percentage": ".429"
+    },
+    "games_back": "22.5"
+  }
+]
