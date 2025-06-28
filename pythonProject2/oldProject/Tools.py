@@ -1,6 +1,6 @@
 import pandas as pd
 import pyodbc
-from YahooLeague import YahooLeague
+from pythonProject2.oldProject.YahooLeague import YahooLeague
 
 
 ### function that check what happens to your team when you change one player in another

@@ -317,8 +317,8 @@ if __name__ == '__main__':
 
 # Your existing setup
 
-from dailyRoster import print_players_for_day, print_players_entire_season, print_all_teams_custom_range, export_to_csv_pivot, export_to_json_pivot,export_to_json_simple
-from boxScore import collect_and_export_nba_boxscores
+from pythonProject2.sync_leagues.dailyRoster import print_players_for_day, print_players_entire_season, print_all_teams_custom_range, export_to_csv_pivot, export_to_json_pivot,export_to_json_simple
+from pythonProject2.sync_leagues.boxScore import collect_and_export_nba_boxscores
 
 if __name__ == '__main__':
     URI_FANTAZY_ID_2024 = '41083'

@@ -7,8 +7,8 @@ from Players.playerAccessor import pg_adj_fantasy
 
 import yahoo_fantasy_api as yfa
 from Teams.team import Team
-from YahooLeague import YahooLeague
-from DataBase import DataBase as db, find_last_year, find_current_year
+from pythonProject2.oldProject.YahooLeague import YahooLeague
+from pythonProject2.oldProject.DataBase import DataBase as db, find_last_year, find_current_year
 
 
 class TeamAccessor(object):

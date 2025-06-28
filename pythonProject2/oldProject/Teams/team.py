@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from DataBase import DataBase as db
+from pythonProject2.oldProject.DataBase import DataBase as db
 
 
 @dataclass()

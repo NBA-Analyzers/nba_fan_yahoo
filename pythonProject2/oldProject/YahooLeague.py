@@ -1,7 +1,7 @@
 from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 import pyodbc
-from DataBase import DataBase as db
+from pythonProject2.oldProject.DataBase import DataBase as db
 
 
 class YahooLeague:

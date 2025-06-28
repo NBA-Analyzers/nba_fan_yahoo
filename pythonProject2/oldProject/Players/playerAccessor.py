@@ -5,7 +5,7 @@ from nba_api.stats.static import players, teams
 import pyodbc
 from Players.player import Player
 import pandas as pd
-from DataBase import DataBase as db, find_current_year, find_last_year
+from pythonProject2.oldProject.DataBase import DataBase as db, find_current_year, find_last_year
 
 
 class PlayerAccesor(object):

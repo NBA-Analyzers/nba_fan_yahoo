@@ -6,8 +6,8 @@ from Players.playerAnalyzer import *
 import pandas as pd
 
 from Players.playerAnalyzer import _rename_players
-from YahooLeague import YahooLeague
-from DataBase import DataBase as db
+from pythonProject2.oldProject.YahooLeague import YahooLeague
+from pythonProject2.oldProject.DataBase import DataBase as db
 from Teams.teamAccessor import get_team_stats, team_size, pg_avg_stats_team, get_team_object, get_team_roster
 from Players.playerAccessor import get_list_of_players_stats, get_player_object, get_player_nba_team
 from Teams.team import Team

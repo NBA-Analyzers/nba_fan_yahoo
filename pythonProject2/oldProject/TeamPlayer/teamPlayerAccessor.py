@@ -1,9 +1,9 @@
 ### insert all the players in all the leagues I am in into team_player table
 from nba_api.stats.library.data import players
 
-from DataBase import DataBase
+from pythonProject2.oldProject.DataBase import DataBase
 from Players.player import Player
-from YahooLeague import YahooLeague
+from pythonProject2.oldProject.YahooLeague import YahooLeague
 from Teams.team import Team
 from Teams.teamAccessor import *
 from Players.playerAccessor import *

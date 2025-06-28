@@ -2,8 +2,8 @@ from Leagues.leagueAccessor import *
 from Players.player import Player
 from Players.playerAccessor import *
 from Teams.teamAccessor import TeamAccessor, get_team_object_by_key, get_team_roster
-from YahooLeague import YahooLeague
-from DataBase import DataBase as db
+from pythonProject2.oldProject.YahooLeague import YahooLeague
+from pythonProject2.oldProject.DataBase import DataBase as db
 
 
 def league_ranking(season_stats, league: League):

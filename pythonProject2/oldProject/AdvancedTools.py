@@ -5,7 +5,7 @@ import numpy
 import pandas as pd
 import pyodbc
 
-from YahooLeague import YahooLeague
+from pythonProject2.oldProject.YahooLeague import YahooLeague
 
 
 class AdvancedTools:

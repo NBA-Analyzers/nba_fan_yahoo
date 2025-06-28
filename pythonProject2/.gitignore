@@ -1,6 +1,5 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-oauth22.json
 *.py[cod]
 *$py.class
 

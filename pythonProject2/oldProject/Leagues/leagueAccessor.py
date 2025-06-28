@@ -1,7 +1,7 @@
 import pandas as pd
 import pyodbc
-from DataBase import DataBase as db
-from DataBase import find_current_year
+from pythonProject2.oldProject.DataBase import DataBase as db
+from pythonProject2.oldProject.DataBase import find_current_year
 from Leagues.league import League
 from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
