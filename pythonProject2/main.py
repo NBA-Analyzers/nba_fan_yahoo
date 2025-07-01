@@ -48,9 +48,9 @@ def test_team():
 def test_league():
     ## class League
     # sync_leagues_to_database()
-    league = League('428.l.144401', 'Test League')
-    print(f"Successfully created League object with ID: {league.league_id}")
-    print(f"draft results: {league.draft_results()}")
+    # league = League('428.l.144401', 'Test League')
+    # print(f"Successfully created League object with ID: {league.league_id}")
+    # print(f"draft results: {league.draft_results()}")
     ### class League
     # sync_leagues_to_database()
     # print(sync_team_player_to_database())
@@ -62,10 +62,10 @@ def test_league():
     # print(league_stats(find_current_year(), league))
     # print(league_ranking(find_current_year(), league))
     # print(matchup_analyzer(8, league))
-    #print('a')
+    print('a')
     
 def test_stuff_todo_organize():
-    update_players_db()
+    #update_players_db()
     # update_league_teams_db()
     # update
     # team_player_to_database(True)
@@ -78,7 +78,7 @@ def test_stuff_todo_organize():
     # sync_players_to_database()
     # sync_teams_to_database()
     # sync_team_player_to_database()
-
+    print('a')
     ##DataBase
     # db.cursor.execute(PlayerAccesor.GAMES_IN_MATCHUP, (8, 'Lakers',  'Lakers'))
     # my_count_games_in_matchup = db.cursor.fetchall()
@@ -87,13 +87,13 @@ def test_stuff_todo_organize():
 
 
 def test_yahoo_league():
-    uri = YahooLeague('428.l.41083')
-    print(uri.league_id)
-    print(uri.league_name())
-    print(uri.league_teams_id())
-    print(uri.get_teamkey('king douchebag'))
-    print(uri.get_matchup(3))
-        
+    #uri = YahooLeague('428.l.41083')
+    # print(uri.league_id)
+    # print(uri.league_name())
+    # print(uri.league_teams_id())
+    # print(uri.get_teamkey('king douchebag'))
+    # print(uri.get_matchup(3))
+    print('a')
     # print(uri.team_key())## current user team key
     # #print(uri.is_injuerd('D\'Angelo Russell'))
     # print(uri.is_injuerd('Kevin Durant'))
@@ -230,103 +230,33 @@ def test_yahoo_league():
 from multiprocessing.spawn import import_main_path
 from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
+import os
+import sys
 
-STAT_ID_TO_NAME = {
-    "5": "Field Goal Percentage (FG%)",
-    "8": "Free Throw Percentage (FT%)",
-    "10": "3-Point Field Goals Made (3PTM)",
-    "12": "Points",
-    "15": "Rebounds",
-    "16": "Assists",
-    "17": "Steals",
-    "18": "Blocks",
-    "19": "Turnovers",
-    "9004003": "Field Goals Made/Attempted (FGM/FGA)",
-    "9007006": "Free Throws Made/Attempted (FTM/FTA)"
-}  
-# Extract key fantasy matchup data
-def extract_matchup_info(parsed):
-    matchups = []
+# Add the current directory to Python path to ensure imports work
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
 
-    for key, matchup_wrap in parsed.items():
-        if key == "count":
-            continue
-        matchup = matchup_wrap.get("matchup", {})
-        week = matchup.get("week")
-        team_data = []
 
-        for team_index in ["0", "1"]:
-            team_info = matchup.get("0", {}).get("teams", {}).get(team_index, {}).get("team", [])
-            if not team_info:
-                continue
 
-            metadata = team_info[0]
-            stats = team_info[1].get("team_stats", {}).get("stats", [])
-            team_points = team_info[1].get("team_points", {}).get("total", None)
+import yahoo_fantasy_api as yfa
+from yahoo_oauth import OAuth2
+from nba_api.stats.static import players
 
-            team = {
-                "week": week,
-                "team_name": next((d.get("name") for d in metadata if "name" in d), None),
-                "team_key": next((d.get("team_key") for d in metadata if "team_key" in d), None),
-                "score": team_points,
-                "stats": {STAT_ID_TO_NAME[s["stat"]["stat_id"]]: s["stat"]["value"] for s in stats}
-            }
-            team_data.append(team)
-        
-        team_0_score = team_data[0]['score']
-        team_1_score = team_data[1]['score']
-        if team_0_score > team_1_score:
-            team_win_name = team_data[0]['team_name']
-            team_win_score = team_data[0]['score']
-        elif team_1_score>team_0_score:
-            team_win_name = team_data[0]['team_name']
-            team_win_score = team_data[0]['score']
-        else: 
-            team_win_name = "Finshed In a Draw"
-            team_win_score = team_data[0]['score']
-            
-        stat_winners =0
-        if len(team_data) == 2:
-            matchups.append({
-                "week": week,
-                "team_1": team_data[0],
-                "team_2": team_data[1],
-                "team_win_name": team_win_name,
-                "team_win_score": team_win_score
-            })
-
-    return matchups   
-    
-if __name__ == '__main__':
-    URI_FANTAZY_ID_2024 = '41083'
-
-    # test_team()
-    
-    # test_league()
-    
-    # test_stuff_todo_organize() 
-    
-    # Initial Configurations
-    import yahoo_fantasy_api as yfa
-    from yahoo_oauth import OAuth2
-    from nba_api.stats.static import players
-    
-    from nba_api.stats.endpoints import playercareerstats
-    import json 
-    from collections import defaultdict
+from nba_api.stats.endpoints import playercareerstats
+import json 
+from collections import defaultdict
 
 # Your existing setup
 
-from pythonProject2.sync_leagues.dailyRoster import print_players_for_day, print_players_entire_season, print_all_teams_custom_range, export_to_csv_pivot, export_to_json_pivot,export_to_json_simple
-from pythonProject2.sync_leagues.boxScore import collect_and_export_nba_boxscores
-
+from sync_leagues.dailyRoster import print_players_for_day, print_players_entire_season, print_all_teams_custom_range, export_to_json_pivot,export_to_json_simple
+from sync_leagues.boxScore import collect_and_export_nba_boxscores
+from fantasy_platforms_integration.sync_league.sync_yahoo_league import YahooLeague
 if __name__ == '__main__':
     URI_FANTAZY_ID_2024 = '41083'
     week = 21
-    sc = OAuth2(None, None, from_file='pythonProject2/oauth22.json')
-    yahoo_game = yfa.Game(sc, 'nba')
-    lg = yahoo_game.to_league('428.l.41083')
-    
+    yahoo_league = YahooLeague('428.l.41083')
+    yahoo_league.daily_roster("2023-10-24", "2023-10-29")
     ######### League Settings  #########
     # league_settings_json = json.dumps(lg.settings(), indent=2)
     # with open("league_settings.json", "w") as f:
