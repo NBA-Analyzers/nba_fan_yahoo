@@ -228,6 +228,7 @@ def test_yahoo_league():
     print('a')
 
 from multiprocessing.spawn import import_main_path
+import requests
 from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 import os
@@ -242,21 +243,24 @@ sys.path.insert(0, current_dir)
 import yahoo_fantasy_api as yfa
 from yahoo_oauth import OAuth2
 from nba_api.stats.static import players
-
+from sync_leagues.injuries   import get_latest_injury_news
 from nba_api.stats.endpoints import playercareerstats
 import json 
 from collections import defaultdict
-
+from nba_api.stats.endpoints import boxscoretraditionalv2
 # Your existing setup
-
-from sync_leagues.dailyRoster import print_players_for_day, print_players_entire_season, print_all_teams_custom_range, export_to_json_pivot,export_to_json_simple
-from sync_leagues.boxScore import collect_and_export_nba_boxscores
+from sync_leagues.boxScore import *
 from fantasy_platforms_integration.sync_league.sync_yahoo_league import YahooLeague
 if __name__ == '__main__':
     URI_FANTAZY_ID_2024 = '41083'
     week = 21
-    yahoo_league = YahooLeague('428.l.41083')
-    yahoo_league.daily_roster("2023-10-24", "2023-10-29")
+    injuries = get_latest_injury_news()
+    print(injuries)
+    print('FINISHED')
+    #yahoo_league = YahooLeague('428.l.41083')
+    #yahoo_league.daily_roster("2023-10-24", "2023-10-29")
+    #json_schdule = requests.get('https://cdn.nba.com/static/json/staticData/scheduleLeagueV2_1.json')
+    #print(json_schdule.json())
     ######### League Settings  #########
     # league_settings_json = json.dumps(lg.settings(), indent=2)
     # with open("league_settings.json", "w") as f:
