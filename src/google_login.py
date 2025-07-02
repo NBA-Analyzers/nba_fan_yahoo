@@ -11,7 +11,7 @@ GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configura
 oauth = OAuth(app)
 oauth.register(
     name='google',
-    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),    
     client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
     server_metadata_url=GOOGLE_DISCOVERY_URL,
     client_kwargs={
@@ -21,7 +21,7 @@ oauth.register(
 
 @app.route('/google/login')
 def google_login():
-    google = oauth.create_client('google')
+    google =oauth.create_client('google') 
     if google is None:
         print("ERROR: Google OAuth client is not available!")
         return "Google OAuth client not configured", 500

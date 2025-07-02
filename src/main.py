@@ -231,36 +231,103 @@ from multiprocessing.spawn import import_main_path
 import requests
 from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
-import os
-import sys
 
-# Add the current directory to Python path to ensure imports work
-current_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, current_dir)
+STAT_ID_TO_NAME = {
+    "5": "Field Goal Percentage (FG%)",
+    "8": "Free Throw Percentage (FT%)",
+    "10": "3-Point Field Goals Made (3PTM)",
+    "12": "Points",
+    "15": "Rebounds",
+    "16": "Assists",
+    "17": "Steals",
+    "18": "Blocks",
+    "19": "Turnovers",
+    "9004003": "Field Goals Made/Attempted (FGM/FGA)",
+    "9007006": "Free Throws Made/Attempted (FTM/FTA)"
+}  
+# Extract key fantasy matchup data
+def extract_matchup_info(parsed):
+    matchups = []
 
+    for key, matchup_wrap in parsed.items():
+        if key == "count":
+            continue
+        matchup = matchup_wrap.get("matchup", {})
+        week = matchup.get("week")
+        team_data = []
 
+        for team_index in ["0", "1"]:
+            team_info = matchup.get("0", {}).get("teams", {}).get(team_index, {}).get("team", [])
+            if not team_info:
+                continue
 
-import yahoo_fantasy_api as yfa
-from yahoo_oauth import OAuth2
-from nba_api.stats.static import players
-from sync_leagues.injuries   import get_latest_injury_news
-from nba_api.stats.endpoints import playercareerstats
-import json 
-from collections import defaultdict
-from nba_api.stats.endpoints import boxscoretraditionalv2
+            metadata = team_info[0]
+            stats = team_info[1].get("team_stats", {}).get("stats", [])
+            team_points = team_info[1].get("team_points", {}).get("total", None)
+
+            team = {
+                "week": week,
+                "team_name": next((d.get("name") for d in metadata if "name" in d), None),
+                "team_key": next((d.get("team_key") for d in metadata if "team_key" in d), None),
+                "score": team_points,
+                "stats": {STAT_ID_TO_NAME[s["stat"]["stat_id"]]: s["stat"]["value"] for s in stats}
+            }
+            team_data.append(team)
+        
+        team_0_score = team_data[0]['score']
+        team_1_score = team_data[1]['score']
+        if team_0_score > team_1_score:
+            team_win_name = team_data[0]['team_name']
+            team_win_score = team_data[0]['score']
+        elif team_1_score>team_0_score:
+            team_win_name = team_data[0]['team_name']
+            team_win_score = team_data[0]['score']
+        else: 
+            team_win_name = "Finshed In a Draw"
+            team_win_score = team_data[0]['score']
+            
+        stat_winners =0
+        if len(team_data) == 2:
+            matchups.append({
+                "week": week,
+                "team_1": team_data[0],
+                "team_2": team_data[1],
+                "team_win_name": team_win_name,
+                "team_win_score": team_win_score
+            })
+
+    return matchups   
+    
+if __name__ == '__main__':
+    URI_FANTAZY_ID_2024 = '41083'
+
+    # test_team()
+    
+    # test_league()
+    
+    # test_stuff_todo_organize() 
+    
+    # Initial Configurations
+    import yahoo_fantasy_api as yfa
+    from yahoo_oauth import OAuth2
+    from nba_api.stats.static import players
+    
+    from nba_api.stats.endpoints import playercareerstats
+    import json 
+    from collections import defaultdict
+
 # Your existing setup
-from sync_leagues.boxScore import *
-from fantasy_platforms_integration.sync_league.sync_yahoo_league import YahooLeague
+
+from pythonProject2.sync_leagues.dailyRoster import print_players_for_day, print_players_entire_season, print_all_teams_custom_range, export_to_csv_pivot, export_to_json_pivot,export_to_json_simple
+from pythonProject2.sync_leagues.boxScore import collect_and_export_nba_boxscores
+
 if __name__ == '__main__':
     URI_FANTAZY_ID_2024 = '41083'
     week = 21
-    injuries = get_latest_injury_news()
-    print(injuries)
-    print('FINISHED')
-    #yahoo_league = YahooLeague('428.l.41083')
-    #yahoo_league.daily_roster("2023-10-24", "2023-10-29")
-    #json_schdule = requests.get('https://cdn.nba.com/static/json/staticData/scheduleLeagueV2_1.json')
-    #print(json_schdule.json())
+    sc = OAuth2(None, None, from_file='pythonProject2/oauth22.json')
+    yahoo_game = yfa.Game(sc, 'nba')
+    lg = yahoo_game.to_league('428.l.41083')
+    
     ######### League Settings  #########
     # league_settings_json = json.dumps(lg.settings(), indent=2)
     # with open("league_settings.json", "w") as f:
@@ -437,3 +504,76 @@ if __name__ == '__main__':
     # # 10. Check if he knows that the team is going to play a bad team so the stat inflates. 
     
 
+
+
+
+
+# Yahoo Fantasy OAuth Multi-User Flow (Flask + Authlib)
+
+from flask import Flask, redirect, request, session, url_for
+from authlib.integrations.flask_client import OAuth
+import os
+import time
+
+app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecret")  # secure in prod
+
+# Configuration (replace with your Yahoo app info)
+YAHOO_CLIENT_ID = "dj0yJmk9Vmx3STVwNzVnNFVOJmQ9WVdrOU9UbDFabFU1V1dZbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTUw"
+YAHOO_CLIENT_SECRET = "c6ecb8500877349e193025923afce04baf6fd315"
+REDIRECT_URI = "localhost:5000/callback"
+
+# Authlib setup
+oauth = OAuth(app)
+yahoo = oauth.register(
+    name='yahoo',
+    client_id=YAHOO_CLIENT_ID,
+    client_secret=YAHOO_CLIENT_SECRET,
+    access_token_url='https://api.login.yahoo.com/oauth2/get_token',
+    authorize_url='https://api.login.yahoo.com/oauth2/request_auth',
+    api_base_url='https://fantasysports.yahooapis.com/',
+    client_kwargs={
+        'scope': 'fspt-w',
+    }
+)
+
+# In-memory token store (for demo)
+token_store = {}
+
+@app.route('/')
+def homepage():
+    return '<a href="/login">Login with Yahoo</a>'
+
+@app.route('/login')
+def login():
+    return yahoo.authorize_redirect(redirect_uri=REDIRECT_URI)
+
+@app.route('/callback')
+def callback():
+    token = yahoo.authorize_access_token()
+    user_guid = token['xoauth_yahoo_guid']
+    # Save token per user (in real use, save in DB)
+    token_store[user_guid] = {
+        'access_token': token['access_token'],
+        'refresh_token': token['refresh_token'],
+        'expires_at': time.time() + token['expires_in'],
+        'guid': user_guid
+    }
+    session['user'] = user_guid
+    return redirect('/leagues')
+
+@app.route('/leagues')
+def leagues():
+    user_guid = session.get('user')
+    if not user_guid or user_guid not in token_store:
+        return redirect('/')
+
+    token_data = token_store[user_guid]
+    resp = yahoo.get(
+        f"fantasy/v2/users;use_login=1/games;game_keys=nba/leagues",
+        token=token_data['access_token']
+    )
+    return resp.text
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5001)
