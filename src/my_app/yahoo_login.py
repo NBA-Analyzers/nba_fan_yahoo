@@ -18,10 +18,12 @@ app.config.update(
 )
 print("✓ Flask session configuration set")
 
+DEBUG = os.getenv("DEBUG", False)
+
 # Configuration (replace with your Yahoo app info)
 YAHOO_CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
 YAHOO_CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
-REDIRECT_URI = "https://e901-2a06-c701-4746-fb00-6014-7012-2470-529c.ngrok-free.app"  # Fixed: added protocol and correct port
+REDIRECT_URI = os.getenv("YAHOO_REDIRECT_URL")
 
 oauth = OAuth(app)
 yahoo = oauth.register(
@@ -83,10 +85,19 @@ def homepage():
 
 @app.route('/login')
 def login():
+    if DEBUG:
+        return redirect('/callback')
+
     return yahoo.authorize_redirect(redirect_uri=REDIRECT_URI + "/callback")
 
 @app.route('/callback')
 def callback():
+    if DEBUG:
+        sc = OAuth2(None, None, from_file='src/my_app/fantasy_platforms_integration/yahoo/authentication/oauth22.json')
+        yahoo_game = yfa.Game(sc, 'nba')
+        lg = yahoo_game.to_league('428.l.41083')
+        return f"League: {lg.team_key()}! <a href='/logout'>Logout</a>"
+
     token = yahoo.authorize_access_token()
     user_guid = token.get('xoauth_yahoo_guid')
 
