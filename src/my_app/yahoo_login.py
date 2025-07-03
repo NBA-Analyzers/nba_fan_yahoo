@@ -5,6 +5,10 @@ import time
 import xml.etree.ElementTree as ET
 from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
+from dotenv import load_dotenv
+
+
+load_dotenv(".env") # Loads from .env or .env.vault if DOTENV_KEY is set
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY", "supersecret")
@@ -15,13 +19,9 @@ app.config.update(
 print("✓ Flask session configuration set")
 
 # Configuration (replace with your Yahoo app info)
-YAHOO_CLIENT_ID = "dj0yJmk9Vmx3STVwNzVnNFVOJmQ9WVdrOU9UbDFabFU1V1dZbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTUw"
-YAHOO_CLIENT_SECRET = "c6ecb8500877349e193025923afce04baf6fd315"
-REDIRECT_URI = "https://ba5d-2a06-c701-4746-fb00-6014-7012-2470-529c.ngrok-free.app"  # Fixed: added protocol and correct port
-
-# YAHOO_CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
-# YAHOO_CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
-# REDIRECT_URI = os.getenv("REDIRECT_URI")
+YAHOO_CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
+YAHOO_CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
+REDIRECT_URI = "https://e901-2a06-c701-4746-fb00-6014-7012-2470-529c.ngrok-free.app"  # Fixed: added protocol and correct port
 
 oauth = OAuth(app)
 yahoo = oauth.register(

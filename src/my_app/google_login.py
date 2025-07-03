@@ -1,6 +1,10 @@
 from flask import Flask, redirect, url_for, session, request
 from authlib.integrations.flask_client import OAuth
 import os
+from dotenv import load_dotenv
+
+
+load_dotenv(".env") # Loads from .env or .env.vault if DOTENV_KEY is set
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecret")
