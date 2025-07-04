@@ -2,7 +2,7 @@
 
 ## 2 Options: 
 
-# 1. If you want to run and get an example League without Login with Yahoo:
+# 1. If you want to run and get an example League without Login with Yahoo, insert at .env file:
 ```bash
 export DEBUG=True
 ```
