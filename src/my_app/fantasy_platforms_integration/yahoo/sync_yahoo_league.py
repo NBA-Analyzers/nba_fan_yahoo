@@ -21,144 +21,22 @@ STAT_ID_TO_NAME = {
     "9007006": "Free Throws Made/Attempted (FTM/FTA)"
 }
 
-class YahooLeague:
+class YahooLeague(SyncLeagueData):
     
-    def __init__(self, league_id):
-      
-        sc = OAuth2(None, None, from_file='PythonProject2/oauth22.json')
-        yahoo_game = yfa.Game(sc, 'nba')
-        self.league_id= yahoo_game.to_league(league_id)
-       
-        
-    
-    def league_setting(self):
-        league_settings_json = json.dumps(self.league_id.settings(), indent=2)
+    def __init__(self, league: yfa.League):
+        self.league= league
+            
+    def _league_setting(self):
+        league_settings_json = json.dumps(self.league.settings(), indent=2)
         with open("league_settings.json", "w") as f:
             f.write(league_settings_json)
-        return self.league_id.settings()
-        
     
-    def standings(self):
-        standings = json.dumps(self.league_id.standings(),indent=2)
+    def _standings(self):
+        standings = json.dumps(self.league.standings(),indent=2)
         with open("standings.json", "w") as f:
             f.write(standings)
-        return self.league_id.standings()
     
-    def matchups(self,start_week,end_week):
-        matchup_data = []
-    
-        for week in range(start_week, end_week + 1):
-            matchups = self.league_id.matchups(week)
-            week_matchups = matchups['fantasy_content']['league'][1]['scoreboard']['0']
-            matchup = self._extract_matchup_info(week_matchups['matchups'])
-            matchup_data.append(matchup)
-
-        matchup_data_json = json.dumps(matchup_data, indent=2)
-        with open("league_matchups.json", "w") as f:
-            f.write(matchup_data_json)
-        return matchup_data
-
-    def free_agents(self, position='Util'):
-        free_agents = self.league_id.free_agents(position)
-        free_agents_json = json.dumps(free_agents, indent=2)
-        with open("free_agents.json", "w") as f:
-            f.write(free_agents_json)
-        return free_agents
-        
-    def daily_roster(self, start_date, end_date, delay_seconds=0.5):
-        """
-        Get active players for ALL teams in a custom date range
-        
-        Args:
-            start_date (str): Start date in 'YYYY-MM-DD' format
-            end_date (str): End date in 'YYYY-MM-DD' format
-            delay_seconds (float): Delay between API calls to avoid rate limiting
-        
-        Returns:
-            dict: All teams data in format:
-            {
-                team_key: {
-                    'team_name': str,
-                    'daily_data': {date_str: [(player_name, position), ...]}
-                }
-            }
-        """
-        try:
-            # Get all teams in the league
-            teams = self.league_id.teams()
-            
-            # Calculate dates
-            start_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
-            end_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
-            
-            # Store all data
-            all_teams_data = {}
-            
-            # Loop through each team
-            for team_key, team_info in teams.items():
-                team_name = team_info.get('name', 'Unknown Team')
-                
-                # Process each day for this team
-                current_date = start_dt
-                team_data = {}
-                
-                while current_date <= end_dt:
-                    # Use the existing get_players_for_day function
-                    active_players = self._get_players_for_day(self.league_id, team_key, current_date)
-                    team_data[current_date.strftime('%Y-%m-%d')] = active_players
-                    
-                    # Add delay to avoid getting rate-limited by the Yahoo API
-                    if delay_seconds > 0:
-                        time.sleep(delay_seconds)
-                    
-                    current_date += timedelta(days=1)
-                
-                # Store team data
-                all_teams_data[team_key] = {
-                    'team_name': team_name,
-                    'daily_data': team_data
-                }
-                print(f'finished team: {team_key}')
-            self._export_daily_roster_to_json(all_teams_data)
-            return all_teams_data
-            
-        except Exception as e:
-            return {}
-
-    def team_current_roster(self):
-        """Get all teams current roster and export to team_roster.json"""
-        try:
-            # Get all teams in the league
-            teams = self.league_id.teams()
-            
-            # Store all team rosters
-            all_teams_rosters = {}
-            
-            # Loop through each team
-            for team_key, team_info in teams.items():
-                team_name = team_info.get('name', 'Unknown Team')
-                
-                # Get current roster for this team
-                team = self.league_id.to_team(team_key)
-                roster = team.roster()
-                
-                # Store team roster
-                all_teams_rosters[team_name] = roster
-            
-            # Export to JSON
-            team_roster_json = json.dumps(all_teams_rosters, indent=2)
-            with open("team_roster.json", "w") as f:
-                f.write(team_roster_json)
-            
-            return all_teams_rosters
-            
-        except Exception as e:
-            print(f"Error getting team rosters: {e}")
-            return {}
-
-
-    @staticmethod
-    def _extract_matchup_info(parsed):
+    def _extract_matchup_info(self,parsed):
         matchups = []
 
         for key, matchup_wrap in parsed.items():
@@ -210,13 +88,88 @@ class YahooLeague:
 
         return matchups
         
+    def _matchups(self,start_week,end_week):
+        matchup_data = []
     
-    
-    
-    
-    
+        for week in range(start_week, end_week + 1):
+            matchups = self.league.matchups(week)
+            week_matchups = matchups['fantasy_content']['league'][1]['scoreboard']['0']
+            matchup = self._extract_matchup_info(week_matchups['matchups'])
+            matchup_data.append(matchup)
 
-    def _export_daily_roster_to_json(self, data, filename_prefix="daily_roster"):
+        matchup_data_json = json.dumps(matchup_data, indent=2)
+        with open("league_matchups.json", "w") as f:
+            f.write(matchup_data_json)
+    
+    def _free_agents(self, position: str = 'Util') -> Dict[str, Any]:
+        """Implementation of abstract method - Get available free agents"""
+        free_agents = self.league.free_agents(position)
+        free_agents_json = json.dumps(free_agents, indent=2)
+        with open("free_agents.json", "w") as f:
+            f.write(free_agents_json)
+        return free_agents
+        
+    def _daily_roster(self, start_date: str, end_date: str, delay_seconds: float = 0.5) -> Dict[str, Any]:
+        """
+        Implementation of abstract method - Get active players for ALL teams in a custom date range
+        
+        Args:
+            start_date (str): Start date in 'YYYY-MM-DD' format
+            end_date (str): End date in 'YYYY-MM-DD' format
+            delay_seconds (float): Delay between API calls to avoid rate limiting
+        
+        Returns:
+            dict: All teams data in format:
+            {
+                team_key: {
+                    'team_name': str,
+                    'daily_data': {date_str: [(player_name, position), ...]}
+                }
+            }
+        """
+        try:
+            # Get all teams in the league
+            teams = self.league.teams()
+            
+            # Calculate dates
+            start_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
+            
+            # Store all data
+            all_teams_data = {}
+            
+            # Loop through each team
+            for team_key, team_info in teams.items():
+                team_name = team_info.get('name', 'Unknown Team')
+                
+                # Process each day for this team
+                current_date = start_dt
+                team_data = {}
+                
+                while current_date <= end_dt:
+                    # Use the existing get_players_for_day function
+                    active_players = self._get_players_for_day(self.league, team_key, current_date)
+                    team_data[current_date.strftime('%Y-%m-%d')] = active_players
+                    
+                    # Add delay to avoid getting rate-limited by the Yahoo API
+                    if delay_seconds > 0:
+                        time.sleep(delay_seconds)
+                    
+                    current_date += timedelta(days=1)
+                
+                # Store team data
+                all_teams_data[team_key] = {
+                    'team_name': team_name,
+                    'daily_data': team_data
+                }
+                print(f'finished team: {team_key}')
+            self._export_to_json_simple(all_teams_data)
+            return all_teams_data
+            
+        except Exception as e:
+            return {}
+
+    def _export_to_json_simple(self, data, filename_prefix="daily_roster"):
         """
         Export fantasy data to simple JSON format:
         {
@@ -306,8 +259,7 @@ class YahooLeague:
         except Exception as e:
             return None
 
-    @staticmethod
-    def _get_players_for_day(league, team_key, date):
+    def _get_players_for_day(self, league, team_key, date):
         """
         Get players for a specific team on a specific day
         Only include players who are NOT on the bench
@@ -339,4 +291,94 @@ class YahooLeague:
         except Exception as e:
             return []
     
-    
+    def _team_current_roster(self) -> Dict[str, Any]:
+        """Implementation of abstract method - Get all teams current roster and export to team_roster.json"""
+        try:
+            # Get all teams in the league
+            teams = self.league.teams()
+            
+            # Store all team rosters
+            all_teams_rosters = {}
+            
+            # Loop through each team
+            for team_key, team_info in teams.items():
+                team_name = team_info.get('name', 'Unknown Team')
+                
+                # Get current roster for this team
+                team = self.league.to_team(team_key)
+                roster = team.roster()
+                
+                # Store team roster
+                all_teams_rosters[team_name] = roster
+            
+            # Export to JSON
+            team_roster_json = json.dumps(all_teams_rosters, indent=2)
+            with open("team_roster.json", "w") as f:
+                f.write(team_roster_json)
+            
+            return all_teams_rosters
+            
+        except Exception as e:
+            print(f"Error getting team rosters: {e}")
+            return {}
+
+    def sync_full_league(self, start_week: int = 1, end_week: int = 20, days_back: int = 7) -> Dict[str, str]:
+        """
+        Implementation of abstract method - Sync all league data and save to JSON files.
+        This function calls all the external functions that save JSON files.
+        
+        Args:
+            start_week (int): Starting week for matchups (default: 1)
+            end_week (int): Ending week for matchups (default: 20)
+            days_back (int): Number of days back for daily roster (default: 7)
+        
+        Returns:
+            dict: Results of each sync operation with success/error status
+        """
+        results = {}
+        
+        # 1. League settings
+        try:
+            self._league_setting()
+            results['league_settings'] = 'Successfully saved to league_settings.json'
+        except Exception as e:
+            results['league_settings'] = f'Error: {str(e)}'
+        
+        # 2. Standings
+        try:
+            self._standings()
+            results['standings'] = 'Successfully saved to standings.json'
+        except Exception as e:
+            results['standings'] = f'Error: {str(e)}'
+        
+        # 3. Matchups
+        try:
+            self._matchups(start_week, end_week)
+            results['matchups'] = f'Successfully saved to league_matchups.json (weeks {start_week}-{end_week})'
+        except Exception as e:
+            results['matchups'] = f'Error: {str(e)}'
+        
+        # 4. Free agents
+        try:
+            free_agents = self._free_agents()
+            results['free_agents'] = 'Successfully saved to free_agents.json'
+        except Exception as e:
+            results['free_agents'] = f'Error: {str(e)}'
+        
+        # 5. Team current roster
+        try:
+            team_rosters = self._team_current_roster()
+            results['team_roster'] = 'Successfully saved to team_roster.json'
+        except Exception as e:
+            results['team_roster'] = f'Error: {str(e)}'
+        
+        # 6. Daily roster
+        try:
+            end_date = '2024-03-03'  #datetime.now().strftime('%Y-%m-%d')
+            start_date =  '2024-03-03'  #(datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
+            daily_roster = self._daily_roster(start_date, end_date)
+            results['daily_roster'] = f'Successfully saved daily roster data for {start_date} to {end_date}'
+        except Exception as e:
+            results['daily_roster'] = f'Error: {str(e)}'
+        
+        return results

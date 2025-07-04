@@ -7,6 +7,8 @@ from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 from dotenv import load_dotenv
 
+from fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
+
 
 load_dotenv(".env") # Loads from .env or .env.vault if DOTENV_KEY is set
 
@@ -149,6 +151,10 @@ def select_league():
     league_id = request.form['league_id']
     yahoo_game = get_yahoo_sdk()
     league = yahoo_game.to_league(league_id)
+
+    yahoo_league = YahooLeague(league)
+    results = yahoo_league.sync_full_league()
+
     session['selected_league'] = league_id
     team_details = league.to_team(league.team_key()).details()
     league_name = league.settings()['name']
