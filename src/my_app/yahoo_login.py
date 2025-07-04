@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request, session, url_for, jsonify
+from flask import Flask, redirect, request, session, url_for, jsonify, render_template_string
 from authlib.integrations.flask_client import OAuth
 import os
 import time
@@ -18,7 +18,7 @@ app.config.update(
 )
 print("✓ Flask session configuration set")
 
-DEBUG = os.getenv("DEBUG", False)
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 # Configuration (replace with your Yahoo app info)
 YAHOO_CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
@@ -39,6 +39,7 @@ yahoo = oauth.register(
 )
 
 token_store = {}
+yahoo_game = None
 
 class CustomYahooSession:
     def __init__(self, token_data):
@@ -119,26 +120,50 @@ def callback():
 
     session['user'] = user_guid
 
-
-# ✅ Usage:
-    # sc = ManualOAuth2(token_store[user_guid], YAHOO_CLIENT_ID, YAHOO_CLIENT_SECRET)
     sc = CustomYahooSession(token_store[user_guid])
-
-    # sc.consumer_key = YAHOO_CLIENT_ID
-    # sc.consumer_secret = YAHOO_CLIENT_SECRET
-    # sc.token = {
-    #     'access_token': token['access_token'],
-    #     'refresh_token': token['refresh_token'],
-    #     'token_type': 'bearer',
-    #     'expires_in': 3600
-    # }
-
     yahoo_game = yfa.Game(sc, 'nba')
-    league_id = yahoo_game.league_ids()[0]
+
+    yahoo_game = get_yahoo_sdk()
+    
+    league_ids = yahoo_game.league_ids()
+    league_options = []
+    for league_id in league_ids:
+        league = yahoo_game.to_league(league_id)
+        league_name = league.settings()['name']
+        league_options.append({'id': league_id, 'name': league_name})
+
+    # Render a simple HTML form for league selection
+    html = '''
+    <h2>Select Your League</h2>
+    <form action="/select_league" method="post">
+        {% for league in leagues %}
+            <input type="radio" name="league_id" value="{{ league.id }}" required> {{ league.name }}<br>
+        {% endfor %}
+        <button type="submit">Continue</button>
+    </form>
+    '''
+    return render_template_string(html, leagues=league_options)
+
+@app.route('/select_league', methods=['POST'])
+def select_league():
+    league_id = request.form['league_id']
+    yahoo_game = get_yahoo_sdk()
     league = yahoo_game.to_league(league_id)
-    print(f"League object: {league}")
-    # Example league ID
-    return f"League: {league.team_key()}! <a href='/logout'>Logout</a>"
+    session['selected_league'] = league_id
+    team_details = league.to_team(league.team_key()).details()
+    league_name = league.settings()['name']
+    return f"You selected: {league_name} and team: {team_details['name']}"  # Display the selected league name
+
+def get_yahoo_sdk() -> yfa.Game:
+    """
+    Returns an authenticated yahoo_fantasy_api.Game object for the current user session.
+    Returns None if the user is not authenticated or token is missing.
+    """
+    user_guid = session.get('user')
+    if not user_guid or user_guid not in token_store:
+        return None
+    sc = CustomYahooSession(token_store[user_guid])
+    return yfa.Game(sc, 'nba')
 
 if __name__ == '__main__':
     print("=== Starting Flask development server ===")

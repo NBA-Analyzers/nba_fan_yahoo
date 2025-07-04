@@ -1,4 +1,13 @@
-### How To Run Locally
+### How To Run Locally 
+
+## 2 Options: 
+
+# 1. If you want to run and get an example League without Login with Yahoo:
+```bash
+export DEBUG=True
+```
+
+# 2. If you want to Login with Yahoo follow this steps:
 
 1. Install Ngrok  
    Download and install ngrok from: https://ngrok.com/download
