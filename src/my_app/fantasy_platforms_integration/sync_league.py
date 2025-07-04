@@ -1,30 +1,42 @@
-from typing import Protocol
+from abc import ABC, abstractmethod
+from typing import Dict, Any, List, Tuple
 
-class SyncLeagueData(Protocol):
-    """Interface that all platform syncs must implement"""
+class SyncLeagueData(ABC):
+    """Abstract base class that all platform syncs must implement"""
     
-    def league_setting(self):
+    @abstractmethod
+    def _league_setting(self) -> None:
         """Get league settings and configuration"""
-        ...
+        pass
 
-    def standings(self):
+    @abstractmethod
+    def _standings(self) -> None:
         """Get current league standings"""
-        ...
+        pass
     
-    def matchups(self,start_week,end_week):
+    @abstractmethod
+    def _matchups(self, start_week: int, end_week: int) -> None:
         """Get matchup data for all weeks"""
-        ...
+        pass
     
-    def free_agents(self):
+    @abstractmethod
+    def _free_agents(self, position: str = 'Util') -> Dict[str, Any]:
         """Get available free agents"""
-        ...
+        pass
     
-    def daily_roster(self):
+    @abstractmethod
+    def _daily_roster(self, start_date: str, end_date: str, delay_seconds: float = 0.5) -> Dict[str, Any]:
         """Get daily roster setup"""
-        ...
+        pass
 
-    def team_current_roster(self):
-        "Get all teams current roster"
-        ...
+    @abstractmethod
+    def _team_current_roster(self) -> Dict[str, Any]:
+        """Get all teams current roster"""
+        pass
+    
+    @abstractmethod
+    def sync_full_league(self, start_week: int = 1, end_week: int = 20, days_back: int = 7) -> Dict[str, str]:
+        """Sync all league data and save to JSON files"""
+        pass
     
     
