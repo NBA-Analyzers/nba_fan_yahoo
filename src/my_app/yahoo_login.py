@@ -7,6 +7,7 @@ from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 from dotenv import load_dotenv
 
+from azure.azure_blob_storage import AzureBlobStorage
 from fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
 
 
@@ -143,11 +144,11 @@ def callback():
 @app.route('/select_league', methods=['POST'])
 def select_league():
     if DEBUG:
-        sc = OAuth2(None, None, from_file='src/my_app/fantasy_platforms_integration/yahoo/authentication/oauth22.json')
+        sc = OAuth2(None, None, from_file='src/my_app/fantasy_platforms_integration/yahoo/oauth22.json')
         yahoo_game = yfa.Game(sc, 'nba')
         league = yahoo_game.to_league('428.l.41083')
         yahoo_league = YahooLeague(league)
-        results = yahoo_league.sync_full_league()
+        results = yahoo_league.sync_full_league(azure_blob_storage=AzureBlobStorage(container_name="fantasy1"))
         return f"You synced: {results}" 
 
 
@@ -162,7 +163,7 @@ def select_league():
 
 @app.route('/debug_league')
 def debug_league():
-    sc = OAuth2(None, None, from_file='src/my_app/fantasy_platforms_integration/yahoo/authentication/oauth22.json')
+    sc = OAuth2(None, None, from_file='src/my_app/fantasy_platforms_integration/yahoo/oauth22.json')
     yahoo_game = yfa.Game(sc, 'nba')
     league = yahoo_game.to_league('428.l.41083')
     yahoo_league = YahooLeague(league)

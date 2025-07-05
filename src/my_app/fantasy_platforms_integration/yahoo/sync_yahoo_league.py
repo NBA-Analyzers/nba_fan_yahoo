@@ -1,11 +1,15 @@
-from datetime import datetime,timedelta
-from typing import Dict, Any
-from ..sync_league import SyncLeagueData
 import json
 import time
-import json
+from datetime import datetime, timedelta
+from typing import Dict, Any, Optional
+
 import yahoo_fantasy_api as yfa
 from yahoo_oauth import OAuth2
+
+import os
+
+from azure.azure_blob_storage import AzureBlobStorage
+from ..sync_league import SyncLeagueData
 
 STAT_ID_TO_NAME = {
     "5": "Field Goal Percentage (FG%)",
@@ -27,14 +31,16 @@ class YahooLeague(SyncLeagueData):
         self.league= league
             
     def _league_setting(self):
-        league_settings_json = json.dumps(self.league.settings(), indent=2)
-        with open("league_settings.json", "w") as f:
-            f.write(league_settings_json)
+        return self.league.settings()
+        # league_settings_json = json.dumps(self.league.settings(), indent=2)
+        # with open("league_settings.json", "w") as f:
+        #     f.write(league_settings_json)
     
     def _standings(self):
-        standings = json.dumps(self.league.standings(),indent=2)
-        with open("standings.json", "w") as f:
-            f.write(standings)
+        return self.league.standings()
+        # standings = json.dumps(self.league.standings(),indent=2)
+        # with open("standings.json", "w") as f:
+        #     f.write(standings)
     
     def _extract_matchup_info(self,parsed):
         matchups = []
@@ -97,17 +103,19 @@ class YahooLeague(SyncLeagueData):
             matchup = self._extract_matchup_info(week_matchups['matchups'])
             matchup_data.append(matchup)
 
-        matchup_data_json = json.dumps(matchup_data, indent=2)
-        with open("league_matchups.json", "w") as f:
-            f.write(matchup_data_json)
+        return matchup_data
+        # matchup_data_json = json.dumps(matchup_data, indent=2)
+        # with open("league_matchups.json", "w") as f:
+        #     f.write(matchup_data_json)
     
     def _free_agents(self, position: str = 'Util') -> Dict[str, Any]:
         """Implementation of abstract method - Get available free agents"""
-        free_agents = self.league.free_agents(position)
-        free_agents_json = json.dumps(free_agents, indent=2)
-        with open("free_agents.json", "w") as f:
-            f.write(free_agents_json)
-        return free_agents
+        return self.league.free_agents(position)
+    
+        # free_agents_json = json.dumps(free_agents, indent=2)
+        # with open("free_agents.json", "w") as f:
+        #     f.write(free_agents_json)
+        # return free_agents
         
     def _daily_roster(self, start_date: str, end_date: str, delay_seconds: float = 0.5) -> Dict[str, Any]:
         """
@@ -163,13 +171,12 @@ class YahooLeague(SyncLeagueData):
                     'daily_data': team_data
                 }
                 print(f'finished team: {team_key}')
-            self._export_to_json_simple(all_teams_data)
-            return all_teams_data
+            return self._export_daily_to_json_simple(all_teams_data)
             
         except Exception as e:
             return {}
 
-    def _export_to_json_simple(self, data, filename_prefix="daily_roster"):
+    def _export_daily_to_json_simple(self, data, filename_prefix="daily_roster"):
         """
         Export fantasy data to simple JSON format:
         {
@@ -250,11 +257,12 @@ class YahooLeague(SyncLeagueData):
                     
                     json_data[date_str][team_name] = players_list
 
-            # Write JSON file
-            with open(filename, 'w', encoding='utf-8') as jsonfile:
-                json.dump(json_data, jsonfile, indent=2, ensure_ascii=False)
             
-            return filename
+            # Write JSON file
+            # with open(filename, 'w', encoding='utf-8') as jsonfile:
+            #     json.dump(json_data, jsonfile, indent=2, ensure_ascii=False)
+            
+            return json_data
             
         except Exception as e:
             return None
@@ -312,9 +320,9 @@ class YahooLeague(SyncLeagueData):
                 all_teams_rosters[team_name] = roster
             
             # Export to JSON
-            team_roster_json = json.dumps(all_teams_rosters, indent=2)
-            with open("team_roster.json", "w") as f:
-                f.write(team_roster_json)
+            # team_roster_json = json.dumps(all_teams_rosters, indent=2)
+            # with open("team_roster.json", "w") as f:
+            #     f.write(team_roster_json)
             
             return all_teams_rosters
             
@@ -322,7 +330,7 @@ class YahooLeague(SyncLeagueData):
             print(f"Error getting team rosters: {e}")
             return {}
 
-    def sync_full_league(self, start_week: int = 1, end_week: int = 20, days_back: int = 7) -> Dict[str, str]:
+    def sync_full_league(self, start_week: int = 1, end_week: int = 20, days_back: int = 7, azure_blob_storage: AzureBlobStorage = AzureBlobStorage(container_name="fantasy1")) -> Dict[str, str]:
         """
         Implementation of abstract method - Sync all league data and save to JSON files.
         This function calls all the external functions that save JSON files.
@@ -336,24 +344,26 @@ class YahooLeague(SyncLeagueData):
             dict: Results of each sync operation with success/error status
         """
         results = {}
-        
         # 1. League settings
         try:
-            self._league_setting()
+            league_settings = self._league_setting()
+            azure_blob_storage.upload_json_data(league_settings, "league_settings.json", overwrite=True)
             results['league_settings'] = 'Successfully saved to league_settings.json'
         except Exception as e:
             results['league_settings'] = f'Error: {str(e)}'
         
         # 2. Standings
         try:
-            self._standings()
+            standings = self._standings()
+            azure_blob_storage.upload_json_data(standings, "standings.json", overwrite=True)
             results['standings'] = 'Successfully saved to standings.json'
         except Exception as e:
             results['standings'] = f'Error: {str(e)}'
         
         # 3. Matchups
         try:
-            self._matchups(start_week, end_week)
+            matchups = self._matchups(start_week, end_week)
+            azure_blob_storage.upload_json_data(matchups, "matchups.json", overwrite=True)
             results['matchups'] = f'Successfully saved to league_matchups.json (weeks {start_week}-{end_week})'
         except Exception as e:
             results['matchups'] = f'Error: {str(e)}'
@@ -361,6 +371,7 @@ class YahooLeague(SyncLeagueData):
         # 4. Free agents
         try:
             free_agents = self._free_agents()
+            azure_blob_storage.upload_json_data(free_agents, "free_agents.json", overwrite=True)
             results['free_agents'] = 'Successfully saved to free_agents.json'
         except Exception as e:
             results['free_agents'] = f'Error: {str(e)}'
@@ -368,6 +379,7 @@ class YahooLeague(SyncLeagueData):
         # 5. Team current roster
         try:
             team_rosters = self._team_current_roster()
+            azure_blob_storage.upload_json_data(team_rosters, "team_roster.json", overwrite=True)
             results['team_roster'] = 'Successfully saved to team_roster.json'
         except Exception as e:
             results['team_roster'] = f'Error: {str(e)}'
@@ -377,6 +389,7 @@ class YahooLeague(SyncLeagueData):
             end_date = '2024-03-03'  #datetime.now().strftime('%Y-%m-%d')
             start_date =  '2024-03-03'  #(datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
             daily_roster = self._daily_roster(start_date, end_date)
+            azure_blob_storage.upload_json_data(daily_roster, "daily_roster.json", overwrite=True)
             results['daily_roster'] = f'Successfully saved daily roster data for {start_date} to {end_date}'
         except Exception as e:
             results['daily_roster'] = f'Error: {str(e)}'

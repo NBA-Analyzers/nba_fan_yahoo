@@ -2,7 +2,7 @@ from yahoo_fantasy_api.league import yfa
 from yahoo_oauth import OAuth2
 
 
-sc = OAuth2(None, None, from_file='src\\my_app\\fantasy_platforms_integration\\yahoo\\authentication\\oauth22.json')
+sc = OAuth2(None, None, from_file='src\\my_app\\fantasy_platforms_integration\\yahoo\\oauth22.json')
 yahoo_game = yfa.Game(sc, 'nba')
 lg = yahoo_game.to_league('428.l.41083')
 all_players = lg.taken_players()
