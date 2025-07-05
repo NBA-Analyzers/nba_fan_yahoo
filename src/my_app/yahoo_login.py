@@ -7,6 +7,9 @@ from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 from dotenv import load_dotenv
 
+from azure.azure_blob_storage import AzureBlobStorage
+from fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
+
 
 load_dotenv(".env") # Loads from .env or .env.vault if DOTENV_KEY is set
 
@@ -87,18 +90,12 @@ def homepage():
 @app.route('/login')
 def login():
     if DEBUG:
-        return redirect('/callback')
+        return redirect('/debug_league')
 
     return yahoo.authorize_redirect(redirect_uri=REDIRECT_URI + "/callback")
 
 @app.route('/callback')
 def callback():
-    if DEBUG:
-        sc = OAuth2(None, None, from_file='src/my_app/fantasy_platforms_integration/yahoo/authentication/oauth22.json')
-        yahoo_game = yfa.Game(sc, 'nba')
-        lg = yahoo_game.to_league('428.l.41083')
-        return f"League: {lg.team_key()}! <a href='/logout'>Logout</a>"
-
     token = yahoo.authorize_access_token()
     user_guid = token.get('xoauth_yahoo_guid')
 
@@ -146,13 +143,32 @@ def callback():
 
 @app.route('/select_league', methods=['POST'])
 def select_league():
+    if DEBUG:
+        sc = OAuth2(None, None, from_file='src/my_app/fantasy_platforms_integration/yahoo/oauth22.json')
+        yahoo_game = yfa.Game(sc, 'nba')
+        league = yahoo_game.to_league('428.l.41083')
+        yahoo_league = YahooLeague(league)
+        results = yahoo_league.sync_full_league(azure_blob_storage=AzureBlobStorage(container_name="fantasy1"))
+        return f"You synced: {results}" 
+
+
     league_id = request.form['league_id']
     yahoo_game = get_yahoo_sdk()
     league = yahoo_game.to_league(league_id)
-    session['selected_league'] = league_id
-    team_details = league.to_team(league.team_key()).details()
-    league_name = league.settings()['name']
-    return f"You selected: {league_name} and team: {team_details['name']}"  # Display the selected league name
+
+    yahoo_league = YahooLeague(league)
+    results = yahoo_league.sync_full_league()
+
+    return f"You synced: {results}"  # Display the selected league name
+
+@app.route('/debug_league')
+def debug_league():
+    sc = OAuth2(None, None, from_file='src/my_app/fantasy_platforms_integration/yahoo/oauth22.json')
+    yahoo_game = yfa.Game(sc, 'nba')
+    league = yahoo_game.to_league('428.l.41083')
+    yahoo_league = YahooLeague(league)
+    results = yahoo_league.sync_full_league()
+    return f"You synced: {results}"  # Display the selected league name
 
 def get_yahoo_sdk() -> yfa.Game:
     """
