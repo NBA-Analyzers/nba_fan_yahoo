@@ -344,10 +344,11 @@ class YahooLeague(SyncLeagueData):
             dict: Results of each sync operation with success/error status
         """
         results = {}
+        directory_name = self.league.league_id
         # 1. League settings
         try:
             league_settings = self._league_setting()
-            azure_blob_storage.upload_json_data(league_settings, "league_settings.json", overwrite=True)
+            azure_blob_storage.upload_json_data(league_settings, directory_name+"/league_settings.json", overwrite=True)
             results['league_settings'] = 'Successfully saved to league_settings.json'
         except Exception as e:
             results['league_settings'] = f'Error: {str(e)}'
@@ -355,7 +356,7 @@ class YahooLeague(SyncLeagueData):
         # 2. Standings
         try:
             standings = self._standings()
-            azure_blob_storage.upload_json_data(standings, "standings.json", overwrite=True)
+            azure_blob_storage.upload_json_data(standings, directory_name+"/standings.json", overwrite=True)
             results['standings'] = 'Successfully saved to standings.json'
         except Exception as e:
             results['standings'] = f'Error: {str(e)}'
@@ -363,7 +364,7 @@ class YahooLeague(SyncLeagueData):
         # 3. Matchups
         try:
             matchups = self._matchups(start_week, end_week)
-            azure_blob_storage.upload_json_data(matchups, "matchups.json", overwrite=True)
+            azure_blob_storage.upload_json_data(matchups, directory_name+"/matchups.json", overwrite=True)
             results['matchups'] = f'Successfully saved to league_matchups.json (weeks {start_week}-{end_week})'
         except Exception as e:
             results['matchups'] = f'Error: {str(e)}'
@@ -371,7 +372,7 @@ class YahooLeague(SyncLeagueData):
         # 4. Free agents
         try:
             free_agents = self._free_agents()
-            azure_blob_storage.upload_json_data(free_agents, "free_agents.json", overwrite=True)
+            azure_blob_storage.upload_json_data(free_agents, directory_name+"/free_agents.json", overwrite=True)
             results['free_agents'] = 'Successfully saved to free_agents.json'
         except Exception as e:
             results['free_agents'] = f'Error: {str(e)}'
@@ -379,7 +380,7 @@ class YahooLeague(SyncLeagueData):
         # 5. Team current roster
         try:
             team_rosters = self._team_current_roster()
-            azure_blob_storage.upload_json_data(team_rosters, "team_roster.json", overwrite=True)
+            azure_blob_storage.upload_json_data(team_rosters, directory_name+"/team_roster.json", overwrite=True)
             results['team_roster'] = 'Successfully saved to team_roster.json'
         except Exception as e:
             results['team_roster'] = f'Error: {str(e)}'
@@ -389,7 +390,7 @@ class YahooLeague(SyncLeagueData):
             end_date = '2024-03-03'  #datetime.now().strftime('%Y-%m-%d')
             start_date =  '2024-03-03'  #(datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
             daily_roster = self._daily_roster(start_date, end_date)
-            azure_blob_storage.upload_json_data(daily_roster, "daily_roster.json", overwrite=True)
+            azure_blob_storage.upload_json_data(daily_roster, directory_name+"/daily_roster.json", overwrite=True)
             results['daily_roster'] = f'Successfully saved daily roster data for {start_date} to {end_date}'
         except Exception as e:
             results['daily_roster'] = f'Error: {str(e)}'
