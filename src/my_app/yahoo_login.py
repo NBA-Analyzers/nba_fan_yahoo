@@ -7,7 +7,7 @@ from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 from dotenv import load_dotenv
 
-from azure.azure_blob_storage import AzureBlobStorage
+from my_app.azure.azure_blob_storage import AzureBlobStorage
 from fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
 
 
