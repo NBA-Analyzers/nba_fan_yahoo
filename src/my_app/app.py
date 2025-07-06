@@ -12,7 +12,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from my_app.azure.azure_blob_storage import AzureBlobStorage
-from fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
+from my_app.fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
 
 load_dotenv(".env") # Loads from .env or .env.vault if DOTENV_KEY is set
 
