@@ -71,4 +71,21 @@ jobs:
         with:
           app-name: 'fantasy'
           slot-name: 'Production'
+
+      - name: Set Azure App Service application settings
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'fantasy'
+          app-settings-json: |
+            {
+              "YAHOO_CLIENT_ID": "${{ secrets.YAHOO_CLIENT_ID }}",
+              "YAHOO_CLIENT_SECRET": "${{ secrets.YAHOO_CLIENT_SECRET }}",
+              "YAHOO_REDIRECT_URL": "${{ secrets.YAHOO_REDIRECT_URL }}"
+            }
+              "FLASK_SECRET_KEY": "${{ secrets.FLASK_SECRET_KEY }}",
+              "AZURE_STORAGE_CONNECTION_STRING": "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}",
+              "GOOGLE_CLIENT_ID": "${{ secrets.GOOGLE_CLIENT_ID }}",
+              "GOOGLE_CLIENT_SECRET": "${{ secrets.GOOGLE_CLIENT_SECRET }}",
+              "DEBUG": "${{ secrets.DEBUG }}"
+            } 
           
