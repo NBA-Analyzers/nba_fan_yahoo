@@ -139,7 +139,7 @@ def yahoo_login():
     """Yahoo OAuth login"""
     if DEBUG:
         return redirect('/yahoo/debug_league')
-    return yahoo.authorize_redirect(redirect_uri=REDIRECT_URI + "/callback")
+    return yahoo.authorize_redirect(redirect_uri=REDIRECT_URI + "/yahoo/callback")
 
 @app.route('/yahoo/callback')
 def yahoo_callback():
