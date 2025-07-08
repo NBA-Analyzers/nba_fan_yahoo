@@ -80,8 +80,7 @@ jobs:
             {
               "YAHOO_CLIENT_ID": "${{ secrets.YAHOO_CLIENT_ID }}",
               "YAHOO_CLIENT_SECRET": "${{ secrets.YAHOO_CLIENT_SECRET }}",
-              "YAHOO_REDIRECT_URL": "${{ secrets.YAHOO_REDIRECT_URL }}"
-            }
+              "YAHOO_REDIRECT_URL": "${{ secrets.YAHOO_REDIRECT_URL }}",
               "FLASK_SECRET_KEY": "${{ secrets.FLASK_SECRET_KEY }}",
               "AZURE_STORAGE_CONNECTION_STRING": "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}",
               "GOOGLE_CLIENT_ID": "${{ secrets.GOOGLE_CLIENT_ID }}",
