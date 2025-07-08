@@ -83,6 +83,6 @@ jobs:
               "YAHOO_REDIRECT_URL": "${{ secrets.YAHOO_REDIRECT_URL }}",
               "AZURE_STORAGE_CONNECTION_STRING": "${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}",
               "GOOGLE_CLIENT_ID": "${{ secrets.GOOGLE_CLIENT_ID }}",
-              "GOOGLE_CLIENT_SECRET": "${{ secrets.GOOGLE_CLIENT_SECRET }}",
+              "GOOGLE_CLIENT_SECRET": "${{ secrets.GOOGLE_CLIENT_SECRET }}"
             } 
           
