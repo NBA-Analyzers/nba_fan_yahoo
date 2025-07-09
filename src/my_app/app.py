@@ -30,7 +30,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 # Configuration (replace with your Yahoo app info)
 YAHOO_CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
 YAHOO_CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
-REDIRECT_URI = os.getenv("YAHOO_REDIRECT_URL")
+YAHOO_REDIRECT_URI = os.getenv("YAHOO_REDIRECT_URL")
 
 # Google OAuth Config
 GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
@@ -139,7 +139,7 @@ def yahoo_login():
     """Yahoo OAuth login"""
     if DEBUG:
         return redirect('/yahoo/debug_league')
-    return yahoo.authorize_redirect(redirect_uri=REDIRECT_URI + "/yahoo/callback")
+    return yahoo.authorize_redirect(redirect_uri=YAHOO_REDIRECT_URI + "/yahoo/callback")
 
 @app.route('/yahoo/callback')
 def yahoo_callback():

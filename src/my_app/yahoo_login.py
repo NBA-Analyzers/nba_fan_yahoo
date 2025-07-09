@@ -26,7 +26,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 # Configuration (replace with your Yahoo app info)
 YAHOO_CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
 YAHOO_CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
-REDIRECT_URI = os.getenv("YAHOO_REDIRECT_URL")
+YAHOO_REDIRECT_URI = os.getenv("YAHOO_REDIRECT_URL")
 
 oauth = OAuth(app)
 yahoo = oauth.register(
@@ -92,7 +92,7 @@ def login():
     if DEBUG:
         return redirect('/debug_league')
 
-    return yahoo.authorize_redirect(redirect_uri=REDIRECT_URI + "/callback")
+    return yahoo.authorize_redirect(redirect_uri=YAHOO_REDIRECT_URI + "/yahoo/callback")
 
 @app.route('/callback')
 def callback():
