@@ -7,6 +7,8 @@ from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 from dotenv import load_dotenv
 import sys
+from datetime import datetime
+from my_app.supaBase.queries.yahoo_auth_queries import YahooAuthManager
 
 # Add the src directory to Python path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -162,7 +164,14 @@ def yahoo_callback():
         'expires_at': time.time() + token['expires_in'],
         'guid': user_guid
     }
-
+    # insert into database yahoo auth
+    database_data = {
+        'yahoo_user_id': user_guid,
+        'access_token': token['access_token'],
+        'refresh_token': token['refresh_token'],
+        'created_at': datetime.now().isoformat()
+    }
+    database_response = YahooAuthManager().insert_single_row(database_data)
     session['user'] = user_guid
 
     sc = CustomYahooSession(token_store[user_guid])
