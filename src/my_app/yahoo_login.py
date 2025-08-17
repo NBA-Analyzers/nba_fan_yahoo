@@ -8,10 +8,17 @@ import yahoo_fantasy_api as yfa
 from dotenv import load_dotenv
 
 from my_app.azure.azure_blob_storage import AzureBlobStorage
-from fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
+from my_app.fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
 
 
-load_dotenv(".env") # Loads from .env or .env.vault if DOTENV_KEY is set
+# Get the directory where this script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Go up to the project root (nba_fan_yahoo directory)
+project_root = os.path.join(script_dir, "..", "..")
+# Load .env from the project root
+env_path = os.path.join(project_root, ".env")
+load_dotenv(env_path)
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv("FLASK_SECRET_KEY", "supersecret")
@@ -26,7 +33,7 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 # Configuration (replace with your Yahoo app info)
 YAHOO_CLIENT_ID = os.getenv("YAHOO_CLIENT_ID")
 YAHOO_CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET")
-YAHOO_REDIRECT_URI = os.getenv("YAHOO_REDIRECT_URL")
+YAHOO_REDIRECT_URL = os.getenv("YAHOO_REDIRECT_URL")
 
 oauth = OAuth(app)
 yahoo = oauth.register(
@@ -89,11 +96,26 @@ def homepage():
 
 @app.route('/login')
 def login():
-    if DEBUG:
-        return redirect('/debug_league')
-
-    return yahoo.authorize_redirect(redirect_uri=YAHOO_REDIRECT_URI + "/yahoo/callback")
-
+    
+    """Start Yahoo OAuth with debugging"""
+    redirect_uri = YAHOO_REDIRECT_URL + "/yahoo/callback"
+    
+    print("=== YAHOO LOGIN DEBUG ===")
+    print(f"Generated redirect URI: {redirect_uri}")
+    print(f"Client ID: {YAHOO_CLIENT_ID}")
+    print(f"Using scope: openid")
+    
+    try:
+        # Try to get the authorization URL
+        return yahoo.authorize_redirect(redirect_uri)
+    except Exception as e:
+        print(f"Error in authorize_redirect: {e}")
+        return f'''
+        <h2>OAuth Error</h2>
+        <p>Error: {str(e)}</p>
+        <p>Check console for details.</p>
+        <a href="/debug-oauth">View Debug Info</a>
+        '''
 @app.route('/callback')
 def callback():
     token = yahoo.authorize_access_token()
@@ -183,6 +205,6 @@ def get_yahoo_sdk() -> yfa.Game:
 
 if __name__ == '__main__':
     print("=== Starting Flask development server ===")
-    print("✓ App will run on http://localhost:5001")
+    print("✓ App will run on https://localhost:5001")
     print("✓ Debug mode: ON")
-    app.run(debug=True, host='0.0.0.0',  use_reloader=False, port=5001)
+    app.run(debug=True, host='0.0.0.0',  port=5001,ssl_context='adhoc')

@@ -330,12 +330,13 @@ class YahooLeague(SyncLeagueData):
             print(f"Error getting team rosters: {e}")
             return {}
 
-    def sync_full_league(self, start_week: int = 1, end_week: int = 20, days_back: int = 7, azure_blob_storage: AzureBlobStorage = AzureBlobStorage(container_name="fantasy1")) -> Dict[str, str]:
+    def sync_full_league(self, azure_blob_storage: AzureBlobStorage, start_week: int = 1, end_week: int = 20, days_back: int = 7) -> Dict[str, str]:
         """
         Implementation of abstract method - Sync all league data and save to JSON files.
         This function calls all the external functions that save JSON files.
         
         Args:
+            azure_blob_storage (AzureBlobStorage): Azure Blob Storage instance for saving data
             start_week (int): Starting week for matchups (default: 1)
             end_week (int): Ending week for matchups (default: 20)
             days_back (int): Number of days back for daily roster (default: 7)
