@@ -166,7 +166,7 @@ def yahoo_callback():
         'expires_at': time.time() + token['expires_in'],
         'guid': user_guid
     }
-    insert into database yahoo auth
+    #insert into database yahoo auth
     database_data = {
         'yahoo_user_id': user_guid,
         'access_token': token['access_token'],
