@@ -4,7 +4,8 @@ import os
 from dotenv import load_dotenv
 
 
-load_dotenv(".env") # Loads from .env or .env.vault if DOTENV_KEY is set
+env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
+load_dotenv(env_path) # Loads from .env or .env.vault if DOTENV_KEY is set
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecret")
@@ -56,4 +57,4 @@ def homepage():
     '''
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', use_reloader=False, port=5002) 
+    app.run(debug=True, host='localhost', use_reloader=False, port=5001)
