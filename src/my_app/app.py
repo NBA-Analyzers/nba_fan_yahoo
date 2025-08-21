@@ -167,13 +167,13 @@ def yahoo_callback():
         'guid': user_guid
     }
     # insert into database yahoo auth
-    database_data = {
-        'yahoo_user_id': user_guid,
-        'access_token': token['access_token'],
-        'refresh_token': token['refresh_token'],
-        'created_at': datetime.now().isoformat()
-    }
-    database_response = YahooAuthManager().insert_single_row(database_data)
+    # database_data = {
+    #     'yahoo_user_id': user_guid,
+    #     'access_token': token['access_token'],
+    #     'refresh_token': token['refresh_token'],
+    #     'created_at': datetime.now().isoformat()
+    # }
+    # database_response = YahooAuthManager().insert_single_row(database_data)
     session['user'] = user_guid
 
     sc = CustomYahooSession(token_store[user_guid])
