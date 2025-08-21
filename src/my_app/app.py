@@ -293,4 +293,5 @@ if __name__ == '__main__':
     print("=== Starting Consolidated Flask App ===")
     print("✓ App will run on http://localhost:5001")
     print("✓ Debug mode:", DEBUG)
+    print("AMEN")
     app.run(debug=DEBUG, host='0.0.0.0', use_reloader=False, port=5001) 
