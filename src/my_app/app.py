@@ -8,15 +8,17 @@ import yahoo_fantasy_api as yfa
 from dotenv import load_dotenv
 import sys
 from datetime import datetime
-#from my_app.supaBase.queries.yahoo_auth_queries import YahooAuthManager
 
-# Add the src directory to Python path for imports
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+
+from my_app.supaBase.queries.yahoo_auth_queries import YahooAuthManager
 from my_app.azure.azure_blob_storage import AzureBlobStorage
 from my_app.fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
 
-load_dotenv(".env") # Loads from .env or .env.vault if DOTENV_KEY is set
+env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
+load_dotenv(env_path) # Loads from .env or .env.vault if DOTENV_KEY is set
 
 # Create the main Flask app
 app = Flask(__name__)
@@ -164,7 +166,14 @@ def yahoo_callback():
         'expires_at': time.time() + token['expires_in'],
         'guid': user_guid
     }
-    
+    # insert into database yahoo auth
+    database_data = {
+        'yahoo_user_id': user_guid,
+        'access_token': token['access_token'],
+        'refresh_token': token['refresh_token'],
+        'created_at': datetime.now().isoformat()
+    }
+    database_response = YahooAuthManager().insert_single_row(database_data)
     session['user'] = user_guid
 
     sc = CustomYahooSession(token_store[user_guid])
@@ -248,7 +257,8 @@ def google_login():
     if google is None:
         print("ERROR: Google OAuth client is not available!")
         return "Google OAuth client not configured", 500
-    redirect_uri = url_for('google_callback', _external=True)
+    scheme = 'https' if not app.debug else 'http'
+    redirect_uri = url_for('google_callback', _external=True, _scheme=scheme)
     return google.authorize_redirect(redirect_uri)
 
 @app.route('/google/callback')
@@ -290,8 +300,4 @@ def get_yahoo_sdk() -> yfa.Game:
 # ============================================================================
 
 if __name__ == '__main__':
-    print("=== Starting Consolidated Flask App ===")
-    print("✓ App will run on http://localhost:5001")
-    print("✓ Debug mode:", DEBUG)
-    print("AMEN T")
-    app.run(debug=DEBUG, host='0.0.0.0', use_reloader=False, port=5001) 
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
