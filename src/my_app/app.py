@@ -8,7 +8,7 @@ import yahoo_fantasy_api as yfa
 from dotenv import load_dotenv
 import sys
 from datetime import datetime
-from my_app.supaBase.queries.yahoo_auth_queries import YahooAuthManager
+#from my_app.supaBase.queries.yahoo_auth_queries import YahooAuthManager
 
 # Add the src directory to Python path for imports
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -293,5 +293,5 @@ if __name__ == '__main__':
     print("=== Starting Consolidated Flask App ===")
     print("✓ App will run on http://localhost:5001")
     print("✓ Debug mode:", DEBUG)
-    print("AMEN")
+    print("AMEN T")
     app.run(debug=DEBUG, host='0.0.0.0', use_reloader=False, port=5001) 
