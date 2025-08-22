@@ -277,7 +277,7 @@ def google_callback():
     session['google_user'] = user_info
     google_user_id = user_info['sub']
     full_name = user_info['name']
-    email = user_info['email
+    email = user_info['email']
     try:
         database_data = {
          'google_user_id': google_user_id,
