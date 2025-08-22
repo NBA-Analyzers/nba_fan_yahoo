@@ -41,7 +41,7 @@ GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configura
 
 # Authlib setup for both Yahoo and Google
 oauth = OAuth(app)
-#supaBase_manager = YahooAuthManager()
+supaBase_manager = YahooAuthManager()
 # Yahoo OAuth
 yahoo = oauth.register(
     name='yahoo',
@@ -166,13 +166,17 @@ def yahoo_callback():
         'expires_at': time.time() + token['expires_in'],
         'guid': user_guid
     }
-    #insert into database yahoo auth
-    # database_data = {
-    #     'yahoo_user_id': user_guid,
-    #     'access_token': token['access_token'],
-    #     'refresh_token': token['refresh_token']
-    # }
-    # supaBase_manager.insert_single_row(database_data)
+    insert into database yahoo auth
+    
+    try:
+        database_data = {
+         'yahoo_user_id': user_guid,
+        'access_token': token['access_token'],
+         'refresh_token': token['refresh_token']
+        }
+        supaBase_manager.insert_single_row(database_data)
+    except Exception as e:
+        print("Insert Failed")
     session['user'] = user_guid
 
     sc = CustomYahooSession(token_store[user_guid])
