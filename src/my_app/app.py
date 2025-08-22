@@ -166,7 +166,7 @@ def yahoo_callback():
         'expires_at': time.time() + token['expires_in'],
         'guid': user_guid
     }
-    insert into database yahoo auth
+    #insert into database yahoo auth
     
     try:
         database_data = {
@@ -275,6 +275,19 @@ def google_callback():
     resp = google.get('https://openidconnect.googleapis.com/v1/userinfo')
     user_info = resp.json()
     session['google_user'] = user_info
+    google_user_id = user_info['sub']
+    full_name = user_info['name']
+    email = user_info['email
+    try:
+        database_data = {
+         'google_user_id': google_user_id,
+        'full_name': full_name,
+         'email': email,
+        'access-token':token['access_token']
+        }
+        GoogleAuthUser().insert_single_row(database_data)
+    except Exception as e:
+        print("Insert Failed")
     return f"Hello, {user_info['email']}! <a href='/logout'>Logout</a>"
 
 # ============================================================================
