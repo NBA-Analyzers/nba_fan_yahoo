@@ -12,6 +12,10 @@ from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
+# Import our database models and services
+from supaBase.models.google_auth import GoogleAuth
+from supaBase.services.auth_services import AuthService
+from supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
 
 from my_app.azure.azure_blob_storage import AzureBlobStorage
 from my_app.fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
@@ -40,7 +44,7 @@ GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configura
 
 # Authlib setup for both Yahoo and Google
 oauth = OAuth(app)
-supaBase_manager = YahooAuthManager()
+
 # Yahoo OAuth
 yahoo = oauth.register(
     name='yahoo',
@@ -146,51 +150,72 @@ def yahoo_login():
 
 @app.route('/yahoo/callback')
 def yahoo_callback():
-    """Yahoo OAuth callback"""
-    token = yahoo.authorize_access_token()
-    user_guid = token.get('xoauth_yahoo_guid')
+    try:
+        token = yahoo.authorize_access_token()
+        user_guid = token.get('xoauth_yahoo_guid')
 
-    if not user_guid:
-        resp = yahoo.get('fantasy/v2/users;use_login=1', token=token)
-        root = ET.fromstring(resp.text)
-        ns = {'ns': 'http://fantasysports.yahooapis.com/fantasy/v2/base.rng'}
-        guid_elem = root.find('.//ns:guid', ns)
-        if guid_elem is None:
-            return "Could not retrieve user GUID", 500
-        user_guid = guid_elem.text
+        if not user_guid:
+            resp = yahoo.get('fantasy/v2/users;use_login=1', token=token)
+            root = ET.fromstring(resp.text)
+            ns = {'ns': 'http://fantasysports.yahooapis.com/fantasy/v2/base.rng'}
+            guid_elem = root.find('.//ns:guid', ns)
+            if guid_elem is None:
+                return "Could not retrieve user GUID", 500
+            user_guid = guid_elem.text
 
-    token_store[user_guid] = {
-        'access_token': token['access_token'],
-        'refresh_token': token['refresh_token'],
-        'expires_at': time.time() + token['expires_in'],
-        'guid': user_guid
-    }
+        # Store tokens in session and token store
+        token_store[user_guid] = {
+            'access_token': token['access_token'],
+            'refresh_token': token['refresh_token'],
+            'expires_at': time.time() + token['expires_in'],
+            'guid': user_guid
+        }
 
-    session['user'] = user_guid
+        session['user'] = user_guid
 
-    sc = CustomYahooSession(token_store[user_guid])
-    yahoo_game = yfa.Game(sc, 'nba')
+        # Create YahooAuth object for database insertion
+        yahoo_auth = YahooAuth(
+            yahoo_user_id=user_guid,
+            access_token=token['access_token'],
+            refresh_token=token['refresh_token']
+        )
+        
+        # Insert or update user in database using AuthService
+        auth_service = AuthService()
+        try:
+            created_user = auth_service.create_or_update_yahoo_user(yahoo_auth)
+            print(f"✅ Yahoo user successfully saved to database: {created_user.yahoo_user_id}")
+        except Exception as e:
+            print(f"❌ Database operation failed: {e}")
+            # Continue with login even if database fails
 
-    yahoo_game = get_yahoo_sdk()
-    
-    league_ids = yahoo_game.league_ids()
-    league_options = []
-    for league_id in league_ids:
-        league = yahoo_game.to_league(league_id)
-        league_name = league.settings()['name']
-        league_options.append({'id': league_id, 'name': league_name})
+        sc = CustomYahooSession(token_store[user_guid])
+        yahoo_game = yfa.Game(sc, 'nba')
 
-    # Render a simple HTML form for league selection
-    html = '''
-    <h2>Select Your League</h2>
-    <form action="/yahoo/select_league" method="post">
-        {% for league in leagues %}
-            <input type="radio" name="league_id" value="{{ league.id }}" required> {{ league.name }}<br>
-        {% endfor %}
-        <button type="submit">Continue</button>
-    </form>
-    '''
-    return render_template_string(html, leagues=league_options)
+        yahoo_game = get_yahoo_sdk()
+        
+        league_ids = yahoo_game.league_ids()
+        league_options = []
+        for league_id in league_ids:
+            league = yahoo_game.to_league(league_id)
+            league_name = league.settings()['name']
+            league_options.append({'id': league_id, 'name': league_name})
+
+        # Render a simple HTML form for league selection
+        html = '''
+        <h2>Select Your League</h2>
+        <form action="/select_league" method="post">
+            {% for league in leagues %}
+                <input type="radio" name="league_id" value="{{ league.id }}" required> {{ league.name }}<br>
+            {% endfor %}
+            <button type="submit">Continue</button>
+        </form>
+        '''
+        return render_template_string(html, leagues=league_options)
+        
+    except Exception as e:
+        print(f"❌ Error during Yahoo callback: {e}")
+        return "Login failed. Please try again.", 500
 
 @app.route('/yahoo/select_league', methods=['POST'])
 def yahoo_select_league():
@@ -255,20 +280,47 @@ def google_login():
 
 @app.route('/google/callback')
 def google_callback():
-    """Google OAuth callback"""
     google = oauth.create_client('google')
     if google is None:
         print("ERROR: Google OAuth client is not available!")
         return "Google OAuth client not configured", 500
-    token = google.authorize_access_token()
-    resp = google.get('https://openidconnect.googleapis.com/v1/userinfo')
-    user_info = resp.json()
-    session['google_user'] = user_info
-    google_user_id = user_info['sub']
-    full_name = user_info['name']
-    email = user_info['email']
- 
-    return f"Hello, {user_info['email']}! <a href='/logout'>Logout</a>"
+    
+    try:
+        token = google.authorize_access_token()
+        resp = google.get('https://openidconnect.googleapis.com/v1/userinfo')
+        user_info = resp.json()
+        
+        # Store user info in session
+        session['google_user'] = user_info
+        
+        # Extract user data
+        google_user_id = user_info['sub']
+        full_name = user_info['name']
+        email = user_info['email']
+        access_token = token['access_token']
+        
+        # Create GoogleAuth object
+        google_auth = GoogleAuth(
+            google_user_id=google_user_id,
+            full_name=full_name,
+            email=email,
+            access_token=access_token
+        )
+        
+        # Insert or update user in database using AuthService
+        auth_service = AuthService()
+        try:
+            created_user = auth_service.create_or_update_google_user(google_auth)
+            print(f"✅ User successfully saved to database: {created_user.full_name}")
+        except Exception as e:
+            print(f"❌ Database operation failed: {e}")
+            # Continue with login even if database fails
+        
+        return f"Hello, {user_info['email']}! <a href='/logout'>Logout</a>"
+        
+    except Exception as e:
+        print(f"❌ Error during Google callback: {e}")
+        return "Login failed. Please try again.", 500
 
 # ============================================================================
 # UTILITY ROUTES
