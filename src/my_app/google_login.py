@@ -1,7 +1,9 @@
 from flask import Flask, redirect, url_for, session, request
 from authlib.integrations.flask_client import OAuth
 import os
+import sys
 from dotenv import load_dotenv
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 
 env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
@@ -43,7 +45,20 @@ def google_callback():
     resp = google.get('https://openidconnect.googleapis.com/v1/userinfo')
     user_info = resp.json()
     session['google_user'] = user_info
-    return f"Hello, {user_info['email']}! <a href='/logout'>Logout</a>"
+    google_user_id = user_info['sub']
+    full_name = user_info['name']
+    email = user_info['email']
+    try:
+        database_data = {
+         'google_user_id': google_user_id,
+        'full_name': full_name,
+         'email': email,
+        'access-token':token['access_token']
+        }
+        GoogleAuthManager().insert_single_row(database_data)
+    except Exception as e:
+        print("Insert Failed")
+    return f"Hello, {user_info['email']}!, <a href='/logout'>Logout</a>"
 
 @app.route('/logout')
 def logout():

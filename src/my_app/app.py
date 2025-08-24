@@ -13,7 +13,6 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 
-from my_app.supaBase.queries.yahoo_auth_queries import YahooAuthManager
 from my_app.azure.azure_blob_storage import AzureBlobStorage
 from my_app.fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
 
@@ -41,7 +40,7 @@ GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configura
 
 # Authlib setup for both Yahoo and Google
 oauth = OAuth(app)
-
+supaBase_manager = YahooAuthManager()
 # Yahoo OAuth
 yahoo = oauth.register(
     name='yahoo',
@@ -167,13 +166,15 @@ def yahoo_callback():
         'guid': user_guid
     }
     # insert into database yahoo auth
-    database_data = {
-        'yahoo_user_id': user_guid,
+    try:
+        database_data = {
+         'yahoo_user_id': user_guid,
         'access_token': token['access_token'],
-        'refresh_token': token['refresh_token'],
-        'created_at': datetime.now().isoformat()
-    }
-    database_response = YahooAuthManager().insert_single_row(database_data)
+         'refresh_token': token['refresh_token']
+        }
+        supaBase_manager.insert_single_row(database_data)
+    except Exception as e:
+        print("Insert Failed")
     session['user'] = user_guid
 
     sc = CustomYahooSession(token_store[user_guid])
@@ -272,6 +273,19 @@ def google_callback():
     resp = google.get('https://openidconnect.googleapis.com/v1/userinfo')
     user_info = resp.json()
     session['google_user'] = user_info
+    google_user_id = user_info['sub']
+    full_name = user_info['name']
+    email = user_info['email']
+    try:
+        database_data = {
+         'google_user_id': google_user_id,
+        'full_name': full_name,
+         'email': email,
+        'access-token':token['access_token']
+        }
+        GoogleAuthManager().insert_single_row(database_data)
+    except Exception as e:
+        print("Insert Failed")
     return f"Hello, {user_info['email']}! <a href='/logout'>Logout</a>"
 
 # ============================================================================
