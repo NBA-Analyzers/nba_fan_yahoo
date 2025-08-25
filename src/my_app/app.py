@@ -14,9 +14,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 # Import our database models and services
 # from my_app.supaBase.models.yahoo_auth import YahooAuth
-# from my_app.supaBase.models.google_auth import GoogleAuth
+from my_app.supaBase.models.google_auth import GoogleAuth
 # from my_app.supaBase.models.google_fantasy import GoogleFantasy
-# from my_app.supaBase.services.auth_services import AuthService
+from my_app.supaBase.services.auth_services import AuthService
 # from my_app.supaBase.services.fantasy_services import FantasyService
 # from my_app.supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
 
@@ -297,27 +297,27 @@ def google_callback():
         session['google_user'] = user_info
         
         # Extract user data
-        # google_user_id = user_info['sub']
-        # full_name = user_info['name']
-        # email = user_info['email']
-        # access_token = token['access_token']
+        google_user_id = user_info['sub']
+        full_name = user_info['name']
+        email = user_info['email']
+        access_token = token['access_token']
         
         # Create GoogleAuth object
-        # google_auth = GoogleAuth(
-        #     google_user_id=google_user_id,
-        #     full_name=full_name,
-        #     email=email,
-        #     access_token=access_token
-        # )
+        google_auth = GoogleAuth(
+            google_user_id=google_user_id,
+            full_name=full_name,
+            email=email,
+            access_token=access_token
+        )
         
-        # # Insert or update user in database using AuthService
-        # auth_service = AuthService()
-        # try:
-        #     created_user = auth_service.create_or_update_google_user(google_auth)
-        #     print(f"✅ User successfully saved to database: {created_user.full_name}")
-        # except Exception as e:
-        #     print(f"❌ Database operation failed: {e}")
-        #     # Continue with login even if database fails
+        # Insert or update user in database using AuthService
+        auth_service = AuthService()
+        try:
+            created_user = auth_service.create_or_update_google_user(google_auth)
+            print(f"✅ User successfully saved to database: {created_user.full_name}")
+        except Exception as e:
+            print(f"❌ Database operation failed: {e}")
+            # Continue with login even if database fails
         
         return f"Hello, {user_info['email']}! <a href='/logout'>Logout</a>"
         
