@@ -1,7 +1,7 @@
 
 from dataclasses import dataclass
 from .base import BaseModel
-from supaBase.utils.validators import validate_platform
+from ..utils.validators import validate_platform
 
 @dataclass
 class GoogleFantasy(BaseModel):
