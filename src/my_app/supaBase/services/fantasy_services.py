@@ -1,9 +1,9 @@
 from typing import List, Optional
-from models.google_fantasy import GoogleFantasy
-from repositories.google_fantasy_repository import GoogleFantasyRepository
-from repositories.google_auth_repository import GoogleAuthRepository
-from repositories.yahoo_auth_repository import YahooAuthRepository
-from exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
+from ..models.google_fantasy import GoogleFantasy
+from ..repositories.google_fantasy_repository import GoogleFantasyRepository
+from ..repositories.google_auth_repository import GoogleAuthRepository
+from ..repositories.yahoo_auth_repository import YahooAuthRepository
+from ..exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
 
 class FantasyService:
     def __init__(self):

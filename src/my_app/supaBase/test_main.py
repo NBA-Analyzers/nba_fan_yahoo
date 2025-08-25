@@ -1,11 +1,11 @@
-from services.auth_services import AuthService
-from services.fantasy_services import FantasyService
-from services.league_services import LeagueService
-from models.google_auth import GoogleAuth
-from models.yahoo_auth import YahooAuth
-from models.google_fantasy import GoogleFantasy
-from models.yahoo_league import YahooLeague
-from exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
+from .services.auth_services import AuthService
+from .services.fantasy_services import FantasyService
+from .services.league_services import LeagueService
+from .models.google_auth import GoogleAuth
+from .models.yahoo_auth import YahooAuth
+from .models.google_fantasy import GoogleFantasy
+from .models.yahoo_league import YahooLeague
+from .exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
 
 def main():
     # Initialize services

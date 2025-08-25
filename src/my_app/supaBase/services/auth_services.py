@@ -1,9 +1,9 @@
 from typing import Optional
-from models.google_auth import GoogleAuth
-from models.yahoo_auth import YahooAuth
-from repositories.google_auth_repository import GoogleAuthRepository
-from repositories.yahoo_auth_repository import YahooAuthRepository
-from exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
+from ..models.google_auth import GoogleAuth
+from ..models.yahoo_auth import YahooAuth
+from ..repositories.google_auth_repository import GoogleAuthRepository
+from ..repositories.yahoo_auth_repository import YahooAuthRepository
+from ..exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
 
 class AuthService:
     def __init__(self):

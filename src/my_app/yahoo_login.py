@@ -7,19 +7,15 @@ from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 from dotenv import load_dotenv
 
-from my_app.azure.azure_blob_storage import AzureBlobStorage
-from my_app.fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
-
-# Add the supaBase directory to the path for imports
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), 'supaBase'))
+from .azure.azure_blob_storage import AzureBlobStorage
+from .fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
 
 # Import our database models and services
-from supaBase.models.yahoo_auth import YahooAuth
-from supaBase.models.google_fantasy import GoogleFantasy
-from supaBase.services.auth_services import AuthService
-from supaBase.services.fantasy_services import FantasyService
-from supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
+from .supaBase.models.yahoo_auth import YahooAuth
+from .supaBase.models.google_fantasy import GoogleFantasy
+from .supaBase.services.auth_services import AuthService
+from .supaBase.services.fantasy_services import FantasyService
+from .supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
 
 # Get the directory where this script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))

@@ -1,6 +1,6 @@
 
-from typing import List, Dict, Any, Optional
-from database.base_repository import BaseRepository, DatabaseError
+from typing import List, Optional, Dict, Any
+from ..database.base_repository import BaseRepository, DatabaseError
 
 class GoogleFantasyRepository(BaseRepository):
     def __init__(self):
