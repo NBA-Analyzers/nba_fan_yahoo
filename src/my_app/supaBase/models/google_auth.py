@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import Optional
 from .base import BaseModel
-from utils.validators import validate_email
+from supaBase.utils.validators import validate_email
 
 
 @dataclass

@@ -1,6 +1,6 @@
 
-from typing import List, Dict, Any, Optional
-from database.base_repository import BaseRepository
+from typing import List, Optional, Dict, Any
+from ..database.base_repository import BaseRepository
 
 class YahooLeagueRepository(BaseRepository):
     def __init__(self):

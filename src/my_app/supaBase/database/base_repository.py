@@ -1,8 +1,8 @@
 
 from abc import ABC
 from typing import List, Dict, Any, Optional
-from database.connection import DatabaseManager
-from exceptions.custom_exceptions import DatabaseError
+from .connection import DatabaseManager
+from ..exceptions.custom_exceptions import DatabaseError
 
 class BaseRepository(ABC):
     def __init__(self, table_name: str):

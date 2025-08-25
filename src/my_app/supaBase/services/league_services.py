@@ -1,10 +1,10 @@
 
 from typing import List, Optional
-from models.yahoo_league import YahooLeague
-from repositories.yahoo_league_repository import YahooLeagueRepository
-from repositories.yahoo_auth_repository import YahooAuthRepository
+from ..models.yahoo_league import YahooLeague
+from ..repositories.yahoo_league_repository import YahooLeagueRepository
+from ..repositories.yahoo_auth_repository import YahooAuthRepository
 from .fantasy_services import FantasyService
-from exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
+from ..exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
 
 class LeagueService:
     def __init__(self):

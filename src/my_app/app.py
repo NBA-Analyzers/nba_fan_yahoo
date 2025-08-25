@@ -13,12 +13,15 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 # Import our database models and services
-from supaBase.models.google_auth import GoogleAuth
-from supaBase.services.auth_services import AuthService
-from supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
 
-from my_app.azure.azure_blob_storage import AzureBlobStorage
-from my_app.fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
+from .supaBase.models.yahoo_auth import YahooAuth
+from .supaBase.models.google_auth import GoogleAuth
+from .supaBase.services.auth_services import AuthService
+from .supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
+
+
+from .azure.azure_blob_storage import AzureBlobStorage
+from .fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
 
 env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
 load_dotenv(env_path) # Loads from .env or .env.vault if DOTENV_KEY is set

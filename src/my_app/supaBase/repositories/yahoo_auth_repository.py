@@ -1,6 +1,6 @@
 
 from typing import Optional, Dict, Any
-from database.base_repository import BaseRepository
+from ..database.base_repository import BaseRepository
 
 class YahooAuthRepository(BaseRepository):
     def __init__(self):

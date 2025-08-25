@@ -7,9 +7,15 @@ from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
 from dotenv import load_dotenv
 
-from my_app.azure.azure_blob_storage import AzureBlobStorage
-from my_app.fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
+from .azure.azure_blob_storage import AzureBlobStorage
+from .fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
 
+# Import our database models and services
+from .supaBase.models.yahoo_auth import YahooAuth
+from .supaBase.models.google_fantasy import GoogleFantasy
+from .supaBase.services.auth_services import AuthService
+from .supaBase.services.fantasy_services import FantasyService
+from .supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
 
 # Get the directory where this script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -92,7 +98,13 @@ class ManualOAuth2(OAuth2):
 
 @app.route('/')
 def homepage():
-    return '<a href="/login">Login with Yahoo</a>'
+    return '''
+        <h1>Yahoo Fantasy Sports Integration</h1>
+        <p><a href="/login">Login with Yahoo</a></p>
+        <p><a href="/connect_yahoo_to_google">Connect Yahoo Account to Google</a></p>
+        <p><a href="/view_connections">View Fantasy Connections</a></p>
+        <p><a href="/debug_league">Debug League Sync</a></p>
+    '''
 
 @app.route('/login')
 def login():
@@ -116,52 +128,91 @@ def login():
         <p>Check console for details.</p>
         <a href="/debug-oauth">View Debug Info</a>
         '''
+
 @app.route('/callback')
 def callback():
-    token = yahoo.authorize_access_token()
-    user_guid = token.get('xoauth_yahoo_guid')
+    try:
+        token = yahoo.authorize_access_token()
+        user_guid = token.get('xoauth_yahoo_guid')
 
-    if not user_guid:
-        resp = yahoo.get('fantasy/v2/users;use_login=1', token=token)
-        root = ET.fromstring(resp.text)
-        ns = {'ns': 'http://fantasysports.yahooapis.com/fantasy/v2/base.rng'}
-        guid_elem = root.find('.//ns:guid', ns)
-        if guid_elem is None:
-            return "Could not retrieve user GUID", 500
-        user_guid = guid_elem.text
+        if not user_guid:
+            resp = yahoo.get('fantasy/v2/users;use_login=1', token=token)
+            root = ET.fromstring(resp.text)
+            ns = {'ns': 'http://fantasysports.yahooapis.com/fantasy/v2/base.rng'}
+            guid_elem = root.find('.//ns:guid', ns)
+            if guid_elem is None:
+                return "Could not retrieve user GUID", 500
+            user_guid = guid_elem.text
 
-    token_store[user_guid] = {
-        'access_token': token['access_token'],
-        'refresh_token': token['refresh_token'],
-        'expires_at': time.time() + token['expires_in'],
-        'guid': user_guid
-    }
+        # Store tokens in session and token store
+        token_store[user_guid] = {
+            'access_token': token['access_token'],
+            'refresh_token': token['refresh_token'],
+            'expires_at': time.time() + token['expires_in'],
+            'guid': user_guid
+        }
 
-    session['user'] = user_guid
+        session['user'] = user_guid
 
-    sc = CustomYahooSession(token_store[user_guid])
-    yahoo_game = yfa.Game(sc, 'nba')
+        # Create YahooAuth object for database insertion
+        yahoo_auth = YahooAuth(
+            yahoo_user_id=user_guid,
+            access_token=token['access_token'],
+            refresh_token=token['refresh_token']
+        )
+        
+        # Insert or update user in database using AuthService
+        auth_service = AuthService()
+        try:
+            created_user = auth_service.create_or_update_yahoo_user(yahoo_auth)
+            print(f"✅ Yahoo user successfully saved to database: {created_user.yahoo_user_id}")
+        except Exception as e:
+            print(f"❌ Database operation failed: {e}")
+            # Continue with login even if database fails
 
-    yahoo_game = get_yahoo_sdk()
-    
-    league_ids = yahoo_game.league_ids()
-    league_options = []
-    for league_id in league_ids:
-        league = yahoo_game.to_league(league_id)
-        league_name = league.settings()['name']
-        league_options.append({'id': league_id, 'name': league_name})
+        # Create a Google Fantasy connection entry for this Yahoo user
+        # This allows the Yahoo user to be linked to Google users later
+        fantasy_service = FantasyService()
+        try:
+            # Note: We don't create a GoogleFantasy entry yet because we need a google_user_id
+            # Instead, we'll create it when a Google user connects their Yahoo account
+            print(f"✅ Yahoo user {user_guid} successfully authenticated")
+            print(f"   - This user can now be linked to Google accounts through the connection process")
+            
+        except Exception as e:
+            print(f"⚠️ Fantasy connection setup note: {e}")
+            # This is not critical, so we continue
 
-    # Render a simple HTML form for league selection
-    html = '''
-    <h2>Select Your League</h2>
-    <form action="/select_league" method="post">
-        {% for league in leagues %}
-            <input type="radio" name="league_id" value="{{ league.id }}" required> {{ league.name }}<br>
-        {% endfor %}
-        <button type="submit">Continue</button>
-    </form>
-    '''
-    return render_template_string(html, leagues=league_options)
+        sc = CustomYahooSession(token_store[user_guid])
+        yahoo_game = yfa.Game(sc, 'nba')
+
+        yahoo_game = get_yahoo_sdk()
+        
+        league_ids = yahoo_game.league_ids()
+        league_options = []
+        for league_id in league_ids:
+            league = yahoo_game.to_league(league_id)
+            league_name = league.settings()['name']
+            league_options.append({'id': league_id, 'name': league_name})
+
+        # Render a simple HTML form for league selection
+        html = '''
+        <h2>Select Your League</h2>
+        <p><strong>Your Yahoo User ID:</strong> <code>{user_guid}</code></p>
+        <p><small>Save this ID to connect your Yahoo account to Google later</small></p>
+        <form action="/select_league" method="post">
+            {% for league in leagues %}
+                <input type="radio" name="league_id" value="{{ league.id }}" required> {{ league.name }}<br>
+            {% endfor %}
+            <button type="submit">Continue</button>
+        </form>
+        <p><a href="/connect_yahoo_to_google">Connect to Google Account</a></p>
+        '''
+        return render_template_string(html, leagues=league_options, user_guid=user_guid)
+        
+    except Exception as e:
+        print(f"❌ Error during Yahoo callback: {e}")
+        return "Login failed. Please try again.", 500
 
 @app.route('/select_league', methods=['POST'])
 def select_league():
@@ -181,7 +232,88 @@ def select_league():
     yahoo_league = YahooLeague(league)
     results = yahoo_league.sync_full_league()
 
-    return f"You synced: {results}"  # Display the selected league name
+    return f"You synced: {results}" # Display the selected league name
+
+@app.route('/connect_yahoo_to_google', methods=['GET', 'POST'])
+def connect_yahoo_to_google():
+    """Route for Google users to connect their Yahoo accounts"""
+    if request.method == 'GET':
+        # Show the connection form
+        return '''
+        <h2>Connect Your Yahoo Account to Google</h2>
+        <form method="POST">
+            <label for="google_user_id">Google User ID:</label><br>
+            <input type="text" id="google_user_id" name="google_user_id" required><br><br>
+            
+            <label for="yahoo_user_id">Yahoo User ID (GUID):</label><br>
+            <input type="text" id="yahoo_user_id" name="yahoo_user_id" required><br><br>
+            
+            <button type="submit">Connect Accounts</button>
+        </form>
+        <p><small>Note: You need to have logged in with both Google and Yahoo first</small></p>
+        '''
+    
+    elif request.method == 'POST':
+        try:
+            google_user_id = request.form['google_user_id']
+            yahoo_user_id = request.form['yahoo_user_id']
+            
+            # Validate that both users exist
+            auth_service = AuthService()
+            fantasy_service = FantasyService()
+            
+            # Check if Google user exists
+            google_user = auth_service.get_google_user(google_user_id)
+            if not google_user:
+                return f"❌ Google user with ID {google_user_id} not found. Please log in with Google first.", 400
+            
+            # Check if Yahoo user exists
+            yahoo_user = auth_service.get_yahoo_user(yahoo_user_id)
+            if not yahoo_user:
+                return f"❌ Yahoo user with ID {yahoo_user_id} not found. Please log in with Yahoo first.", 400
+            
+            # Create the Google Fantasy connection
+            google_fantasy = GoogleFantasy(
+                google_user_id=google_user_id,
+                fantasy_user_id=yahoo_user_id,
+                fantasy_platform="yahoo"
+            )
+            
+            # Connect the accounts
+            created_connection = fantasy_service.connect_fantasy_platform(google_fantasy)
+            
+            return f'''
+            <h2>✅ Accounts Successfully Connected!</h2>
+            <p>Google user <strong>{google_user.full_name}</strong> is now connected to Yahoo user <strong>{yahoo_user_id}</strong></p>
+            <p><a href="/">Return to Home</a></p>
+            '''
+            
+        except ValidationError as e:
+            return f"❌ Validation error: {e}", 400
+        except NotFoundError as e:
+            return f"❌ Not found error: {e}", 400
+        except DuplicateError as e:
+            return f"❌ Duplicate error: {e}", 400
+        except Exception as e:
+            return f"❌ Unexpected error: {e}", 500
+
+@app.route('/view_connections')
+def view_connections():
+    """Route to view existing fantasy connections"""
+    try:
+        fantasy_service = FantasyService()
+        
+        # Get all connections (this would need to be implemented in the service)
+        # For now, we'll show a message about the feature
+        return '''
+        <h2>Fantasy Connections</h2>
+        <p>This feature will show all existing connections between Google and Yahoo users.</p>
+        <p><strong>Note:</strong> The view connections functionality is being implemented.</p>
+        <p><a href="/">Return to Home</a></p>
+        '''
+        
+    except Exception as e:
+        return f"❌ Error viewing connections: {e}", 500
 
 @app.route('/debug_league')
 def debug_league():
@@ -190,7 +322,7 @@ def debug_league():
     league = yahoo_game.to_league('428.l.41083')
     yahoo_league = YahooLeague(league)
     results = yahoo_league.sync_full_league()
-    return f"You synced: {results}"  # Display the selected league name
+    return f"You synced: {results}" # Display the selected league name
 
 def get_yahoo_sdk() -> yfa.Game:
     """

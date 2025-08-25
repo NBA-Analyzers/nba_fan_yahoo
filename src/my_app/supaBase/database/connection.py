@@ -1,7 +1,7 @@
 
 from supabase import create_client, Client
 from typing import Optional
-from config.settings import Config
+from ..config.settings import Config
 
 class DatabaseManager:
     _instance: Optional['DatabaseManager'] = None
