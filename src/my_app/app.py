@@ -13,7 +13,7 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 # Import our database models and services
-# from my_app.supaBase.models.yahoo_auth import YahooAuth
+from my_app.supaBase.models.yahoo_auth import YahooAuth
 from my_app.supaBase.models.google_auth import GoogleAuth
 # from my_app.supaBase.models.google_fantasy import GoogleFantasy
 from my_app.supaBase.services.auth_services import AuthService
@@ -177,20 +177,20 @@ def yahoo_callback():
         session['user'] = user_guid
 
         # Create YahooAuth object for database insertion
-        # yahoo_auth = YahooAuth(
-        #     yahoo_user_id=user_guid,
-        #     access_token=token['access_token'],
-        #     refresh_token=token['refresh_token']
-        # )
+        yahoo_auth = YahooAuth(
+            yahoo_user_id=user_guid,
+            access_token=token['access_token'],
+            refresh_token=token['refresh_token']
+        )
         
         # Insert or update user in database using AuthService
-        # auth_service = AuthService()
-        # try:
-        #     created_user = auth_service.create_or_update_yahoo_user(yahoo_auth)
-        #     print(f"✅ Yahoo user successfully saved to database: {created_user.yahoo_user_id}")
-        # except Exception as e:
-        #     print(f"❌ Database operation failed: {e}")
-        #     # Continue with login even if database fails
+        auth_service = AuthService()
+        try:
+            created_user = auth_service.create_or_update_yahoo_user(yahoo_auth)
+            print(f"✅ Yahoo user successfully saved to database: {created_user.yahoo_user_id}")
+        except Exception as e:
+            print(f"❌ Database operation failed: {e}")
+            # Continue with login even if database fails
 
         sc = CustomYahooSession(token_store[user_guid])
         yahoo_game = yfa.Game(sc, 'nba')
