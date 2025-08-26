@@ -3,7 +3,7 @@ from typing import Optional, Dict, Any
 
 @dataclass
 class BaseModel:
-    created_at: Optional[str] = field(default=None)
+
     
     def to_dict(self) -> Dict[str, Any]:
         result = {}
