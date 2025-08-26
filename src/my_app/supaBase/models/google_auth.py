@@ -11,6 +11,7 @@ class GoogleAuth(BaseModel):
     full_name: str
     email: str
     access_token: str
+    created_at: Optional[str] = None
 
     
     def __post_init__(self):

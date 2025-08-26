@@ -1,10 +1,9 @@
-
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, Dict, Any
 
-
+@dataclass
 class BaseModel:
-    created_at: Optional[str] = None
+    created_at: Optional[str] = field(default=None)
     
     def to_dict(self) -> Dict[str, Any]:
         result = {}
@@ -16,6 +15,9 @@ class BaseModel:
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         # Filter out keys that don't exist in the model
-        valid_keys = {field.name for field in cls.__dataclass_fields__.values()}
-        filtered_data = {k: v for k, v in data.items() if k in valid_keys}
+        if hasattr(cls, '__dataclass_fields__'):
+            valid_keys = {field_name for field_name in cls.__dataclass_fields__.keys()}
+            filtered_data = {k: v for k, v in data.items() if k in valid_keys}
+        else:
+            filtered_data = data
         return cls(**filtered_data)
