@@ -2,9 +2,9 @@ import time
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from flask import session
-from supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
-from fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
-from azure.azure_blob_storage import AzureBlobStorage
+from ..supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
+from ..fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
+from ..azure.azure_blob_storage import AzureBlobStorage
 
 class YahooService:
     def __init__(self, token_store):
@@ -13,7 +13,7 @@ class YahooService:
     def get_user_leagues(self, user_guid):
         """Get user's leagues from Yahoo API"""
         try:
-            from utils.helpers import get_yahoo_sdk
+            from ..utils.helpers import get_yahoo_sdk
             yahoo_game = get_yahoo_sdk(self.token_store, {'user': user_guid})
             if not yahoo_game:
                 return []
@@ -32,7 +32,7 @@ class YahooService:
     def sync_league_data(self, league_id, user_guid, azure_container="fantasy1"):
         """Sync league data and store in database"""
         try:
-            from utils.helpers import get_yahoo_sdk
+            from ..utils.helpers import get_yahoo_sdk
             yahoo_game = get_yahoo_sdk(self.token_store, {'user': user_guid})
             if not yahoo_game:
                 return {"error": "Yahoo SDK not available"}

@@ -1,7 +1,7 @@
 from flask import Flask
-from config.settings import configure_app
-from config.oauth_config import configure_oauth
-from routes import register_routes
+from .config.settings import configure_app
+from .config.oauth_config import configure_oauth
+from .routes import register_routes
 import os
 
 def create_app():
