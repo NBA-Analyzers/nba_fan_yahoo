@@ -172,7 +172,7 @@ def yahoo_callback():
             print("❌ Could not find Google user ID in session for fantasy connection")
 
         # Get leagues for selection
-        from my_app.services.yahoo_service import YahooService
+        from ..services.yahoo_service import YahooService
         yahoo_service = YahooService(session['token_store'])
         league_options = yahoo_service.get_user_leagues(user_guid)
 
