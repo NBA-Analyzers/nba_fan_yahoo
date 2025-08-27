@@ -1,9 +1,12 @@
-from dataclasses import dataclass, field
+
+# base.py
+from dataclasses import dataclass
 from typing import Optional, Dict, Any
 
 @dataclass
 class BaseModel:
-    created_at: Optional[str] = field(default=None)
+    # All required fields first, optional fields last
+
     
     def to_dict(self) -> Dict[str, Any]:
         result = {}
@@ -21,3 +24,4 @@ class BaseModel:
         else:
             filtered_data = data
         return cls(**filtered_data)
+
