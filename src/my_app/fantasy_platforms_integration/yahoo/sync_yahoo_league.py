@@ -8,7 +8,7 @@ from yahoo_oauth import OAuth2
 
 import os
 
-from ...azure.azure_blob_storage import AzureBlobStorage
+from azure.azure_blob_storage import AzureBlobStorage
 from ..sync_league import SyncLeagueData
 
 STAT_ID_TO_NAME = {

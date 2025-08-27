@@ -1,8 +1,11 @@
-from dataclasses import dataclass, field
+
+# base.py
+from dataclasses import dataclass
 from typing import Optional, Dict, Any
 
 @dataclass
 class BaseModel:
+
 
     
     def to_dict(self) -> Dict[str, Any]:
@@ -21,3 +24,4 @@ class BaseModel:
         else:
             filtered_data = data
         return cls(**filtered_data)
+
