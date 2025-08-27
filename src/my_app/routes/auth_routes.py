@@ -1,12 +1,12 @@
 from flask import Blueprint, session, redirect, url_for, request
-from middleware.auth_decorators import require_google_auth
-from supaBase.models.yahoo_auth import YahooAuth
-from supaBase.models.google_auth import GoogleAuth
-from supaBase.models.google_fantasy import GoogleFantasy
-from supaBase.services.auth_services import AuthService
-from supaBase.services.fantasy_services import FantasyService
-from supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
-from config.settings import DEBUG
+from ..middleware.auth_decorators import require_google_auth
+from ..supaBase.models.yahoo_auth import YahooAuth
+from ..supaBase.models.google_auth import GoogleAuth
+from ..supaBase.models.google_fantasy import GoogleFantasy
+from ..supaBase.services.auth_services import AuthService
+from ..supaBase.services.fantasy_services import FantasyService
+from ..supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
+from ..config.settings import DEBUG
 import time
 import xml.etree.ElementTree as ET
 
@@ -172,7 +172,7 @@ def yahoo_callback():
             print("❌ Could not find Google user ID in session for fantasy connection")
 
         # Get leagues for selection
-        from services.yahoo_service import YahooService
+        from my_app.services.yahoo_service import YahooService
         yahoo_service = YahooService(session['token_store'])
         league_options = yahoo_service.get_user_leagues(user_guid)
 

@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify
-from middleware.auth_decorators import require_google_auth
-from config.settings import DEBUG
+from ..middleware.auth_decorators import require_google_auth
+from ..config.settings import DEBUG
 from yahoo_oauth import OAuth2
-from fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
-from supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
+from ..fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
+from ..supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
 from datetime import datetime
 import yahoo_fantasy_api as yfa
 
