@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any
 
 @dataclass
 class BaseModel:
-    # All required fields first, optional fields last
+
 
     
     def to_dict(self) -> Dict[str, Any]:
