@@ -1,6 +1,8 @@
 # validators.py
 import re
+
 from ..exceptions.custom_exceptions import ValidationError
+
 
 def validate_email(email: str) -> bool:
     """Validate email format"""
@@ -23,6 +25,7 @@ def validate_platform(platform: str) -> bool:
     
     allowed_platforms = ["yahoo", "espn"]  # Future-ready
     if platform.lower() not in allowed_platforms:
+
         raise ValidationError(f"Invalid platform '{platform}'. Allowed: {', '.join(allowed_platforms)}")
     return True
 
@@ -31,3 +34,5 @@ def validate_user_id(user_id: str, platform: str = None) -> bool:
     if not user_id or not user_id.strip():
         raise ValidationError(f"User ID cannot be empty{' for ' + platform if platform else ''}")
     return True
+
+
