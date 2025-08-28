@@ -37,7 +37,31 @@ def select_league():
         if 'error' in result:
             return f"<h2>Error</h2><p>{result['error']}</p><br><a href='/dashboard'>← Back to Dashboard</a>", 500
         
-        return f"<h2>League Sync Complete!</h2><p>{result['db_message']}</p><p>Sync Results: {result['sync_results']}</p><br><a href='/dashboard'>← Back to Dashboard</a>"
+        # Get league name for the redirect
+        try:
+            from ..utils.helpers import get_yahoo_sdk
+            yahoo_game = get_yahoo_sdk(session['token_store'], {'user': user_guid})
+            league = yahoo_game.to_league(league_id)
+            league_settings = league.settings()
+            league_name = league_settings.get('name', 'Unknown League')
+        except:
+            league_name = 'Unknown League'
+        
+        # URL encode the league name to handle special characters
+        from urllib.parse import quote
+        encoded_league_name = quote(league_name)
+        
+        # Redirect to league-specific AI chat page after successful league sync
+        return f"""
+        <h2>🎉 League Connected Successfully!</h2>
+        <p>{result['db_message']}</p>
+        <p><strong>League:</strong> {league_name}</p>
+        <p>Your league data has been synced and you're ready to use the AI Assistant!</p>
+        <br>
+        <a href='/ai-chat/{league_id}' style="background: #28a745; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-size: 18px;">🚀 Go to AI Chat for {league_name}</a>
+        <br><br>
+        <a href='/dashboard'>← Back to Dashboard</a>
+        """
         
     except Exception as e:
         print(f"❌ Error during league selection: {e}")
@@ -63,10 +87,14 @@ def my_leagues():
         leagues_html = ""
         for league in user_leagues:
             leagues_html += f"""
-            <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 5px;">
+            <div style="border: 1px solid #ccc; padding: 15px; margin: 15px 0; border-radius: 8px; background: white;">
                 <h3>League ID: {league.get('league_id', 'Unknown')}</h3>
                 <p><strong>Team:</strong> {league.get('team_name', 'Unknown Team')}</p>
                 <p><strong>Added:</strong> {league.get('created_at', 'Unknown')}</p>
+                <div style="margin-top: 15px;">
+                    <a href="/ai-chat/{league.get('league_id', 'unknown')}" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px;">🚀 AI Chat</a>
+                    <a href="/dashboard" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">← Dashboard</a>
+                </div>
             </div>
             """
         

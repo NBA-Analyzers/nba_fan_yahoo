@@ -5,6 +5,7 @@ from flask import session
 from ..supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
 from ..fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
 from ..azure.azure_blob_storage import AzureBlobStorage
+import os
 
 class YahooService:
     def __init__(self, token_store):
@@ -47,10 +48,23 @@ class YahooService:
             teams = league.teams()
             user_team_name = None
             
-            # Find the user's team (assuming first team is the user's)
-            if teams:
-                first_team_key = list(teams.keys())[0]
-                user_team_name = teams[first_team_key].get('name', 'Unknown Team')
+            # Get the user's actual team key from Yahoo API
+            try:
+                user_team_key = league.team_key()  # This gets YOUR actual team key
+                if user_team_key and user_team_key in teams:
+                    user_team_name = teams[user_team_key].get('name', 'Unknown Team')
+                else:
+                    print(f"⚠️ User team key {user_team_key} not found in teams list")
+                    # Fallback to first team if user team not found
+                    if teams:
+                        first_team_key = list(teams.keys())[0]
+                        user_team_name = teams[first_team_key].get('name', 'Unknown Team')
+            except Exception as e:
+                print(f"⚠️ Error getting user team key: {e}")
+                # Fallback to first team if there's an error
+                if teams:
+                    first_team_key = list(teams.keys())[0]
+                    user_team_name = teams[first_team_key].get('name', 'Unknown Team')
             
             # Get yahoo_user_id from token store
             yahoo_user_id = self.token_store[user_guid].get('xoauth_yahoo_guid') or self.token_store[user_guid].get('guid')
@@ -79,8 +93,19 @@ class YahooService:
             
             # Sync league data
             yahoo_league = YahooLeague(league)
-            azure_storage = AzureBlobStorage(container_name=azure_container)
-            results = yahoo_league.sync_full_league(azure_storage)
+            
+            # Check if Azure Storage is configured
+            azure_connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+            if azure_connection_string:
+                try:
+                    azure_storage = AzureBlobStorage(container_name=azure_container)
+                    results = yahoo_league.sync_full_league(azure_storage)
+                except Exception as azure_error:
+                    print(f"⚠️ Azure Storage error: {azure_error}")
+                    results = {"warning": "Azure Storage not available, data not backed up"}
+            else:
+                print("⚠️ Azure Storage not configured, skipping data backup")
+                results = {"warning": "Azure Storage not configured, data not backed up"}
             
             return {
                 "success": True,

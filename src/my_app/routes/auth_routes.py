@@ -20,8 +20,9 @@ def google_login():
     if google is None:
         print("ERROR: Google OAuth client is not available!")
         return "Google OAuth client not configured", 500
-    scheme = 'https' if not current_app.debug else 'http'
-    redirect_uri = url_for('auth.google_callback', _external=True, _scheme=scheme)
+    
+    # Always use HTTPS when behind ngrok proxy
+    redirect_uri = url_for('auth.google_callback', _external=True, _scheme='https')
     return google.authorize_redirect(redirect_uri)
 
 @auth_bp.route('/google/callback')
@@ -183,17 +184,23 @@ def yahoo_callback():
         user_info = session.get('google_user', {})
         user_name = user_info.get('name', 'User')
 
+        # Build league options HTML dynamically
+        league_html = ""
+        if league_options and len(league_options) > 0:
+            for league in league_options:
+                league_html += f'<input type="radio" name="league_id" value="{league.get("id", "")}" required> {league.get("name", "Unknown League")}<br>'
+        else:
+            league_html = '<p>No leagues found. Please check your Yahoo account.</p>'
+
         # Render a simple HTML form for league selection
         html = f'''
         <h2>Hello {user_name}!</h2>
         <h3>Your Yahoo Fantasy Leagues</h3>
         <p>Yahoo account connected successfully! Select your league:</p>
         <form action="/yahoo/select_league" method="post">
-            {{% for league in leagues %}}
-                <input type="radio" name="league_id" value="{{{{ league.id }}}}" required> {{{{ league.name }}}}<br>
-            {{% endfor %}}
+            {league_html}
             <br>
-            <button type="submit">Sync This League</button>
+            <button type="submit">Connect League & Go to AI Chat</button>
         </form>
         <br>
         <a href="/dashboard">← Back to Dashboard</a>
