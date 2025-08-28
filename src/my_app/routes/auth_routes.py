@@ -80,7 +80,10 @@ def yahoo_login():
     
     from flask import current_app
     yahoo = current_app.oauth.create_client('yahoo')
-    return yahoo.authorize_redirect(redirect_uri=current_app.config.get('YAHOO_REDIRECT_URI') + "/auth/yahoo/callback")
+    
+    # Always use HTTPS when behind ngrok proxy, same as Google login
+    redirect_uri = url_for('auth.yahoo_callback', _external=True, _scheme='https')
+    return yahoo.authorize_redirect(redirect_uri=redirect_uri)
 
 @auth_bp.route('/yahoo/callback')
 @require_google_auth
