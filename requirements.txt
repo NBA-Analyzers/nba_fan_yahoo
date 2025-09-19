@@ -6,13 +6,10 @@ Flask==2.3.3
 Authlib==1.3.0  # For Yahoo and Google OAuth
 requests==2.31.0
 python-dotenv==1.0.1
-<<<<<<< HEAD
-=======
 openai
 fastapi
 uvicorn
 fastapi-utils
->>>>>>> ea40828c3e840b1e9413b562629329f7c1d37c68
 azure-storage-blob==12.19.0
 gunicorn==21.2.0
 supabase
