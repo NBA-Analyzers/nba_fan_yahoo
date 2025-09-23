@@ -11,4 +11,5 @@ class YahooLeague(BaseModel):
     league_id: str
     team_name: str
     # Optional fields last
+    vector_store_league_id: Optional[str] = None  # FK → Vector_Metadata.vector_store_id
     created_at: Optional[str] = None

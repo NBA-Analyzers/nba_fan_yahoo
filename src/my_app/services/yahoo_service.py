@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from flask import session
 from ..supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
-from ..fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
+from my_app.integrations.yahoo.sync_yahoo_league import YahooLeague
 from ..azure.azure_blob_storage import AzureBlobStorage
 import os
 
