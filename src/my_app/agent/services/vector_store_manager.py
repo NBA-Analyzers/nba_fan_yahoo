@@ -1,13 +1,7 @@
-from curses import meta
 from dataclasses import dataclass
-from enum import Enum
-from typing import Optional
-import openai
 from openai import OpenAI
-from openai.types import vector_store
+from openai.types.vector_store import VectorStore
 
-from my_app.agent.api.files_api import LeagueFile
-from my_app.agent.services.file_manager import FileMetadata
 
 @dataclass
 class VectorStoreMetadata:
@@ -23,14 +17,14 @@ class VectorStoreManager():
         self, 
         vector_store_id: str, 
         openai_file_ids: list[str]
-    ):
+    ) -> str:
         openai_vector_store_id = self.create_vector_store_in_openai(openai_file_ids)
         
         #TODO: fetch from DB - vector store based on vector store id
         current_vector_store_metadata = None
         
         if current_vector_store_metadata is None:
-            vector_store = VectorStoreMetadata(
+            current_vector_store_metadata = VectorStoreMetadata(
                 vector_store_id=vector_store_id,
                 openai_vector_store_id=openai_vector_store_id
             )
@@ -38,7 +32,7 @@ class VectorStoreManager():
         else:
             self.client.vector_stores.delete(current_vector_store_metadata.openai_vector_store_id)
             #TODO: update DB with the new openai_vector_store_id
-
+        return openai_vector_store_id
 
 
     def create_vector_store_in_openai(self, openai_file_ids: list[str]):

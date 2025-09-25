@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Basketball Helper</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🏀 Fantasy Basketball Helper</h1>
+            <p>Ask me anything about your fantasy basketball league!</p>
+        </header>
+        
+        <!-- Initial Screen - Choose New or Continue -->
+        <div class="screen" id="initialScreen">
+            <div class="choice-container">
+                <div class="choice-card" id="newChatOption">
+                    <div class="choice-icon">💬</div>
+                    <h3>Start New Chat</h3>
+                    <p>Begin a fresh conversation with the Fantasy Basketball Helper</p>
+                    <button class="choice-button">Start New Chat</button>
+                </div>
+                
+                <div class="choice-card" id="continueChatOption">
+                    <div class="choice-icon">🔄</div>
+                    <h3>Continue Chat</h3>
+                    <p>Resume a previous conversation using your session ID</p>
+                    <button class="choice-button">Continue Chat</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Session ID Input Screen -->
+        <div class="screen hidden" id="sessionIdScreen">
+            <div class="session-input-container">
+                <div class="session-input-card">
+                    <h3>Enter Session ID</h3>
+                    <p>Please enter your session ID to continue your previous conversation:</p>
+                    <div class="input-group">
+                        <input type="text" id="sessionIdInput" placeholder="Enter your session ID..." autocomplete="off">
+                        <button id="continueSessionButton" class="continue-button">Continue</button>
+                    </div>
+                    <button id="backToInitialButton" class="back-button">← Back to Options</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat Screen -->
+        <div class="screen hidden" id="chatScreen">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="session-info">
+                        <span>Session: <span id="currentSessionId">Loading...</span></span>
+                        <div class="header-buttons">
+                            <button id="newSessionFromChatButton" class="new-session-button">New Session</button>
+                            <button id="quitSessionButton" class="quit-session-button">Quit Session</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message system-message">
+                        <div class="message-content">
+                            Welcome to Fantasy Basketball Helper! I'm here to help you with your league management, player analysis, and strategic advice. Type 'quit' to end the conversation.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="input-container">
+                    <div class="input-group">
+                        <input type="text" id="messageInput" placeholder="Type your message here..." autocomplete="off">
+                        <button id="sendButton" class="send-button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <span id="connectionStatus" class="status-indicator">Ready</span>
+        </div>
+    </div>
+    
+    <script src="/static/script.js"></script>
+</body>
+</html>
