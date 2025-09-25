@@ -1,10 +1,6 @@
-from curses import meta
 from dataclasses import dataclass
-from enum import Enum
-from typing import Optional
-import openai
 from openai import OpenAI
-from openai.types import vector_store
+from openai.types.vector_store import VectorStore
 
 from my_app.agent.api.files_api import LeagueFile
 from my_app.agent.services.file_manager import FileMetadata

@@ -1,6 +1,6 @@
-from my_app.agent.services.vector_store_manager import VectorStoreManager
 from services.agent_manager import AgentManager
 from services.file_manager import FileManager
+from services.vector_store_manager import VectorStoreManager
 
 
 _agent_manager = None
@@ -16,7 +16,7 @@ def set_services(agent_manager: AgentManager, file_manager: FileManager, vector_
 def get_agent_manager() -> AgentManager:
     return _agent_manager
 
-def get_file_manager() -> FileManager:
+def get_file_manager1() -> FileManager:
     return _file_manager
 
 def get_vector_store_manager() -> VectorStoreManager:
