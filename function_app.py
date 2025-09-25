@@ -5,3 +5,7 @@ app = func.FunctionApp()
 @app.route(route="sync_full_league", auth_level=func.AuthLevel.ANONYMOUS)
 def test_sync_full_league(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse("Hello, World!")
+    # TODO  - add argrument league_id
+    # TODO - Get from DB the Yahoo Tokens
+    # TODO - Get the League from Yahoo SDK
+    # TODO - Call Sync League with the League
