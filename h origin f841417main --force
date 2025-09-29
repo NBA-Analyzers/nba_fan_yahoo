@@ -1,0 +1,243 @@
+*   [33mea90080[m[33m ([m[1;36mHEAD -> [m[1;32mrinat/agent[m[33m)[m Merge branch 'rinat/agent' of https://github.com/NBA-Analyzers/nba_fan_yahoo into rinat/agent
+[31m|[m[32m\[m  
+* [32m|[m [33mf841417[m Chat added
+[32m|[m [32m|[m *   [33m6f01676[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #22 from NBA-Analyzers/rinat/agent
+[32m|[m [32m|[m [33m|[m[32m\[m  
+[32m|[m [32m|[m [33m|[m[32m/[m  
+[32m|[m [32m|[m[32m/[m[33m|[m   
+[32m|[m * [33m|[m [33m13b5744[m[33m ([m[1;31morigin/rinat/agent[m[33m)[m Chat added
+[32m|[m [33m|[m[33m/[m  
+[32m|[m * [33mdec3f3d[m Merge pull request #21 from NBA-Analyzers/OPENAI_to_supabase
+[32m|[m[32m/[m[36m|[m 
+[32m|[m * [33m40ad22a[m[33m ([m[1;31morigin/OPENAI_to_supabase[m[33m)[m savinf metadaata of open ai to db
+[32m|[m[32m/[m  
+*   [33m11daa61[m[33m ([m[1;32mmain[m[33m)[m Merge pull request #20 from NBA-Analyzers/agents_creation
+[1;31m|[m[1;32m\[m  
+[1;31m|[m * [33mae39c98[m[33m ([m[1;31morigin/agents_creation[m[33m, [m[1;32magents_creation[m[33m)[m Fix pip install
+* [1;32m|[m [33m7270e0d[m Merge pull request #19 from NBA-Analyzers/agents_creation
+[1;33m|[m[1;32m\[m[1;32m|[m 
+[1;33m|[m *   [33m1f7ebe1[m Merge branch 'agents_creation' of https://github.com/NBA-Analyzers/nba_fan_yahoo into agents_creation
+[1;33m|[m [1;35m|[m[1;36m\[m  
+[1;33m|[m [1;35m|[m * [33mea40828[m OPENAI File change
+[1;33m|[m * [1;36m|[m [33m4113a6d[m OPENAI File change
+[1;33m|[m[1;33m/[m [1;36m/[m  
+* [1;36m|[m [33m5db55f0[m Update README.md
+[1;36m|[m [1;36m|[m * [33m1afb6ce[m[33m ([m[1;31morigin/function_app_test[m[33m)[m Test Function App Locally
+[1;36m|[m [1;36m|[m[1;36m/[m  
+[1;36m|[m[1;36m/[m[1;36m|[m   
+* [1;36m|[m [33me3e4c19[m Update app.py
+* [1;36m|[m   [33m62d7f4a[m Merge pull request #18 from NBA-Analyzers/authentications
+[32m|[m[33m\[m [1;36m\[m  
+[32m|[m * [1;36m|[m [33m3447b37[m[33m ([m[1;31morigin/authentications[m[33m)[m connect to DB fully and improve flask
+* [33m|[m [1;36m|[m [33m0fc609b[m Update auth_routes.py
+* [33m|[m [1;36m|[m [33mc06f52f[m Merge pull request #17 from NBA-Analyzers/authentications
+[34m|[m[33m\[m[33m|[m [1;36m|[m 
+[34m|[m * [1;36m|[m   [33m775c310[m Merge branch 'authentications' of https://github.com/urilevy77/nba_fan_yahoo into authentications
+[34m|[m [36m|[m[1;31m\[m [1;36m\[m  
+[34m|[m * [1;31m|[m [1;36m|[m [33m299ce56[m last fix
+* [1;31m|[m [1;31m|[m [1;36m|[m   [33m3a3e7b6[m Merge pull request #16 from NBA-Analyzers/authentications
+[1;32m|[m[1;31m\[m [1;31m\[m [1;31m\[m [1;36m\[m  
+[1;32m|[m [1;31m|[m [1;31m|[m[1;31m/[m [1;36m/[m  
+[1;32m|[m [1;31m|[m[1;31m/[m[1;31m|[m [1;36m|[m   
+[1;32m|[m * [1;31m|[m [1;36m|[m   [33md87711c[m Merge branch 'main' into authentications
+[1;32m|[m [1;31m|[m[1;32m\[m [1;31m\[m [1;36m\[m  
+[1;32m|[m [1;31m|[m[1;32m/[m [1;31m/[m [1;36m/[m  
+[1;32m|[m[1;32m/[m[1;31m|[m [1;31m/[m [1;36m/[m   
+[1;32m|[m [1;31m|[m[1;31m/[m [1;36m/[m    
+* [1;31m|[m [1;36m|[m [33me678ad3[m Update startup.txt
+* [1;31m|[m [1;36m|[m [33m98336e9[m Update app.py
+* [1;31m|[m [1;36m|[m [33mcd0c012[m Update app.py
+* [1;31m|[m [1;36m|[m   [33mf5c37e0[m Merge pull request #15 from NBA-Analyzers/authentications
+[1;36m|[m[31m\[m [1;31m\[m [1;36m\[m  
+[1;36m|[m [31m|[m * [1;36m\[m   [33m528e0ba[m Merge branch 'authentications' of https://github.com/urilevy77/nba_fan_yahoo into authentications
+[1;36m|[m [31m|[m [32m|[m[31m\[m [1;36m\[m  
+[1;36m|[m [31m|[m [32m|[m[31m/[m [1;36m/[m  
+[1;36m|[m [31m|[m[31m/[m[32m|[m [1;36m|[m   
+[1;36m|[m * [32m|[m [1;36m|[m   [33mf412a8e[m Merge branch 'main' into authentications
+[1;36m|[m [34m|[m[1;36m\[m [32m\[m [1;36m\[m  
+[1;36m|[m [34m|[m[1;36m/[m [32m/[m [1;36m/[m  
+[1;36m|[m[1;36m/[m[34m|[m [32m|[m [1;36m|[m   
+* [34m|[m [32m|[m [1;36m|[m [33m1ab9164[m Update base.py
+* [34m|[m [32m|[m [1;36m|[m   [33md757a87[m Merge pull request #14 from NBA-Analyzers/authentications
+[36m|[m[1;31m\[m [34m\[m [32m\[m [1;36m\[m  
+[36m|[m [1;31m|[m [34m|[m * [1;36m|[m [33m093b29d[m fix imports
+[36m|[m [1;31m|[m [34m|[m[34m/[m [1;36m/[m  
+[36m|[m [1;31m|[m * [1;36m|[m   [33m21e29b1[m Merge branch 'authentications' of https://github.com/urilevy77/nba_fan_yahoo into authentications
+[36m|[m [1;31m|[m [1;32m|[m[1;31m\[m [1;36m\[m  
+[36m|[m [1;31m|[m [1;32m|[m[1;31m/[m [1;36m/[m  
+[36m|[m [1;31m|[m[1;31m/[m[1;32m|[m [1;36m|[m   
+[36m|[m * [1;32m|[m [1;36m|[m   [33m515c497[m Merge branch 'main' into authentications
+[36m|[m [1;34m|[m[36m\[m [1;32m\[m [1;36m\[m  
+[36m|[m [1;34m|[m[36m/[m [1;32m/[m [1;36m/[m  
+[36m|[m[36m/[m[1;34m|[m [1;32m|[m [1;36m|[m   
+* [1;34m|[m [1;32m|[m [1;36m|[m [33m41af8fe[m Update app.py
+* [1;34m|[m [1;32m|[m [1;36m|[m [33m79bdbb5[m Update validators.py
+* [1;34m|[m [1;32m|[m [1;36m|[m   [33m0f494b5[m Merge pull request #13 from NBA-Analyzers/authentications
+[1;36m|[m[31m\[m [1;34m\[m [1;32m\[m [1;36m\[m  
+* [31m\[m [1;34m\[m [1;32m\[m [1;36m\[m   [33mce580dd[m Merge pull request #12 from NBA-Analyzers/authentications
+[32m|[m[33m\[m [31m\[m [1;34m\[m [1;32m\[m [1;36m\[m  
+* [33m\[m [31m\[m [1;34m\[m [1;32m\[m [1;36m\[m   [33md388034[m Merge pull request #11 from NBA-Analyzers/authentications
+[34m|[m[35m\[m [33m\[m [31m\[m [1;34m\[m [1;32m\[m [1;36m\[m  
+* [35m\[m [33m\[m [31m\[m [1;34m\[m [1;32m\[m [1;36m\[m   [33md152056[m Merge pull request #10 from NBA-Analyzers/authentications
+[36m|[m[1;31m\[m [35m\[m [33m\[m [31m\[m [1;34m\[m [1;32m\[m [1;36m\[m  
+[36m|[m [1;31m|[m [35m|[m [33m|[m [31m|[m [1;34m|[m * [1;36m|[m [33m78377e4[m restructure app.py
+[36m|[m [1;31m|[m [35m|[m [33m|[m [31m|[m [1;34m|[m[1;34m/[m [1;36m/[m  
+[36m|[m [1;31m|[m [35m|[m [33m|[m [31m|[m * [1;36m/[m [33ma9e84e2[m save google+ yahoo to DB
+[36m|[m [1;31m|[m [35m|[m [33m|[m [31m|[m[31m/[m [1;36m/[m  
+[36m|[m [1;31m|[m [35m|[m [33m|[m * [1;36m/[m [33m35afb66[m added only insertion to google_auth
+[36m|[m [1;31m|[m [35m|[m [33m|[m[33m/[m [1;36m/[m  
+[36m|[m [1;31m|[m [35m|[m * [1;36m/[m [33m02facda[m removed connection to DB
+[36m|[m [1;31m|[m [35m|[m[35m/[m [1;36m/[m  
+[36m|[m [1;31m|[m * [1;36m|[m   [33m10d1aac[m Merge branch 'authentications' of https://github.com/urilevy77/nba_fan_yahoo into authentications
+[36m|[m [1;31m|[m [1;32m|[m[1;31m\[m [1;36m\[m  
+[36m|[m [1;31m|[m [1;32m|[m[1;31m/[m [1;36m/[m  
+[36m|[m [1;31m|[m[1;31m/[m[1;32m|[m [1;36m|[m   
+[36m|[m * [1;32m|[m [1;36m|[m   [33m41349c6[m Merge branch 'main' into authentications
+[36m|[m [1;34m|[m[36m\[m [1;32m\[m [1;36m\[m  
+[36m|[m [1;34m|[m[36m/[m [1;32m/[m [1;36m/[m  
+[36m|[m[36m/[m[1;34m|[m [1;32m|[m [1;36m|[m   
+* [1;34m|[m [1;32m|[m [1;36m|[m [33m4ecfd9d[m Update app.py
+* [1;34m|[m [1;32m|[m [1;36m|[m   [33ma23d78f[m Merge pull request #9 from NBA-Analyzers/authentications
+[1;36m|[m[31m\[m [1;34m\[m [1;32m\[m [1;36m\[m  
+[1;36m|[m [31m|[m [1;34m|[m * [1;36m|[m [33mba29e23[m fix imports
+[1;36m|[m [31m|[m [1;34m|[m[1;34m/[m [1;36m/[m  
+[1;36m|[m [31m|[m * [1;36m|[m [33m82e06fd[m fix imports
+[1;36m|[m [31m|[m * [1;36m|[m   [33mf515af0[m Merge branch 'authentications' of https://github.com/urilevy77/nba_fan_yahoo into authentications
+[1;36m|[m [31m|[m [32m|[m[31m\[m [1;36m\[m  
+[1;36m|[m [31m|[m [32m|[m[31m/[m [1;36m/[m  
+[1;36m|[m [31m|[m[31m/[m[32m|[m [1;36m|[m   
+[1;36m|[m * [32m|[m [1;36m|[m   [33m6c26f81[m Merge branch 'main' into authentications
+[1;36m|[m [34m|[m[1;36m\[m [32m\[m [1;36m\[m  
+[1;36m|[m [34m|[m[1;36m/[m [32m/[m [1;36m/[m  
+[1;36m|[m[1;36m/[m[34m|[m [32m|[m [1;36m|[m   
+* [34m|[m [32m|[m [1;36m|[m [33m402a99a[m Update app.py
+* [34m|[m [32m|[m [1;36m|[m [33mae9d881[m Update app.py
+* [34m|[m [32m|[m [1;36m|[m [33m774d923[m Update app.py
+* [34m|[m [32m|[m [1;36m|[m [33mde6d11f[m Update app.py
+* [34m|[m [32m|[m [1;36m|[m [33m4c1506d[m Update app.py
+* [34m|[m [32m|[m [1;36m|[m [33m0f40b42[m Update app.py
+* [34m|[m [32m|[m [1;36m|[m [33m4a70aac[m Update app.py
+* [34m|[m [32m|[m [1;36m|[m   [33m93c66d8[m Merge pull request #8 from NBA-Analyzers/authentications
+[36m|[m[1;31m\[m [34m\[m [32m\[m [1;36m\[m  
+* [1;31m\[m [34m\[m [32m\[m [1;36m\[m   [33mc7ad168[m Merge pull request #7 from NBA-Analyzers/authentications
+[1;32m|[m[1;33m\[m [1;31m\[m [34m\[m [32m\[m [1;36m\[m  
+[1;32m|[m [1;33m|[m [1;31m|[m [34m|[m * [1;36m|[m [33m2cae9e8[m updates database functions
+[1;32m|[m [1;33m|[m [1;31m|[m [34m|[m[34m/[m [1;36m/[m  
+[1;32m|[m [1;33m|[m [1;31m|[m * [1;36m/[m [33m921baca[m fix database files
+[1;32m|[m [1;33m|[m [1;31m|[m[1;31m/[m [1;36m/[m  
+[1;32m|[m [1;33m|[m * [1;36m/[m [33mf2a3ef2[m fixing authentications
+[1;32m|[m [1;33m|[m[1;33m/[m [1;36m/[m  
+[1;32m|[m * [1;36m/[m [33m4795304[m updata app.py for google login
+[1;32m|[m[1;32m/[m [1;36m/[m  
+* [1;36m|[m [33m2708561[m Add or update the Azure App Service build and deployment workflow config
+* [1;36m|[m [33m4b82c24[m Update app.py
+* [1;36m|[m [33m385a024[m Update app.py
+* [1;36m|[m [33mc077d13[m Update app.py
+* [1;36m|[m [33me0ff036[m Add or update the Azure App Service build and deployment workflow config
+* [1;36m|[m [33m2d5c2a8[m try insert into database
+* [1;36m|[m   [33m8d11ea7[m Merge pull request #6 from NBA-Analyzers/supabase
+[1;34m|[m[1;35m\[m [1;36m\[m  
+[1;34m|[m * [1;36m|[m [33m4993430[m[33m ([m[1;31morigin/supabase[m[33m)[m added functions for supaBase
+[1;34m|[m[1;34m/[m [1;36m/[m  
+* [1;36m|[m [33mbeba74c[m Fix Google and Yahoo - hopefully
+* [1;36m|[m [33mb69c238[m Fix Yahoo
+* [1;36m|[m [33mf65edd9[m azure cli
+* [1;36m|[m [33mcf4a932[m No way it works
+* [1;36m|[m [33m2cbc64f[m try
+* [1;36m|[m [33m83cc2e8[m again
+* [1;36m|[m [33m61f2639[m Fix
+* [1;36m|[m [33m8f6803d[m Fix
+* [1;36m|[m [33mfe2d23b[m Added env to deployment
+* [1;36m|[m [33m4898f87[m Fix deploy action
+* [1;36m|[m [33mecbed4d[m Test with Port
+* [1;36m|[m [33m6e495dc[m addition for deploy
+* [1;36m|[m [33m065b856[m Fix app.py
+* [1;36m|[m [33mfcaad43[m Fix import paths for Azure deployment
+* [1;36m|[m [33ma32c1db[m Update workflow for Azure deployment
+* [1;36m|[m [33m79df07a[m App Function
+* [1;36m|[m [33m92f41ac[m Requirements Fix
+* [1;36m|[m [33mf308865[m Add or update the Azure App Service build and deployment workflow config
+* [1;36m|[m   [33md44e6ed[m Merge pull request #5 from NBA-Analyzers/sync_full_league
+[1;36m|[m[31m\[m [1;36m\[m  
+[1;36m|[m * [1;36m|[m [33m3e734f5[m[33m ([m[1;31morigin/sync_full_league[m[33m)[m Add Directories
+[1;36m|[m * [1;36m|[m [33m950d40a[m Sync Yahoo League to Azure Blob
+[1;36m|[m * [1;36m|[m [33m91b4415[m yahoo debugging
+[1;36m|[m * [1;36m|[m [33m6a772c1[m sync league
+[1;36m|[m[1;36m/[m [1;36m/[m  
+* [1;36m|[m   [33mb51eb7a[m Merge pull request #4 from NBA-Analyzers/yahoo_league_sync
+[32m|[m[33m\[m [1;36m\[m  
+[32m|[m * [1;36m|[m [33m3f00ce6[m[33m ([m[1;31morigin/yahoo_league_sync[m[33m)[m implement interface
+[32m|[m[32m/[m [1;36m/[m  
+* [1;36m/[m [33m298d327[m Add Yahoo flow for leagues
+[1;36m|[m[1;36m/[m  
+* [33m5f40c75[m Add an easy Debug Solution
+* [33md8e17ce[m Read Me file
+*   [33m2be8563[m Merge pull request #3 from NBA-Analyzers/yahoo
+[34m|[m[35m\[m  
+[34m|[m * [33mddbba73[m[33m ([m[1;31morigin/yahoo[m[33m)[m Yahoo Login and Direcrory preparation
+[34m|[m * [33m1b6bcfd[m Delete a lot
+[34m|[m * [33mff02a91[m Organize
+* [35m|[m [33m16adbdf[m Merge pull request #2 from NBA-Analyzers/feature/yahoo-league-daily-roster
+[36m|[m[35m\[m[35m|[m 
+[36m|[m * [33mc73dd08[m[33m ([m[1;31morigin/feature/yahoo-league-daily-roster[m[33m)[m hodaa
+[36m|[m * [33m1bc1dae[m added nba_integration
+[36m|[m * [33m0d277a5[m bla bla
+[36m|[m * [33mc065163[m Add new features and improvements: increased NBA API timeout, injury news fetch, and other updates
+[36m|[m * [33me2471f9[m merged all syncing parts to sync_league/sync_yahoo_league'
+[36m|[m[36m/[m  
+*   [33m60e2cb1[m Merge pull request #1 from NBA-Analyzers/google_sign_in
+[1;32m|[m[1;33m\[m  
+[1;32m|[m * [33ma2cd0b5[m[33m ([m[1;31morigin/google_sign_in[m[33m)[m Fixz
+* [1;33m|[m [33m99ae674[m Directory Fixes
+* [1;33m|[m [33m50201ff[m demo data
+[1;33m|[m[1;33m/[m  
+* [33m9367f8d[m Project Refactor
+* [33m9b996e5[m System Instructions
+* [33m0017e11[m Update System prompt and league settings
+* [33mb012f77[m Prettify
+* [33m45fed7f[m Added Standings
+* [33m7174a39[m Remove unneed files
+* [33m6af3860[m Remove unneed files
+* [33m9394b05[m System Instructions updated
+* [33m44f43dc[m Free Agents
+* [33mec379ba[m boxScore code
+* [33m0ebef00[m updated daily roster to json file
+*   [33m59adb1d[m Merge branch 'origin/best_player_overall_by_cat'
+[1;34m|[m[1;35m\[m  
+[1;34m|[m * [33md34a5c5[m Fix teams
+[1;34m|[m * [33m156a220[m Team Roster
+[1;34m|[m * [33mf53f7f4[m Cleanups
+[1;34m|[m * [33m0af1721[m league_matchup
+[1;34m|[m *   [33m149de20[m Merge branch 'best_player_overall_by_cat' of https://github.com/urilevy77/nba_fan_yahoo into best_player_overall_by_cat
+[1;34m|[m [1;36m|[m[31m\[m  
+[1;34m|[m [1;36m|[m * [33m3d59014[m Create System_Instructions.txt
+[1;34m|[m * [31m|[m [33mefda238[m league Matchups
+[1;34m|[m [31m|[m[31m/[m  
+[1;34m|[m * [33md59dd06[m A few fixes
+* [31m|[m [33m4f614a1[m added daily roster for each team
+[31m|[m[31m/[m  
+* [33m2f8752d[m script for data
+* [33med4c19a[m Refactor folders
+* [33md8e4d5a[m Organize a bit Yahoo League and constants
+* [33m5fb852c[m Added gitignore
+* [33m9c1acd7[m Fix requirements
+* [33m40f7d04[m Update README.md
+* [33mb826415[m Update README.md
+* [33ma90979b[m Update README.md
+* [33m28d9629[m Update README.md
+* [33m30a06b5[m Update README.md
+* [33ma7a6e94[m[33m ([m[1;31morigin/123[m[33m)[m ///
+* [33m80ebe90[m ///
+*   [33m9a34c46[m Merge branch 'main' of https://github.com/urilevy77/nba_fantasy into league_refactor
+[32m|[m[33m\[m  
+[32m|[m * [33madcee97[m - Added SQL DB - Sync Leagues from Yahoo - Sync players from NBA API
+[32m|[m * [33mb62b325[m first commit
+* [33m469d48f[m Include features, not yet exactly according to Yoav's Satisfaction, code wise
+* [33m55a0337[m create object Team,convert the functions to use object team, now create object league and then I will take care of Tools.py and AdvancedTools.py
+* [33m3fa5af3[m create object Team,convert the functions to use object team, now create object league and then I will take care of Tools.py and AdvancedTools.py
+* [33mfa7d463[m create object Team,convert the functions to use object team, now create object league and then I will take care of Tools.py and AdvancedTools.py
+* [33me2da398[m Player ,playerAnalyzer,PlayerAccessor
+* [33mf32151b[m test commit
+* [33m33cd52a[m next commit
+* [33mb7231e8[m gos is good
+* [33m5ffabc9[m first commit
