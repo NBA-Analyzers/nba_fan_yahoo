@@ -1,8 +1,8 @@
-
 # yahoo_auth.py
 from dataclasses import dataclass
 from typing import Optional
 from .base import BaseModel
+
 
 @dataclass
 class YahooAuth(BaseModel):
@@ -11,4 +11,6 @@ class YahooAuth(BaseModel):
     access_token: str
     refresh_token: str
     # Optional fields last
+    username: Optional[str] = None
     created_at: Optional[str] = None
+    last_updated: Optional[str] = None

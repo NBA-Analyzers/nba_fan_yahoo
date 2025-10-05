@@ -1,17 +1,22 @@
-from flask import Blueprint, session, redirect, url_for, jsonify
+from flask import Blueprint, session, redirect, url_for, jsonify, render_template
 import time
+import uuid
+import logging
 
-main_bp = Blueprint('main', __name__)
+logger = logging.getLogger(__name__)
 
-@main_bp.route('/')
+main_bp = Blueprint("main", __name__)
+
+
+@main_bp.route("/")
 def homepage():
     """Main homepage with login options"""
     # Check if user is already logged in with Google
-    if 'google_user' in session:
-        return redirect(url_for('main.dashboard'))
-    
+    if "google_user" in session:
+        return redirect(url_for("main.dashboard"))
+
     # Show homepage with login options
-    return '''
+    return """
     <h1>Fantasy League App</h1>
     <p>Welcome! Please login to get started:</p>
     <ul>
@@ -23,73 +28,77 @@ def homepage():
         <li><a href="/api/sync_league">Sync League (Debug)</a></li>
         <li><a href="/health">Health Check</a></li>
     </ul>
-    '''
+    """
 
-@main_bp.route('/dashboard')
+
+@main_bp.route("/dashboard")
 def dashboard():
     """Dashboard page after Google authentication - shows Yahoo login option"""
     from ..middleware.auth_decorators import require_google_auth
-    
+
     @require_google_auth
     def dashboard_content():
-        user_info = session.get('google_user', {})
-        user_name = user_info.get('name', 'User')
-        
+        user_info = session.get("google_user", {})
+        user_name = user_info.get("name", "User")
+
         # Check if user also has Yahoo authentication
-        yahoo_authenticated = 'user' in session and session['user'] in session.get('token_store', {})
-        
+        yahoo_authenticated = "user" in session and session["user"] in session.get(
+            "token_store", {}
+        )
+
         # Get user's synced leagues if they have Yahoo auth
         synced_leagues_html = ""
         if yahoo_authenticated:
             try:
                 from ..services.yahoo_service import YahooService
-                yahoo_service = YahooService(session['token_store'])
-                user_leagues = yahoo_service.get_user_synced_leagues(session['user'])
-                
+
+                yahoo_service = YahooService(session["token_store"])
+                user_leagues = yahoo_service.get_user_synced_leagues(session["user"])
+
                 if user_leagues:
                     # Build league HTML dynamically
                     league_items = []
                     for league in user_leagues:
-                        league_items.append(f'''
+                        league_items.append(f"""
                         <div style="border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 8px; background: white;">
-                            <h4>League: {league.get('league_id', 'Unknown')}</h4>
-                            <p><strong>Team:</strong> {league.get('team_name', 'Unknown Team')}</p>
-                            <p><strong>Added:</strong> {league.get('created_at', 'Unknown')}</p>
-                            <a href="/ai-chat/{league.get('league_id', 'unknown')}" style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; font-size: 14px;">AI Chat</a>
+                            <h4>League: {league.get("league_id", "Unknown")}</h4>
+                            <p><strong>Team:</strong> {league.get("team_name", "Unknown Team")}</p>
+                            <p><strong>Added:</strong> {league.get("created_at", "Unknown")}</p>
+                            <a href="/ai-chat/{league.get("league_id", "unknown")}" style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; font-size: 14px;">AI Chat</a>
                         </div>
-                        ''')
-                    
-                    synced_leagues_html = f'''
+                        """)
+
+                    synced_leagues_html = f"""
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
                         <h3>Your Synced Leagues</h3>
                         <p>Click on any league to access its AI Assistant:</p>
-                        {''.join(league_items)}
+                        {"".join(league_items)}
                     </div>
-                    '''
+                    """
                 else:
-                    synced_leagues_html = '''
+                    synced_leagues_html = """
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
                         <h3>Your Synced Leagues</h3>
                         <p>No leagues synced yet. Connect your Yahoo account to get started!</p>
                     </div>
-                    '''
+                    """
             except Exception as e:
                 print(f"Error getting synced leagues: {e}")
-                synced_leagues_html = '''
+                synced_leagues_html = """
                 <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
                     <h3>Your Synced Leagues</h3>
                     <p>Error loading leagues. Please try refreshing the page.</p>
                 </div>
-                '''
-        
-        html = f'''
+                """
+
+        html = f"""
         <h1>Welcome, {user_name}!</h1>
         <p>You are logged in with Google.</p>
         
         <h2>Connect to Yahoo Fantasy</h2>
         <p>To access your fantasy leagues, please connect your Yahoo account:</p>
         
-        {'<p>Yahoo account connected!</p>' if yahoo_authenticated else ''}
+        {"<p>Yahoo account connected!</p>" if yahoo_authenticated else ""}
         
         <ul>
             <li>
@@ -122,64 +131,89 @@ def dashboard():
         '''
         
         return html
-    
+
     return dashboard_content()
 
-@main_bp.route('/health')
+
+@main_bp.route("/health")
 def health_check():
     """Health check endpoint"""
-    return jsonify({
-        "status": "healthy",
-        "service": "Fantasy League App",
-        "timestamp": time.time()
-    })
+    return jsonify(
+        {"status": "healthy", "service": "Fantasy League App", "timestamp": time.time()}
+    )
 
-@main_bp.route('/ai-chat/<league_id>')
+
+@main_bp.route("/ai-chat/<league_id>")
 def ai_chat(league_id):
-    """AI Chat interface for a specific league - placeholder for future AI integration"""
+    """AI Chat interface for a specific league - triggers background data sync"""
     from ..middleware.auth_decorators import require_google_auth
-    
+    import logging
+
+    logger = logging.getLogger(__name__)
+
     @require_google_auth
     def chat_content():
-        user_info = session.get('google_user', {})
-        user_name = user_info.get('name', 'User')
-        
-        # Get user's connected Yahoo info
-        yahoo_authenticated = 'user' in session and session['user'] in session.get('token_store', {})
-        
+        user_info = session.get("google_user", {})
+        user_guid = session.get("user")
+
+        # Verify Yahoo authentication
+        yahoo_authenticated = "user" in session and session["user"] in session.get(
+            "token_store", {}
+        )
+
         if not yahoo_authenticated:
-            return redirect(url_for('main.dashboard'))
-        
-        html = f'''
-        <h1>Fantasy AI Assistant</h1>
-        <p>Welcome, {user_name}!</p>
-        
-        <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
-            <h2>🎯 Your Connected League</h2>
-            <p><strong>League ID:</strong> {league_id}</p>
-            <p>✅ Yahoo Fantasy League Connected</p>
-            <p>✅ Team Data Synced</p>
-            <p>✅ Ready for AI Analysis</p>
-        </div>
-        
-        <div style="background: #e8f4fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
-            <h2>🤖 AI Chat Interface</h2>
-            <p><em>This is where your AI chat will be implemented for league {league_id}!</em></p>
-            <p>Users will be able to ask questions like:</p>
-            <ul>
-                <li>"How is my team performing this week in this league?"</li>
-                <li>"Who should I pick up from free agents in this league?"</li>
-                <li>"How do I match up against my opponent this week?"</li>
-                <li>"Should I make this trade for my team?"</li>
-            </ul>
-        </div>
-        
-        <div style="margin: 20px 0;">
-            <a href="/dashboard" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">← Back to Dashboard</a>
-            <a href="/auth/logout" style="background: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-left: 10px;">Logout</a>
-        </div>
-        '''
-        
-        return html
-    
+            return redirect(url_for("main.dashboard"))
+
+        # ========== TRIGGER NON-BLOCKING BACKGROUND SYNC ========== #
+        # This happens in the background while the chat loads immediately
+        try:
+            print(f"\n{'=' * 60}")
+            print(f"🔄 Triggering background sync for league: {league_id}")
+            print(f"{'=' * 60}\n")
+
+            if user_guid and "token_store" in session:
+                from ..services.yahoo_service import YahooService
+
+                yahoo_service = YahooService(session["token_store"])
+
+                # ✨ NEW: Start background sync (non-blocking)
+                yahoo_service.sync_league_data_async(league_id, user_guid)
+
+                print(f"✅ Background sync thread started!")
+                print(f"   Chat will load immediately while data updates in background")
+                logger.info(f"Background sync triggered for league {league_id}")
+        except Exception as e:
+            print(f"⚠️ Could not start background sync: {str(e)}")
+            logger.warning(f"Could not trigger sync for league {league_id}: {e}")
+            # Don't block the user - let them use the chat with existing data
+
+        # ========== RENDER CHAT IMMEDIATELY (DON'T WAIT FOR SYNC) ========== #
+
+        # Generate unique session ID
+        session_id = str(uuid.uuid4())
+
+        # For now, use demo vector store
+        # LATER: This is where you'll load league files!
+        vector_store_id = "vs_68d28df1db1081919589f7dcbb4df3c3"  # Demo data
+        vector_store_initialized = False
+
+        # TODO (STAGE 2): Uncomment this to load real league data
+        # from ..services.agent_initialization_service import AgentInitializationService
+        # try:
+        #     agent_init = AgentInitializationService()
+        #     vector_store_id = agent_init.initialize_league_context(league_id)
+        #     vector_store_initialized = True
+        # except Exception as e:
+        #     print(f"⚠️ Could not load league data: {e}")
+        #     # Fall back to demo data
+
+        # Render the chat template immediately (sync happens in background)
+        return render_template(
+            "agent_chat.html",
+            league_id=league_id,
+            session_id=session_id,
+            vector_store_id=vector_store_id,
+            vector_store_initialized=vector_store_initialized,
+        )
+
     return chat_content()
