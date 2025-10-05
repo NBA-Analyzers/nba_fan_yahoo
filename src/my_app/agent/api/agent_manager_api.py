@@ -49,10 +49,53 @@ class AgentAPI:
             "vs_68d28df1db1081919589f7dcbb4df3c3"  # Default vector store ID
         )
 
+    def get_vector_store_id(self, league_id: Optional[str] = None) -> str:
+        """
+        Get OpenAI vector store ID.
+        Priority:
+        1. League-specific vector store (if league_id provided)
+        2. Fetch from DB
+        3. Fall back to default
+        """
+        # If league_id provided, try to get league-specific vector store
+        if league_id and self.vector_store_manager:
+            vector_store_id = f"league_{league_id}"
+            openai_vs_id = self.vector_store_manager.get_vector_store_id(
+                vector_store_id
+            )
+            if openai_vs_id:
+                print(f"📚 Using league vector store: {openai_vs_id}")
+                return openai_vs_id
+
+        # Try to fetch from DB (for rules, box score, etc.)
+        if self.file_service:
+            try:
+                # Try common vector stores
+                for vs_id in ["rules", "box_score"]:
+                    vector_meta = self.file_service.get_vector_store(vs_id)
+                    if vector_meta:
+                        print(
+                            f"📚 Using {vs_id} vector store: {vector_meta.openai_vector_id}"
+                        )
+                        return vector_meta.openai_vector_id
+            except Exception:
+                pass
+
+        # Fall back to default
+        print(f"📚 Using default vector store: {self.default_vector_store_id}")
+        return self.default_vector_store_id
+
 
 @agent_router.post("/chat")
 async def chat_with_openai(request: ChatRequest):
+    """
+    Chat endpoint that supports league-specific context.
+    If league_id is provided, uses league-specific vector store.
+    """
     agent_api = get_agent_api_instance()
+
+    # Get appropriate vector store ID
+    vector_store_id = agent_api.get_vector_store_id(request.league_id)
 
     # Start new chat
     if request.session_id not in [
@@ -61,7 +104,7 @@ async def chat_with_openai(request: ChatRequest):
         assistant_response = agent_api.agent_manager.start_chat(
             previous_response_id=None,
             new_user_message=request.user_message,
-            openai_vector_store_id=agent_api.vector_store_id,
+            openai_vector_store_id=vector_store_id,
         )
         new_chat_session = ChatSession(
             session_id=request.session_id,
@@ -74,8 +117,9 @@ async def chat_with_openai(request: ChatRequest):
                 assistant_response = agent_api.agent_manager.start_chat(
                     previous_response_id=chat_session.previous_openai_response_id,
                     new_user_message=request.user_message,
-                    openai_vector_store_id=agent_api.vector_store_id,
+                    openai_vector_store_id=vector_store_id,
                 )
                 chat_session.previous_openai_response_id = assistant_response.id
                 break
+
     return assistant_response.output_text
