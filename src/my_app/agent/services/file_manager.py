@@ -87,8 +87,7 @@ class FileManager:
             FilePurpose.RULES, openai_file_ids
         )
         return OpenaiStoredFiles(
-            openai_vs_id=openai_vector_store_id, 
-            file_metadata=metadata
+            openai_vs_id=openai_vector_store_id, file_metadata=metadata
         )
 
     def update_box_score(self, file: UpdateFile) -> OpenaiStoredFiles:
@@ -99,13 +98,15 @@ class FileManager:
             FilePurpose.BOX_SCORE, [openai_file_id]
         )
         return OpenaiStoredFiles(
-            openai_vs_id=openai_vector_store_id, 
-            file_metadata=[FileMetadata(
-                file_id=file.file_name,
-                file_name=file.file_name,
-                openai_file_id=openai_file_id,
-                file_path_s3=s3_path,
-            )]
+            openai_vs_id=openai_vector_store_id,
+            file_metadata=[
+                FileMetadata(
+                    file_id=file.file_name,
+                    file_name=file.file_name,
+                    openai_file_id=openai_file_id,
+                    file_path_s3=s3_path,
+                )
+            ],
         )
 
     def update_file(self, file_id: str, file: UpdateFile):

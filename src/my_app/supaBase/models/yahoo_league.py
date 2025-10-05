@@ -1,8 +1,8 @@
-
 # yahoo_league.py
 from dataclasses import dataclass
 from typing import Optional
 from .base import BaseModel
+
 
 @dataclass
 class YahooLeague(BaseModel):
@@ -10,5 +10,8 @@ class YahooLeague(BaseModel):
     yahoo_user_id: str  # FK to yahoo_auth.yahoo_user_id
     league_id: str
     team_name: str
+    team_id: str
+    league_name: str
     # Optional fields last
     created_at: Optional[str] = None
+    last_blob_sync: Optional[str] = None
