@@ -1,9 +1,7 @@
 {
-  "IsEncrypted": false,
+  "IsEncrypted": true,
   "Values": {
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "FUNCTIONS_WORKER_RUNTIME": "python",
-    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
-    "PYTHON_VERSION": "3.10"
-  }
+    "FUNCTIONS_WORKER_RUNTIME": "CfDJ8AqPLCLDIX1OglpL0nJn2RW3iIb8bLM1ggGfTSZA1alSZbPr4Z7DhKL2AY3riz+U8v5PBQMLWhzN5FspLzV0OJ6Rz8Ng210okhzLL3fN7NLe6062KxnhV5EjglIadq/omw=="
+  },
+  "ConnectionStrings": {}
 }
