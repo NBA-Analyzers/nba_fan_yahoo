@@ -1,9 +1,10 @@
 import time
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from dotenv.main import logger
 from flask import session
 from ..supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
-from ..fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
+from my_app.integrations.yahoo.sync_yahoo_league import YahooLeague
 from ..azure.azure_blob_storage import AzureBlobStorage
 import os
 
@@ -34,11 +35,11 @@ class YahooService:
         """Sync league data and store in database"""
         try:
             from ..utils.helpers import get_yahoo_sdk
-            yahoo_game = get_yahoo_sdk(self.token_store, {'user': user_guid})
-            if not yahoo_game:
+            yahoo_sdk = get_yahoo_sdk(self.token_store, {'user': user_guid})
+            if not yahoo_sdk:
                 return {"error": "Yahoo SDK not available"}
                 
-            league = yahoo_game.to_league(league_id)
+            league = yahoo_sdk.to_league(league_id)
             
             # Get league information for database insertion
             league_settings = league.settings()
@@ -98,8 +99,14 @@ class YahooService:
             azure_connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
             if azure_connection_string:
                 try:
+                    import time
+                    start_time = time.time()
                     azure_storage = AzureBlobStorage(container_name=azure_container)
                     results = yahoo_league.sync_full_league(azure_storage)
+                    end_time = time.time()
+                    duration = end_time - start_time
+                    results['sync_duration_seconds'] = duration
+                    logger.info(f"Sync duration: {duration} seconds")
                 except Exception as azure_error:
                     print(f"⚠️ Azure Storage error: {azure_error}")
                     results = {"warning": "Azure Storage not available, data not backed up"}

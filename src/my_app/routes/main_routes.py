@@ -92,7 +92,12 @@ def dashboard():
         {'<p>Yahoo account connected!</p>' if yahoo_authenticated else ''}
         
         <ul>
-            <li><a href="/auth/yahoo/login">{'Re-connect' if yahoo_authenticated else 'Connect'} Yahoo Account</a></li>
+            <li>
+                <a href="/auth/yahoo/login" id="yahooLoginLink" onclick="showYahooLoading()">
+                    <span id="yahooLoginText">{'Re-connect' if yahoo_authenticated else 'Connect'} Yahoo Account</span>
+                    <span id="yahooLoadingSpinner" style="display: none;">⏳ Connecting...</span>
+                </a>
+            </li>
             {'<li><a href="/yahoo/my_leagues">View My Synced Leagues</a></li>' if yahoo_authenticated else ''}
             <li><a href="/api/sync_league">Sync League (Debug)</a></li>
             <li><a href="/health">Health Check</a></li>
@@ -100,6 +105,20 @@ def dashboard():
         </ul>
         
         {synced_leagues_html}
+        
+        <script>
+        function showYahooLoading() {{
+            // Show loading spinner and hide original text
+            document.getElementById('yahooLoginText').style.display = 'none';
+            document.getElementById('yahooLoadingSpinner').style.display = 'inline';
+            
+            // Optional: Add a timeout to re-enable if something goes wrong
+            setTimeout(function() {{
+                document.getElementById('yahooLoginText').style.display = 'inline';
+                document.getElementById('yahooLoadingSpinner').style.display = 'none';
+            }}, 30000); // 30 second timeout
+        }}
+        </script>
         '''
         
         return html
