@@ -197,13 +197,26 @@ def yahoo_callback():
         <h2>Hello {user_name}!</h2>
         <h3>Your Yahoo Fantasy Leagues</h3>
         <p>Yahoo account connected successfully! Select your league:</p>
-        <form action="/yahoo/select_league" method="post">
+        <form id="leagueForm" action="/yahoo/select_league" method="post">
             {league_html}
             <br>
-            <button type="submit">Connect League & Go to AI Chat</button>
+            <button type="submit" id="submitBtn">
+                <span id="btnText">Connect League & Go to AI Chat</span>
+                <span id="loadingSpinner" style="display: none;">⏳ Loading...</span>
+            </button>
         </form>
         <br>
         <a href="/dashboard">← Back to Dashboard</a>
+        
+        <script>
+        document.getElementById('leagueForm').addEventListener('submit', function(e) {{
+            // Show loading spinner and disable button
+            document.getElementById('btnText').style.display = 'none';
+    document.getElementById('loadingSpinner').style.display = 'inline';
+            document.getElementById('submitBtn').disabled = true;
+            
+        }});
+        </script>
         '''
         return html
         
