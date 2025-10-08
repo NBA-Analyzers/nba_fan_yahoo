@@ -8,8 +8,8 @@ from yahoo_oauth import OAuth2
 
 import os
 
-from ...azure.azure_blob_storage import AzureBlobStorage
-from ..sync_league import SyncLeagueData
+from ....azure.azure_blob_storage import AzureBlobStorage
+from ...i_sync_league import SyncLeagueData
 
 STAT_ID_TO_NAME = {
     "5": "Field Goal Percentage (FG%)",
@@ -330,7 +330,7 @@ class YahooLeague(SyncLeagueData):
             print(f"Error getting team rosters: {e}")
             return {}
 
-    def sync_full_league(self, azure_blob_storage: AzureBlobStorage, start_week: int = 1, end_week: int = 20, days_back: int = 7) -> Dict[str, str]:
+    def sync_full_league(self, azure_blob_storage: AzureBlobStorage, start_week: int = 1, end_week: int = 20) -> Dict[str, str]:
         """
         Implementation of abstract method - Sync all league data and save to JSON files.
         This function calls all the external functions that save JSON files.
@@ -339,7 +339,6 @@ class YahooLeague(SyncLeagueData):
             azure_blob_storage (AzureBlobStorage): Azure Blob Storage instance for saving data
             start_week (int): Starting week for matchups (default: 1)
             end_week (int): Ending week for matchups (default: 20)
-            days_back (int): Number of days back for daily roster (default: 7)
         
         Returns:
             dict: Results of each sync operation with success/error status
@@ -389,7 +388,7 @@ class YahooLeague(SyncLeagueData):
         # 6. Daily roster
         try:
             end_date = '2024-03-03'  #datetime.now().strftime('%Y-%m-%d')
-            start_date =  '2024-03-03'  #(datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
+            start_date =  '2024-03-03'
             daily_roster = self._daily_roster(start_date, end_date)
             azure_blob_storage.upload_json_data(daily_roster, directory_name+"/daily_roster.json", overwrite=True)
             results['daily_roster'] = f'Successfully saved daily roster data for {start_date} to {end_date}'
