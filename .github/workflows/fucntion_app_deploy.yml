@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'src/my_app/sync_general_data' # set this to the path to your function app project
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'sync_general_data' # set this to the path to your function app project
   PYTHON_VERSION: '3.10' # set this to the python version to use (supports 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12)
 
 jobs:
@@ -40,9 +40,9 @@ jobs:
 
       - name: Prepare function app for deployment
         run: |
-          cd src/my_app/sync_general_data
-          cp ../../../requirements.txt .
-          zip -r ../../../release.zip . -x "__pycache__/*"
+          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          cp ../requirements.txt .
+          zip -r ../release.zip . -x "__pycache__/*"
 
       # Optional: Add step to run tests here
 
@@ -52,7 +52,6 @@ jobs:
           name: python-app
           path: |
             release.zip
-            !venv/
 
   deploy:
     runs-on: ubuntu-latest
