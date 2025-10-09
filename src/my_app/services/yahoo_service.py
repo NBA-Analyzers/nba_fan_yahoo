@@ -4,7 +4,7 @@ from datetime import datetime
 from dotenv.main import logger
 from flask import session
 from ..supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
-from my_app.integrations.yahoo.sync_yahoo_league import YahooLeague
+from my_app.integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
 from ..azure.azure_blob_storage import AzureBlobStorage
 import os
 
