@@ -71,6 +71,12 @@ jobs:
         run: |
           unzip release.zip
           rm release.zip
+      
+      - name: Debug event
+        run: |
+          echo "event=${{ github.event_name }}"
+          echo "actor=${{ github.actor }}"
+          echo "ref=${{ github.ref }}"
 
       - name: Assert Azure secrets exist
         run: |
