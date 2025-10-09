@@ -74,9 +74,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: '564a223d-4638-4b7d-ab5d-8a641293bd80'
-          tenant-id: '04de722a-6b01-4773-bc59-6830e8c29b5c'
-          subscription-id: '08fbd41d-caae-483b-beac-a77ad4083bc2'
+          client-id: 564a223d-4638-4b7d-ab5d-8a641293bd80
+          tenant-id: 04de722a-6b01-4773-bc59-6830e8c29b5c
+          subscription-id: 08fbd41d-caae-483b-beac-a77ad4083bc2
 
       - name: 'Deploy to Azure Functions'
         uses: Azure/functions-action@v1
