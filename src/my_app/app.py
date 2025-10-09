@@ -5,40 +5,54 @@ from .config.oauth_config import configure_oauth
 from .routes import register_routes
 import os
 
+
 def create_app():
     """Application factory pattern"""
     app = Flask(__name__)
-    
+
     # Configure app to work behind ngrok proxy (HTTPS)
-    app.config['PREFERRED_URL_SCHEME'] = 'https'
-    
+    app.config["PREFERRED_URL_SCHEME"] = "https"
+
     # Trust proxy headers from ngrok
-    app.config['SERVER_NAME'] = None
-    
+    app.config["SERVER_NAME"] = None
+
     # Apply ProxyFix middleware to handle ngrok headers properly
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1, x_prefix=1)
-    
+
     # Middleware to handle ngrok proxy headers
     @app.before_request
     def before_request():
         # Check if we're behind ngrok and force HTTPS
-        if request.headers.get('X-Forwarded-Proto') == 'https':
-            request.environ['wsgi.url_scheme'] = 'https'
-    
+        if request.headers.get("X-Forwarded-Proto") == "https":
+            request.environ["wsgi.url_scheme"] = "https"
+
     # Configure app settings
     configure_app(app)
-    
+
     # Configure OAuth
     oauth = configure_oauth(app)
     app.oauth = oauth  # Store oauth instance in app for routes to access
-    
+
+    # Initialize FileService for file/vector tracking
+    # try:
+    #     from .supaBase.services.file_services import FileService
+
+    #     file_service = FileService()
+    #     app.file_service = file_service  # Store in app for routes to access
+    #     print("✅ FileService initialized - DB tracking enabled")
+    # except Exception as e:
+    #     print(f"⚠️  FileService initialization failed: {e}")
+    #     print("⚠️  Continuing without DB tracking")
+    #     app.file_service = None
+
     # Register all routes
     register_routes(app)
-    
+
     return app
+
 
 # Create the app instance
 app = create_app()
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8000)), debug=True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

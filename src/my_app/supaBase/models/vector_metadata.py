@@ -1,16 +1,14 @@
-# yahoo_auth.py
+# vector_metadata.py
 from dataclasses import dataclass
 from typing import Optional
 from .base import BaseModel
 
 
 @dataclass
-class YahooAuth(BaseModel):
+class VectorMetadata(BaseModel):
     # Required fields first
-    yahoo_user_id: str
-    access_token: str
-    refresh_token: str
+    vector_store_id: str
+    openai_vector_id: str
     # Optional fields last
-    username: Optional[str] = None
     created_at: Optional[str] = None
-    last_updated: Optional[str] = None
+    last_synced: Optional[str] = None
