@@ -1,9 +1,10 @@
 from flask import Blueprint, request, session
+
+from my_app.integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
 from ..middleware.auth_decorators import require_google_auth
 from ..services.yahoo_service import YahooService
 from ..config.settings import DEBUG
 from yahoo_oauth import OAuth2
-from ..fantasy_platforms_integration.yahoo.sync_yahoo_league import YahooLeague
 from ..azure.azure_blob_storage import AzureBlobStorage
 from datetime import datetime
 from ..supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
