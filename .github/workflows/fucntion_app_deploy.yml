@@ -42,7 +42,12 @@ jobs:
         run: |
           cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           cp ../requirements.txt .
-          zip -r ../release.zip . -x "__pycache__/*"
+          echo "Files in function app directory:"
+          ls -la
+          echo "Creating deployment package..."
+          zip -r ../release.zip . -x "__pycache__/*" "*.pyc"
+          echo "Contents of release.zip:"
+          unzip -l ../release.zip
 
       # Optional: Add step to run tests here
 
