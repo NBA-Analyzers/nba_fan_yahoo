@@ -70,19 +70,7 @@ jobs:
         run: |
           unzip release.zip
           rm release.zip
-      
-      - name: Debug event
-        run: |
-          echo "event=${{ github.event_name }}"
-          echo "actor=${{ github.actor }}"
-          echo "ref=${{ github.ref }}"
-
-      - name: Assert Azure secrets exist
-        run: |
-          test -n "${{ secrets.AZUREAPPSERVICE_CLIENTID_7E258A35D99E41C1B4A2F675FA29DD7F }}" || (echo "::error::Missing CLIENTID secret" && exit 1)
-          test -n "${{ secrets.AZUREAPPSERVICE_TENANTID_B1F0EF8CA08B4D05AB9F504EB4F2F7D1 }}" || (echo "::error::Missing TENANTID secret" && exit 1)
-          test -n "${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7B536FAEB49C4086A72B6F8B0D816C14 }}" || (echo "::error::Missing SUBSCRIPTIONID secret" && exit 1)
-             
+          
       - name: Login to Azure
         uses: azure/login@v2
         with:
