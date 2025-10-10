@@ -40,7 +40,9 @@ jobs:
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
-        run: zip release.zip sync_general_data/* -r
+        run: |
+            cd sync_general_data
+            zip -r ../release.zip . \ -x 
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -71,6 +73,6 @@ jobs:
         with:
           app-name: 'LeaguaData'
           slot-name: 'Production'
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          package: 'release.zip'
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-          sku: 'flexconsumption'
+        #   sku: 'flexconsumption'
