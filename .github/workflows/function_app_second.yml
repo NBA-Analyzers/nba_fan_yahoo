@@ -73,6 +73,6 @@ jobs:
         with:
           app-name: 'LeaguaData'
           slot-name: 'Production'
-          package: 'release'
+          package: '.'
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
         #   sku: 'flexconsumption'
