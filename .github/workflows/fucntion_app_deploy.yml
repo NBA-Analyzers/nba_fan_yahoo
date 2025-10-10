@@ -1,7 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# More info on Python, GitHub Actions, and Azure Functions: https://aka.ms/python-webapps-actions
-
 name: Build and deploy Python project to Azure Function App - LeaguaData
 
 on:
@@ -12,78 +8,32 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'sync_general_data' # set this to the path to your function app project
-  PYTHON_VERSION: '3.12' # set this to the python version to use (supports 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12)
+  PYTHON_VERSION: '3.10'  # ← FIXED: More stable version
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read #This is required for actions/checkout
-
+    
     steps:
-      - name: Checkout repository
+      - name: 'Checkout repository'
         uses: actions/checkout@v4
 
-        
-      - name: Setup Python version
+      - name: 'Setup Python ${{ env.PYTHON_VERSION }}'
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Create and start virtual environment
+      - name: 'Resolve Project Dependencies Using Pip'
+        shell: bash
         run: |
-          python -m venv venv
-          source venv/bin/activate
+          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+          popd
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Prepare function app for deployment
-        run: |
-          cd ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          cp ../requirements.txt .
-          echo "Files in function app directory:"
-          ls -la
-          echo "Creating deployment package..."
-          zip -r ../release.zip . -x "__pycache__/*" "*.pyc"
-          echo "Contents of release.zip:"
-          unzip -l ../release.zip
-
-      # Optional: Add step to run tests here
-
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
-        with:
-          name: function-app
-          path: |
-            release.zip
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
-
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: function-app
-
-      - name: Unzip artifact for deployment
-        run: |
-          unzip release.zip
-          rm release.zip
-
-      - name: 'Deploy to Azure Functions'
+      - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
-        id: deploy-to-function
         with:
           app-name: 'LeaguaData'
-          slot-name: 'Production'
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-          # package: .
-          sku: 'flexconsumption'
-
-          
