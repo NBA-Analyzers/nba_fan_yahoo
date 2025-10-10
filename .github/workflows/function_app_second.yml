@@ -42,7 +42,7 @@ jobs:
       - name: Zip artifact for deployment
         run: |
             cd sync_general_data
-            zip -r ../release.zip . \ -x 
+            zip -r ../release.zip . \ -x 'local.settings.json'
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -73,6 +73,6 @@ jobs:
         with:
           app-name: 'LeaguaData'
           slot-name: 'Production'
-          package: 'release.zip'
+          package: 'release'
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
         #   sku: 'flexconsumption'
