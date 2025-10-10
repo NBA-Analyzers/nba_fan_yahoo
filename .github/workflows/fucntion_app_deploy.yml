@@ -70,13 +70,6 @@ jobs:
         run: |
           unzip release.zip
           rm release.zip
-          
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.APP_FUNCTION_GENERAL_DATA_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_B1F0EF8CA08B4D05AB9F504EB4F2F7D1 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7B536FAEB49C4086A72B6F8B0D816C14 }}
 
       - name: 'Deploy to Azure Functions'
         uses: Azure/functions-action@v1
@@ -84,6 +77,8 @@ jobs:
         with:
           app-name: 'LeaguaData'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: '.'
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          sku: 'flexconsumption'
+
           
