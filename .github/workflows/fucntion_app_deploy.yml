@@ -3,7 +3,7 @@ name: Build and deploy Python project to Azure Function App - LeaguaData
 on:
   push:
     branches:
-      - function_app_test
+      - function_app_test2
   workflow_dispatch:
 
 env:
