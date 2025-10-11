@@ -29,7 +29,7 @@ jobs:
       - name: Python Syntax Check
         run: |
           source venv/bin/activate
-          python -m py_compile src/my_app/app.py
+          python -m py_compile appl/app.py
           find src -name "*.py" -exec python -m py_compile {} \;
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
