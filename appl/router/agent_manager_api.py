@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from services.agent_manager import AgentManager
+from service.agent_manager import AgentManager
 
 
 class ChatRequest(BaseModel):

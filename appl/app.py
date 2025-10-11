@@ -1,8 +1,8 @@
 from flask import Flask, request
 from werkzeug.middleware.proxy_fix import ProxyFix
-from .config.settings import configure_app
+from .config.app_config import configure_app
 from .config.oauth_config import configure_oauth
-from .routes import register_routes
+from .router import register_routes
 import os
 
 def create_app():

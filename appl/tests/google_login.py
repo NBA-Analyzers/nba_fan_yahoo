@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src', 'my_app')))
 
 # Import our database models and services
-from supaBase.models.google_auth import GoogleAuth
-from supaBase.models.google_fantasy import GoogleFantasy
-from supaBase.services.auth_services import AuthService
-from supaBase.services.fantasy_services import FantasyService
-from supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
+from ..repository.supaBase.models.google_auth import GoogleAuth
+from ..repository.supaBase.models.google_fantasy import GoogleFantasy
+from ..repository.supaBase.services.auth_services import AuthService
+from ..repository.supaBase.services.fantasy_services import FantasyService
+from ..repository.supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
 
 env_path = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
 load_dotenv(env_path) # Loads from .env or .env.vault if DOTENV_KEY is set

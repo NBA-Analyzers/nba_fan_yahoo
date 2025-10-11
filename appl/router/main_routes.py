@@ -1,6 +1,8 @@
 from flask import Blueprint, session, redirect, url_for, jsonify
 import time
 
+from appl.fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
+
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
@@ -42,7 +44,6 @@ def dashboard():
         synced_leagues_html = ""
         if yahoo_authenticated:
             try:
-                from ..services.yahoo_service import YahooService
                 yahoo_service = YahooService(session['token_store'])
                 user_leagues = yahoo_service.get_user_synced_leagues(session['user'])
                 

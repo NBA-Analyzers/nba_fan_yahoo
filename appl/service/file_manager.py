@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Optional
 from openai import OpenAI
 
-from services.vector_store_manager import VectorStoreManager
+from .vector_store_manager import VectorStoreManager
 
 
 class FilePurpose(Enum):

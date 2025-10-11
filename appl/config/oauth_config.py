@@ -1,5 +1,5 @@
 from authlib.integrations.flask_client import OAuth
-from .settings import YAHOO_CLIENT_ID, YAHOO_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_DISCOVERY_URL
+from .app_config import YAHOO_CLIENT_ID, YAHOO_CLIENT_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_DISCOVERY_URL
 
 def configure_oauth(app):
     """Configure OAuth for the Flask app"""
