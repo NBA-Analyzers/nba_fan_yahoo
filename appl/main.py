@@ -1,17 +1,17 @@
 import os
 
 import uvicorn
-from api.agent_manager_api import agent_router, AgentAPI, set_agent_api_instance
-from api.files_api import files_router
-from dependencies import set_services
+from router.agent_manager_api import agent_router, AgentAPI, set_agent_api_instance
+from router.files_api import files_router
+from config.dependencies import set_services
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
-from services.agent_manager import AgentManager
-from services.file_manager import FileManager
-from services.vector_store_manager import VectorStoreManager
+from service.agent_manager import AgentManager
+from service.file_manager import FileManager
+from service.vector_store_manager import VectorStoreManager
 
 
 app = FastAPI()

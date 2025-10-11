@@ -1,13 +1,14 @@
 from flask import Blueprint, request, session
 
-from my_app.integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
-from ..middleware.auth_decorators import require_google_auth
-from ..services.yahoo_service import YahooService
-from ..config.settings import DEBUG
+from fantasy_integrations.yahoo.sync_league.yahoo_service import get_yahoo_sdk
+from fantasy_integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
+from middleware.auth_decorators import require_google_auth
+from fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
+from config.app_config import DEBUG
 from yahoo_oauth import OAuth2
-from ..azure.azure_blob_storage import AzureBlobStorage
+from repository.azure.azure_blob_storage import AzureBlobStorage
+from repository.supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
 from datetime import datetime
-from ..supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
 import yahoo_fantasy_api as yfa
 
 yahoo_bp = Blueprint('yahoo', __name__, url_prefix='/yahoo')
@@ -40,7 +41,6 @@ def select_league():
         
         # Get league name for the redirect
         try:
-            from ..utils.helpers import get_yahoo_sdk
             yahoo_game = get_yahoo_sdk(session['token_store'], {'user': user_guid})
             league = yahoo_game.to_league(league_id)
             league_settings = league.settings()

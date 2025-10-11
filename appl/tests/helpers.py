@@ -38,13 +38,4 @@ class ManualOAuth2(OAuth2):
             'expires_in': 3600
         }
 
-def get_yahoo_sdk(token_store, session):
-    """
-    Returns an authenticated yahoo_fantasy_api.Game object for the current user session.
-    Returns None if the user is not authenticated or token is missing.
-    """
-    user_guid = session.get('user')
-    if not user_guid or user_guid not in token_store:
-        return None
-    sc = CustomYahooSession(token_store[user_guid])
-    return yfa.Game(sc, 'nba')
+

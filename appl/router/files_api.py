@@ -1,15 +1,18 @@
-from fastapi import APIRouter, Depends
 from typing import List
-from dependencies import get_file_manager1
-from services.file_manager import FileManager, UpdateFile, OpenaiStoredFiles
+
+from fastapi import APIRouter, Depends
 from fastapi_utils.cbv import cbv
+
+from config.dependencies import get_file_manager
+from service.file_manager import FileManager, OpenaiStoredFiles, UpdateFile
+
 
 files_router = APIRouter()
 
 @cbv(files_router)
 class FilesAPI:
 
-    file_manager: FileManager = Depends(get_file_manager1)
+    file_manager: FileManager = Depends(get_file_manager)
 
     @files_router.post("/{league_id}/update_files")
     def update_league_files(

@@ -1,12 +1,12 @@
 from flask import Blueprint, session, redirect, url_for, request
-from ..middleware.auth_decorators import require_google_auth
-from ..supaBase.models.yahoo_auth import YahooAuth
-from ..supaBase.models.google_auth import GoogleAuth
-from ..supaBase.models.google_fantasy import GoogleFantasy
-from ..supaBase.services.auth_services import AuthService
-from ..supaBase.services.fantasy_services import FantasyService
-from ..supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
-from ..config.settings import DEBUG
+from middleware.auth_decorators import require_google_auth
+from repository.supaBase.models.yahoo_auth import YahooAuth
+from repository.supaBase.models.google_auth import GoogleAuth
+from repository.supaBase.models.google_fantasy import GoogleFantasy
+from repository.supaBase.services.auth_services import AuthService
+from repository.supaBase.services.fantasy_services import FantasyService
+from repository.supaBase.exceptions.custom_exceptions import ValidationError, NotFoundError, DuplicateError
+from config.app_config import DEBUG
 import time
 import xml.etree.ElementTree as ET
 
@@ -167,11 +167,9 @@ def yahoo_callback():
                 
             except ValidationError as e:
                 print(f"❌ Fantasy connection validation error: {str(e)}")
-                # Continue with the flow even if connection fails
                 
             except Exception as e:
                 print(f"❌ Unexpected error creating fantasy connection: {str(e)}")
-                # Continue with the flow even if connection fails
         else:
             print("❌ Could not find Google user ID in session for fantasy connection")
 

@@ -3,9 +3,10 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from dotenv.main import logger
 from flask import session
-from ..supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
-from my_app.integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
-from ..azure.azure_blob_storage import AzureBlobStorage
+
+from repository.supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
+from fantasy_integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
+from repository.azure.azure_blob_storage import AzureBlobStorage
 import os
 
 class YahooService:
@@ -15,7 +16,6 @@ class YahooService:
     def get_user_leagues(self, user_guid):
         """Get user's leagues from Yahoo API"""
         try:
-            from ..utils.helpers import get_yahoo_sdk
             yahoo_game = get_yahoo_sdk(self.token_store, {'user': user_guid})
             if not yahoo_game:
                 return []
@@ -34,7 +34,6 @@ class YahooService:
     def sync_league_data(self, league_id, user_guid, azure_container="fantasy1"):
         """Sync league data and store in database"""
         try:
-            from ..utils.helpers import get_yahoo_sdk
             yahoo_sdk = get_yahoo_sdk(self.token_store, {'user': user_guid})
             if not yahoo_sdk:
                 return {"error": "Yahoo SDK not available"}
@@ -136,3 +135,15 @@ class YahooService:
         except Exception as e:
             print(f"❌ Error retrieving user leagues: {e}")
             return []
+
+
+def get_yahoo_sdk(token_store, session):
+    """
+    Returns an authenticated yahoo_fantasy_api.Game object for the current user session.
+    Returns None if the user is not authenticated or token is missing.
+    """
+    user_guid = session.get('user')
+    if not user_guid or user_guid not in token_store:
+        return None
+    sc = CustomYahooSession(token_store[user_guid])
+    return yfa.Game(sc, 'nba')
