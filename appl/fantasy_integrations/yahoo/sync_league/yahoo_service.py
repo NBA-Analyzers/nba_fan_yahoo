@@ -3,10 +3,12 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 from dotenv.main import logger
 from flask import session
+import requests
+from yahoo_fantasy_api.league import yfa
 
-from repository.supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
-from fantasy_integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
-from repository.azure.azure_blob_storage import AzureBlobStorage
+from ....repository.supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
+from ....fantasy_integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
+from ....repository.azure.azure_blob_storage import AzureBlobStorage
 import os
 
 class YahooService:
@@ -136,6 +138,16 @@ class YahooService:
             print(f"❌ Error retrieving user leagues: {e}")
             return []
 
+class CustomYahooSession:
+    def __init__(self, token_data):
+        self.access_token = token_data['access_token']
+        self.refresh_token = token_data.get('refresh_token')
+        self.token_type = token_data.get('token_type', 'bearer')
+        self.token = token_data
+        self.session = requests.Session()
+        self.session.headers.update({
+            'Authorization': f"Bearer {self.access_token}"
+        })
 
 def get_yahoo_sdk(token_store, session):
     """

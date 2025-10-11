@@ -1,8 +1,8 @@
 from flask import Flask, request
 from werkzeug.middleware.proxy_fix import ProxyFix
-from .config.settings import configure_app
+from .config.app_config import configure_app
 from .config.oauth_config import configure_oauth
-from .routes import register_routes
+from .router import register_routes
 import os
 
 def create_app():
@@ -41,4 +41,4 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)), debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8000)), debug=True)

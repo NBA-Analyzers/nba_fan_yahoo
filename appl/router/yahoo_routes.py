@@ -1,13 +1,12 @@
 from flask import Blueprint, request, session
 
-from fantasy_integrations.yahoo.sync_league.yahoo_service import get_yahoo_sdk
-from fantasy_integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
-from middleware.auth_decorators import require_google_auth
-from fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
-from config.app_config import DEBUG
-from yahoo_oauth import OAuth2
-from repository.azure.azure_blob_storage import AzureBlobStorage
-from repository.supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
+from ..fantasy_integrations.yahoo.sync_league.yahoo_service import get_yahoo_sdk
+from ..fantasy_integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
+from ..middleware.auth_decorators import require_google_auth
+from ..fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
+from ..config.app_config import DEBUG
+from ..repository.azure.azure_blob_storage import AzureBlobStorage
+from ..repository.supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
 from datetime import datetime
 import yahoo_fantasy_api as yfa
 

@@ -1,5 +1,3 @@
-# import services.rag as rag
-
 from openai import OpenAI
 from openai.types.responses import Response
 

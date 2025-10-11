@@ -8,7 +8,7 @@ from yahoo_oauth import OAuth2
 
 import os
 
-from repository.azure.azure_blob_storage import AzureBlobStorage
+from appl.repository.azure.azure_blob_storage import AzureBlobStorage
 
 from ...i_sync_league import SyncLeagueData
 
