@@ -34,6 +34,12 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
+      - name: Copy shared code
+        run: |
+          mkdir -p functions/shared
+          cp -r appl/repository sync_general_data/shared/
+
+
       - name: Install dependencies
         run: pip install -r sync_general_data/requirements.txt
 
