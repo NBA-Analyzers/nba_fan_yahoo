@@ -1,1 +1,0 @@
-from .validators import validate_email, validate_required_fields, validate_platform

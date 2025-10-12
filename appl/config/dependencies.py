@@ -1,23 +1,56 @@
-from service.agent_manager import AgentManager
-from service.file_manager import FileManager
+import os
+from openai import OpenAI
+from service.chat_session_manager import ChatSessionManager
+from service.openai_agent_manager import OpenaiAgentManager
+from service.openai_file_manager import OpenaiFileManager
 from service.vector_store_manager import VectorStoreManager
+from repository.supaBase.repositories.vector_metadata_repository import (
+    vector_store_matadata_repository,
+)
 
-
-_agent_manager = None
-_file_manager = None
+_openai_client = None
+_openai_agent_manager = None
+_openai_file_manager = None
 _vector_store_manager = None
+_chat_session_manager = None
 
-def set_services(agent_manager: AgentManager, file_manager: FileManager, vector_store_manager: VectorStoreManager):
-    global _agent_manager, _file_manager, _vector_store_manager
-    _agent_manager = agent_manager
-    _file_manager = file_manager
-    _vector_store_manager = vector_store_manager
 
-def get_agent_manager() -> AgentManager:
-    return _agent_manager
+def set_services():
+    global \
+        _openai_client, \
+        _openai_agent_manager, \
+        _openai_file_manager, \
+        _vector_store_manager, \
+        _chat_session_manager
 
-def get_file_manager() -> FileManager:
-    return _file_manager
+    _openai_client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    _chat_session_manager = ChatSessionManager()
+    _vector_store_manager = VectorStoreManager(
+        vector_store_matadata_repository, _openai_client
+    )
+    _openai_file_manager = OpenaiFileManager(_vector_store_manager, _openai_client)
+    _openai_agent_manager = OpenaiAgentManager(
+        _chat_session_manager, _vector_store_manager, _openai_client
+    )
 
-def get_vector_store_manager() -> VectorStoreManager:
+
+def openai_client() -> OpenAI:
+    return _openai_client
+
+
+def openai_agent_manager() -> OpenaiAgentManager:
+    return _openai_agent_manager
+
+
+def openai_file_manager() -> OpenaiFileManager:
+    return _openai_file_manager
+
+
+def vector_store_manager() -> VectorStoreManager:
     return _vector_store_manager
+
+
+def chat_session_manager() -> ChatSessionManager:
+    return _chat_session_manager
+
+

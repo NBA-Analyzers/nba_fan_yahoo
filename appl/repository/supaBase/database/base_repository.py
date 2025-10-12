@@ -6,6 +6,7 @@ from .connection import DatabaseManager
 from ..exceptions.custom_exceptions import DatabaseError
 
 class BaseRepository(ABC):
+    
     def __init__(self, table_name: str):
         self.db = DatabaseManager().get_client()
         self.table_name = table_name
