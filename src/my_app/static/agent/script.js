@@ -3,31 +3,31 @@ class FantasyBasketballChat {
         console.log('FantasyBasketballChat constructor called');
         this.sessionId = null;
         this.isLoading = false;
-        this.league_id = window.LEAGUE_ID && window.LEAGUE_ID !== null && window.LEAGUE_ID.trim() !== '' ? window.LEAGUE_ID : null;
-        
-        // Debug logging
-        console.log('Debug - window.LEAGUE_ID:', window.LEAGUE_ID);
-        console.log('Debug - window.SESSION_ID:', window.SESSION_ID);
-        console.log('Debug - this.league_id:', this.league_id);
-        
+        this.leagueId = config.leagueId || null;  // NEW: League context
+        this.vectorStoreId = config.vectorStoreId || null;  // NEW: Vector store
         this.initializeElements();
         this.bindEvents();
-        // Always start with a new session
-        this.startNewChat();
-        console.log('FantasyBasketballChat initialized with league_id:', this.league_id);
+        this.showScreen('initialScreen');
+        console.log('FantasyBasketballChat initialized');
     }
-    
+
     initializeElements() {
         console.log('Initializing elements...');
-        
+
         // Screen elements
         this.initialScreen = document.getElementById('initialScreen');
         this.sessionIdScreen = document.getElementById('sessionIdScreen');
         this.chatScreen = document.getElementById('chatScreen');
-        
-        // Initial screen elements (only new chat option)
+
+        // Initial screen elements
         this.newChatOption = document.getElementById('newChatOption');
-        
+        this.continueChatOption = document.getElementById('continueChatOption');
+
+        // Session ID screen elements
+        this.sessionIdInput = document.getElementById('sessionIdInput');
+        this.continueSessionButton = document.getElementById('continueSessionButton');
+        this.backToInitialButton = document.getElementById('backToInitialButton');
+
         // Chat screen elements
         this.chatMessages = document.getElementById('chatMessages');
         this.messageInput = document.getElementById('messageInput');
@@ -35,16 +35,20 @@ class FantasyBasketballChat {
         this.currentSessionIdDisplay = document.getElementById('currentSessionId');
         this.newSessionFromChatButton = document.getElementById('newSessionFromChatButton');
         this.quitSessionButton = document.getElementById('quitSessionButton');
-        
+
         // Status elements
         this.connectionStatus = document.getElementById('connectionStatus');
-        
+
         // Debug: Log which elements were found
         console.log('Elements found:', {
             initialScreen: !!this.initialScreen,
             sessionIdScreen: !!this.sessionIdScreen,
             chatScreen: !!this.chatScreen,
             newChatOption: !!this.newChatOption,
+            continueChatOption: !!this.continueChatOption,
+            sessionIdInput: !!this.sessionIdInput,
+            continueSessionButton: !!this.continueSessionButton,
+            backToInitialButton: !!this.backToInitialButton,
             chatMessages: !!this.chatMessages,
             messageInput: !!this.messageInput,
             sendButton: !!this.sendButton,
@@ -54,18 +58,50 @@ class FantasyBasketballChat {
             connectionStatus: !!this.connectionStatus
         });
     }
-    
+
     bindEvents() {
         console.log('Binding events...');
-        
-        // Initial screen events (only new chat)
+
+        // Initial screen events
         if (this.newChatOption) {
             this.newChatOption.addEventListener('click', () => {
                 console.log('New chat clicked');
                 this.startNewChat();
             });
         }
-        
+
+        if (this.continueChatOption) {
+            this.continueChatOption.addEventListener('click', () => {
+                console.log('Continue chat clicked');
+                this.showContinueChat();
+            });
+        }
+
+        // Session ID screen events
+        if (this.continueSessionButton) {
+            this.continueSessionButton.addEventListener('click', () => {
+                console.log('Continue session clicked');
+                this.continueWithSessionId();
+            });
+        }
+
+        if (this.backToInitialButton) {
+            this.backToInitialButton.addEventListener('click', () => {
+                console.log('Back to initial clicked');
+                this.showScreen('initialScreen');
+            });
+        }
+
+        if (this.sessionIdInput) {
+            this.sessionIdInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    console.log('Enter pressed in session ID input');
+                    this.continueWithSessionId();
+                }
+            });
+        }
+
         // Chat screen events
         if (this.sendButton) {
             this.sendButton.addEventListener('click', () => {
@@ -73,7 +109,7 @@ class FantasyBasketballChat {
                 this.sendMessage();
             });
         }
-        
+
         if (this.messageInput) {
             this.messageInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -83,36 +119,36 @@ class FantasyBasketballChat {
                 }
             });
         }
-        
+
         if (this.newSessionFromChatButton) {
             this.newSessionFromChatButton.addEventListener('click', () => {
                 console.log('New session from chat clicked');
                 this.startNewChat();
             });
         }
-        
+
         if (this.quitSessionButton) {
             this.quitSessionButton.addEventListener('click', () => {
                 console.log('Quit session clicked');
                 this.quitSession();
             });
         }
-        
+
         console.log('Events bound successfully');
     }
-    
+
     generateSessionId() {
         return 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
     }
-    
+
     showScreen(screenId) {
         console.log('Showing screen:', screenId);
-        
+
         // Hide all screens
         if (this.initialScreen) this.initialScreen.classList.add('hidden');
         if (this.sessionIdScreen) this.sessionIdScreen.classList.add('hidden');
         if (this.chatScreen) this.chatScreen.classList.add('hidden');
-        
+
         // Show target screen
         const targetScreen = document.getElementById(screenId);
         if (targetScreen) {
@@ -121,13 +157,15 @@ class FantasyBasketballChat {
         } else {
             console.error('Target screen not found:', screenId);
         }
-        
+
         // Focus appropriate input
-        if (screenId === 'chatScreen' && this.messageInput) {
+        if (screenId === 'sessionIdScreen' && this.sessionIdInput) {
+            setTimeout(() => this.sessionIdInput.focus(), 100);
+        } else if (screenId === 'chatScreen' && this.messageInput) {
             setTimeout(() => this.messageInput.focus(), 100);
         }
     }
-    
+
     startNewChat() {
         this.sessionId = this.generateSessionId();
         this.updateSessionDisplay();
@@ -135,58 +173,76 @@ class FantasyBasketballChat {
         this.addSystemMessage('Welcome to Fantasy Basketball Helper! I\'m here to help you with your league management, player analysis, and strategic advice. Use the "Quit Session" button or type \'quit\' to end the conversation.');
         this.showScreen('chatScreen');
     }
-    
+
     quitSession() {
-        console.log('Quit session button clicked - starting new session');
-        
+        console.log('Quit session button clicked - returning to main screen');
+
         // Add a system message showing the session ended
-        this.addSystemMessage('Session ended. Starting a new session.');
-        
+        this.addSystemMessage('Session ended. You can start a new chat or continue an existing one.');
+
         // Update status
         this.updateStatus('success', 'Session ended');
-        
-        // Start a new session after a short delay
+
+        // Return to initial screen after a short delay
         setTimeout(() => {
-            this.startNewChat();
+            this.showScreen('initialScreen');
         }, 1500);
     }
-    
-    
+
+    showContinueChat() {
+        this.sessionIdInput.value = '';
+        this.showScreen('sessionIdScreen');
+    }
+
+    continueWithSessionId() {
+        const sessionId = this.sessionIdInput.value.trim();
+        if (!sessionId) {
+            this.showError('Please enter a session ID to continue.');
+            return;
+        }
+
+        this.sessionId = sessionId;
+        this.updateSessionDisplay();
+        this.clearChatMessages();
+        this.addSystemMessage(`Continuing session: ${this.sessionId}. Type 'quit' to end the conversation.`);
+        this.showScreen('chatScreen');
+    }
+
     updateSessionDisplay() {
         if (this.currentSessionIdDisplay) {
             this.currentSessionIdDisplay.textContent = this.sessionId;
         }
     }
-    
+
     clearChatMessages() {
         if (this.chatMessages) {
             this.chatMessages.innerHTML = '';
         }
     }
-    
+
     async sendMessage() {
         const message = this.messageInput.value.trim();
         if (!message || this.isLoading) return;
-        
+
         // Add user message to chat
         this.addUserMessage(message);
         this.messageInput.value = '';
-        
+
         // Check if user typed "quit" - handle it locally
         if (message.toLowerCase() === 'quit') {
-            console.log('User typed quit - starting new session');
-            this.addSystemMessage('Session ended. Starting a new session.');
+            console.log('User typed quit - ending session locally');
+            this.addSystemMessage('Session ended. You can start a new chat or continue an existing one.');
             this.updateStatus('success', 'Session ended');
-            
+
             setTimeout(() => {
-                this.startNewChat();
+                this.showScreen('initialScreen');
             }, 1500);
             return;
         }
-        
+
         // Show loading state for regular messages
         this.setLoading(true);
-        
+
         try {
             const response = await this.callChatAPI(message);
             this.addAssistantMessage(response);
@@ -199,27 +255,38 @@ class FantasyBasketballChat {
             this.setLoading(false);
         }
     }
-    
+
     async callChatAPI(message) {
+        // Build request body
+        const requestBody = {
+            session_id: this.sessionId,
+            user_message: message
+        };
+
+        // Add league context if available (from Flask)
+        if (this.leagueId) {
+            requestBody.league_id = this.leagueId;
+        }
+
+        if (this.vectorStoreId) {
+            requestBody.vector_store_id = this.vectorStoreId;
+        }
+
         const response = await fetch(`/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                session_id: this.sessionId,
-                user_message: message,
-                league_id: this.league_id,
-            })
+            body: JSON.stringify(requestBody)
         });
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         return await response.text();
     }
-    
+
     addUserMessage(message) {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message user-message';
@@ -229,7 +296,7 @@ class FantasyBasketballChat {
         this.chatMessages.appendChild(messageDiv);
         this.scrollToBottom();
     }
-    
+
     addAssistantMessage(response) {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message assistant-message';
@@ -240,7 +307,7 @@ class FantasyBasketballChat {
         this.chatMessages.appendChild(messageDiv);
         this.scrollToBottom();
     }
-    
+
     addSystemMessage(message) {
         const messageDiv = document.createElement('div');
         messageDiv.className = 'message system-message';
@@ -250,7 +317,7 @@ class FantasyBasketballChat {
         this.chatMessages.appendChild(messageDiv);
         this.scrollToBottom();
     }
-    
+
     showError(message) {
         // Create a temporary error message
         const errorDiv = document.createElement('div');
@@ -264,11 +331,11 @@ class FantasyBasketballChat {
             margin: 10px 0;
             border: 1px solid #f5c6cb;
         `;
-        
+
         // Insert at the top of the session input card
         const sessionInputCard = document.querySelector('.session-input-card');
         sessionInputCard.insertBefore(errorDiv, sessionInputCard.firstChild);
-        
+
         // Remove after 3 seconds
         setTimeout(() => {
             if (errorDiv.parentNode) {
@@ -276,11 +343,11 @@ class FantasyBasketballChat {
             }
         }, 3000);
     }
-    
+
     setLoading(loading) {
         this.isLoading = loading;
         this.sendButton.disabled = loading;
-        
+
         if (loading) {
             this.sendButton.innerHTML = `
                 <div class="typing-indicator">
@@ -300,41 +367,41 @@ class FantasyBasketballChat {
             this.updateStatus('ready', 'Ready');
         }
     }
-    
+
     updateStatus(type, message) {
         this.connectionStatus.textContent = message;
         this.connectionStatus.className = `status-indicator ${type}`;
     }
-    
+
     scrollToBottom() {
         if (this.chatMessages) {
             this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
         }
     }
-    
+
     formatAssistantResponse(text) {
         // First escape HTML to prevent XSS
         let formatted = this.escapeHtml(text);
-        
+
         // Replace line breaks with <br> tags
         formatted = formatted.replace(/\n/g, '<br>');
-        
+
         // Format bullet points and lists
         formatted = formatted.replace(/^[\s]*[-•]\s+(.+)$/gm, '<div class="bullet-point">• $1</div>');
         formatted = formatted.replace(/^[\s]*(\d+)\.\s+(.+)$/gm, '<div class="numbered-point">$1. $2</div>');
-        
+
         // Format headers (lines that end with :)
         formatted = formatted.replace(/^(.+):\s*$/gm, '<div class="response-header">$1:</div>');
-        
+
         // Format code blocks (text between backticks)
         formatted = formatted.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
-        
+
         // Format bold text (text between **)
         formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        
+
         // Format italic text (text between *)
         formatted = formatted.replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, '<em>$1</em>');
-        
+
         // Wrap paragraphs
         const paragraphs = formatted.split('<br><br>');
         formatted = paragraphs.map(para => {
@@ -343,16 +410,43 @@ class FantasyBasketballChat {
             }
             return para;
         }).join('<br><br>');
-        
+
         return formatted;
     }
-    
+
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-    
+
+    // Method to test API connection
+    async testConnection() {
+        try {
+            this.updateStatus('loading', 'Testing connection...');
+            const response = await fetch(`/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    session_id: 'test_connection',
+                    user_message: 'test'
+                })
+            });
+
+            if (response.ok) {
+                this.updateStatus('success', 'Connected to API');
+                return true;
+            } else {
+                throw new Error(`API returned status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Connection test failed:', error);
+            this.updateStatus('error', 'Cannot connect to API');
+            return false;
+        }
+    }
 }
 
 // Initialize the chat when the page loads
@@ -360,9 +454,10 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM Content Loaded');
     try {
         const chat = new FantasyBasketballChat();
-        
-        // No automatic connection test - only connect when user sends message
-        
+
+        // Test connection on load
+        chat.testConnection();
+
         // Make chat instance globally available for debugging
         window.fantasyChat = chat;
         console.log('Chat initialized and available as window.fantasyChat');
@@ -378,6 +473,8 @@ document.addEventListener('visibilitychange', () => {
         const activeScreen = document.querySelector('.screen:not(.hidden)');
         if (activeScreen && activeScreen.id === 'chatScreen') {
             window.fantasyChat.messageInput.focus();
+        } else if (activeScreen && activeScreen.id === 'sessionIdScreen') {
+            window.fantasyChat.sessionIdInput.focus();
         }
     }
 });

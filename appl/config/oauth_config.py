@@ -6,7 +6,7 @@ def configure_oauth(app):
     oauth = OAuth(app)
     
     # Yahoo OAuth
-    yahoo = oauth.register(
+    oauth.register(
         name='yahoo',
         client_id=YAHOO_CLIENT_ID,
         client_secret=YAHOO_CLIENT_SECRET,

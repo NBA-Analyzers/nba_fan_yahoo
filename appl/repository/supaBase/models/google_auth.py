@@ -1,9 +1,9 @@
-
 # google_auth.py
 from dataclasses import dataclass
 from typing import Optional
 from .base import BaseModel
 from ..utils.validators import validate_email
+
 
 @dataclass
 class GoogleAuth(BaseModel):
@@ -14,9 +14,9 @@ class GoogleAuth(BaseModel):
     access_token: str
     # Optional fields last
     created_at: Optional[str] = None
-    
+    last_updated: Optional[str] = None
+
     def __post_init__(self):
         if self.email:
             self.email = self.email.lower()
             validate_email(self.email)
-

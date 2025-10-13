@@ -11,6 +11,12 @@
         <header class="header">
             <h1>🏀 Fantasy Basketball Helper</h1>
             <p>Ask me anything about your fantasy basketball league!</p>
+            {% if league_id and session_id %}
+            <div class="session-info-header">
+                <p><strong>League ID:</strong> {{ league_id }}</p>
+                <p><strong>Session ID:</strong> {{ session_id }}</p>
+            </div>
+            {% endif %}
         </header>
         
         <!-- Initial Screen - Choose New or Continue -->
@@ -52,7 +58,10 @@
             <div class="chat-container">
                 <div class="chat-header">
                     <div class="session-info">
-                        <span>Session: <span id="currentSessionId">Loading...</span></span>
+                        <span>Session: <span id="currentSessionId">{{ session_id if session_id else 'Loading...' }}</span></span>
+                        {% if league_id %}
+                        <span class="league-info">League: {{ league_id }}</span>
+                        {% endif %}
                         <div class="header-buttons">
                             <button id="newSessionFromChatButton" class="new-session-button">New Session</button>
                             <button id="quitSessionButton" class="quit-session-button">Quit Session</button>
@@ -87,6 +96,21 @@
         </div>
     </div>
     
+    <script>
+        // Pass server-side variables to JavaScript
+        window.LEAGUE_ID = "{{ league_id if league_id else '' }}";
+        window.SESSION_ID = "{{ session_id if session_id else '' }}";
+        
+        // Debug logging
+        console.log('Server-side variables:', {
+            league_id: "{{ league_id if league_id else 'None' }}",
+            session_id: "{{ session_id if session_id else 'None' }}"
+        });
+        
+        // Additional debug
+        console.log('window.LEAGUE_ID after template render:', window.LEAGUE_ID);
+        console.log('window.SESSION_ID after template render:', window.SESSION_ID);
+    </script>
     <script src="/static/script.js"></script>
 </body>
 </html>

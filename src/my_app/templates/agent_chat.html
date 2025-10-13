@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Basketball AI - League {{ league_id }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='agent/styles.css') }}">
+    <style>
+        .back-to-dashboard {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: white;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-to-dashboard:hover {
+            background: #f0f0f0;
+        }
+
+        /* Show chat screen immediately */
+        #chatScreen {
+            display: flex !important;
+        }
+
+        #initialScreen,
+        #sessionIdScreen {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/dashboard" class="back-to-dashboard">← Dashboard</a>
+
+    <div class="container">
+        <header class="header">
+            <h1>🏀 Fantasy Basketball Helper</h1>
+            <p>League: {{ league_id }}</p>
+        </header>
+
+        <!-- Chat Screen (shown immediately) -->
+        <div class="screen" id="chatScreen">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="session-info">
+                        <span>Session: <span id="currentSessionId">{{ session_id }}</span></span>
+                        <div class="header-buttons">
+                            <button id="newSessionFromChatButton" class="new-session-button">New Session</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message system-message">
+                        <div class="message-content">
+                            Welcome to Fantasy Basketball Helper for league {{ league_id }}!
+                            {% if vector_store_initialized %}
+                            ✅ League data loaded successfully!
+                            {% else %}
+                            ⚠️ Using demo data (league data not yet loaded)
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-container">
+                    <div class="input-group">
+                        <input type="text" id="messageInput" placeholder="Type your message here..." autocomplete="off">
+                        <button id="sendButton" class="send-button">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <span id="connectionStatus" class="status-indicator">Ready</span>
+        </div>
+    </div>
+
+    <!-- Load the script -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <!-- Configuration for chat -->
+    <script>
+        // Global configuration passed from Flask
+        window.FLASK_CONFIG = {
+            sessionId: "{{ session_id }}",
+            leagueId: "{{ league_id }}",
+            apiBaseUrl: "http://localhost:5001"
+        };
+
+        // Override the chat initialization
+        document.addEventListener('DOMContentLoaded', function () {
+            // The chat script will use window.FLASK_CONFIG
+            console.log('League context:', window.FLASK_CONFIG);
+        });
+    </script>
+</body>
+
+</html>
