@@ -26,7 +26,7 @@ class VectorStoreManager:
         vector_store_metadata.openai_vector_id = openai_vector_store_id
         vector_store_metadata.last_synced = datetime.now(timezone.utc).isoformat()
 
-        self.vector_store_meatadata_repository.upsert_by_vector_store_id(
+        return self.vector_store_meatadata_repository.upsert_by_vector_store_id(
             vector_store_metadata_id, vector_store_metadata
         )
 

@@ -24,11 +24,18 @@ class OpenaiFileManager:
         vector_store_id = generate_league_vector_store_id(league_id)
         self.vector_store_manager.update_vector_store(vector_store_id, openai_file_ids)
 
-    def update_rules(self, file: Dict[str, str]):
-        openai_file_id = self.upload_file_in_openai("rules", file)
+    def update_rules(self, pdf_path: str):
+        with open(pdf_path, "rb") as f:
+            openai_file = self.openai_client.files.create(
+            file=f,
+                purpose="assistants"
+            )
+
+        openai_file_id = openai_file.id
 
         vector_store_id = FilePurpose.RULES.value
-        self.vector_store_manager.update_vector_store(vector_store_id, [openai_file_id])
+        vector_store_metadata = self.vector_store_manager.update_vector_store(vector_store_id, [openai_file_id])
+        return vector_store_metadata
 
     def update_box_score(self, files: Dict[str, Dict[str, str]]):
         openai_file_ids = []
