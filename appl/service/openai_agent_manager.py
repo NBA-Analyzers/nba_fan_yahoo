@@ -59,9 +59,9 @@ class OpenaiAgentManager:
         # openai_box_score_vs_id = self.vector_store_manager.get_vector_store_by_id(
         #     FilePurpose.BOX_SCORE
         # )
-        # openai_rules_vs_id = self.vector_store_manager.get_vector_store_by_id(
-        #     FilePurpose.RULES
-        # )
+        openai_rules_vs_id = self.vector_store_manager.get_vector_store_by_id(
+            FilePurpose.RULES
+        )
 
         return [
             {
@@ -69,7 +69,7 @@ class OpenaiAgentManager:
                 "vector_store_ids": [
                     openai_league_vs_id,
                     # openai_box_score_vs_id,
-                    # openai_rules_vs_id,
+                    openai_rules_vs_id,
                 ],
             }
         ]
