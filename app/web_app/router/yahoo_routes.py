@@ -2,7 +2,7 @@ from datetime import datetime
 from urllib.parse import quote
 
 import yahoo_fantasy_api as yfa
-from service.openai_file_manager import OpenaiFileManager
+from common.openai_file_manager import OpenaiFileManager
 from config.app_config import DEBUG
 from fantasy_integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
 from fantasy_integrations.yahoo.sync_league.yahoo_service import (
@@ -11,21 +11,19 @@ from fantasy_integrations.yahoo.sync_league.yahoo_service import (
 )
 from flask import Blueprint, request, session
 from middleware.auth_decorators import require_google_auth
-from repository.azure.azure_blob_storage import AzureBlobStorage
-from repository.supaBase.repositories.yahoo_league_repository import (
+from common.repository.azure.azure_blob_storage import AzureBlobStorage
+from common.repository.supaBase.repositories.yahoo_league_repository import (
     YahooLeagueRepository,
 )
 from yahoo_oauth import OAuth2
 
 
 class YahooRouter:
-    
     def __init__(self, openai_file_manager: OpenaiFileManager):
         self.openai_file_manager = openai_file_manager
         self._blueprint = self._create_blueprint()
 
     def _create_blueprint(self):
-        
         yahoo_bp = Blueprint("yahoo", __name__, url_prefix="/yahoo")
 
         @yahoo_bp.route("/select_league", methods=["POST"])
@@ -58,7 +56,9 @@ class YahooRouter:
                     return "User not authenticated", 401
 
                 # Use Yahoo service to sync league
-                yahoo_service = YahooService(session["token_store"], self.openai_file_manager)
+                yahoo_service = YahooService(
+                    session["token_store"], self.openai_file_manager
+                )
                 result = yahoo_service.sync_league_data(league_id, user_guid)
 
                 if "error" in result:
@@ -69,7 +69,9 @@ class YahooRouter:
 
                 # Get league name for the redirect
                 try:
-                    yahoo_game = get_yahoo_sdk(session["token_store"], {"user": user_guid})
+                    yahoo_game = get_yahoo_sdk(
+                        session["token_store"], {"user": user_guid}
+                    )
                     league = yahoo_game.to_league(league_id)
                     league_settings = league.settings()
                     league_name = league_settings.get("name", "Unknown League")
@@ -99,7 +101,6 @@ class YahooRouter:
                     500,
                 )
 
-
         @yahoo_bp.route("/my_leagues")
         @require_google_auth
         def my_leagues():
@@ -114,7 +115,9 @@ class YahooRouter:
                     return "User not authenticated", 401
 
                 # Use Yahoo service to get synced leagues
-                yahoo_service = YahooService(session["token_store"], self.openai_file_manager)
+                yahoo_service = YahooService(
+                    session["token_store"], self.openai_file_manager
+                )
                 user_leagues = yahoo_service.get_user_synced_leagues(user_guid)
 
                 if not user_leagues:
@@ -148,7 +151,6 @@ class YahooRouter:
                     f"<h2>Error</h2><p>Failed to retrieve leagues: {str(e)}</p><br><a href='/dashboard'>← Back to Dashboard</a>",
                     500,
                 )
-
 
         @yahoo_bp.route("/debug_league")
         @require_google_auth
@@ -214,8 +216,8 @@ class YahooRouter:
                     f"<h2>Error</h2><p>Failed to process debug league sync: {str(e)}</p><br><a href='/dashboard'>← Back to Dashboard</a>",
                     500,
                 )
-        
+
         return yahoo_bp
-    
+
     def get_bp(self):
         return self._blueprint

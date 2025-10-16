@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 import yahoo_fantasy_api as yfa
 from fantasy_integrations.i_sync_league import SyncLeagueData
-from repository.azure.azure_blob_storage import AzureBlobStorage
+from common.repository.azure.azure_blob_storage import AzureBlobStorage
 
 logger = logging.getLogger(__name__)
 STAT_ID_TO_NAME = {

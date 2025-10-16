@@ -5,24 +5,23 @@ from config.app_config import DEBUG
 from fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
 from flask import Blueprint, current_app, redirect, session, url_for
 from middleware.auth_decorators import require_google_auth
-from repository.supaBase.models.google_auth import GoogleAuth
-from repository.supaBase.models.google_fantasy import GoogleFantasy
-from repository.supaBase.models.yahoo_auth import YahooAuth
-from repository.supaBase.services.auth_services import AuthService
-from repository.supaBase.services.fantasy_services import FantasyService
-from service.openai_file_manager import OpenaiFileManager
+
+from common.openai_file_manager import OpenaiFileManager
+from common.repository.supaBase.models.google_auth import GoogleAuth
+from common.repository.supaBase.models.google_fantasy import GoogleFantasy
+from common.repository.supaBase.models.yahoo_auth import YahooAuth
+from common.repository.supaBase.services.auth_services import AuthService
+from common.repository.supaBase.services.fantasy_services import FantasyService
 
 
 class AuthRouter:
-    
     def __init__(self, openai_file_manager: OpenaiFileManager):
         self.openai_file_manager = openai_file_manager
         self._blueprint = self._create_blueprint()
 
     def _create_blueprint(self):
-        
-        auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
-        
+        auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+
         @auth_bp.route("/google/login")
         def google_login():
             """Google OAuth login - First step in authentication flow"""
@@ -33,7 +32,9 @@ class AuthRouter:
                 return "Google OAuth client not configured", 500
 
             # Always use HTTPS when behind ngrok proxy
-            redirect_uri = url_for("auth.google_callback", _external=True, _scheme="https")
+            redirect_uri = url_for(
+                "auth.google_callback", _external=True, _scheme="https"
+            )
             return google.authorize_redirect(redirect_uri)
 
         @auth_bp.route("/google/callback")
@@ -70,7 +71,9 @@ class AuthRouter:
                 # Insert or update user in database using AuthService
                 auth_service = AuthService()
                 try:
-                    created_user = auth_service.create_or_update_google_user(google_auth)
+                    created_user = auth_service.create_or_update_google_user(
+                        google_auth
+                    )
                     print(
                         f"✅ User successfully saved to database: {created_user.full_name}"
                     )
@@ -95,7 +98,9 @@ class AuthRouter:
             yahoo = current_app.oauth.create_client("yahoo")
 
             # Always use HTTPS when behind ngrok proxy, same as Google login
-            redirect_uri = url_for("auth.yahoo_callback", _external=True, _scheme="https")
+            redirect_uri = url_for(
+                "auth.yahoo_callback", _external=True, _scheme="https"
+            )
             return yahoo.authorize_redirect(redirect_uri=redirect_uri)
 
         @auth_bp.route("/yahoo/callback")
@@ -110,7 +115,9 @@ class AuthRouter:
                 if not user_guid:
                     resp = yahoo.get("fantasy/v2/users;use_login=1", token=token)
                     root = ET.fromstring(resp.text)
-                    ns = {"ns": "http://fantasysports.yahooapis.com/fantasy/v2/base.rng"}
+                    ns = {
+                        "ns": "http://fantasysports.yahooapis.com/fantasy/v2/base.rng"
+                    }
                     guid_elem = root.find(".//ns:guid", ns)
                     if guid_elem is None:
                         return "Could not retrieve user GUID", 500
@@ -189,7 +196,9 @@ class AuthRouter:
                         )
 
                     except Exception as e:
-                        print(f"❌ Unexpected error creating fantasy connection: {str(e)}")
+                        print(
+                            f"❌ Unexpected error creating fantasy connection: {str(e)}"
+                        )
                 else:
                     print(
                         "❌ Could not find Google user ID in session for fantasy connection"
@@ -245,6 +254,6 @@ class AuthRouter:
             return redirect("/")
 
         return auth_bp
-    
+
     def get_bp(self):
         return self._blueprint

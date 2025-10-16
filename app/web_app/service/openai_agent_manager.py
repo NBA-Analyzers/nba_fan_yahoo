@@ -1,13 +1,13 @@
 import os
 from pathlib import Path
 
+from common.repository.supaBase.models.vector_store import generate_league_vector_store_id
 from model.chat import ChatRequest
-from model.file import FilePurpose
-from model.vector_store import generate_league_vector_store_id
+
 from openai import OpenAI
 from openai.types.responses import Response
 from service.chat_session_manager import ChatSessionManager
-from service.vector_store_manager import VectorStoreManager
+from common.vector_store_manager import VectorStoreManager
 
 
 class OpenaiAgentManager:
@@ -51,16 +51,15 @@ class OpenaiAgentManager:
         )
 
     def create_tools(self, league_id: str):
-
         openai_league_vs_id = self.vector_store_manager.get_vector_store_by_id(
             generate_league_vector_store_id(league_id)
         ).openai_vector_id
 
         # openai_box_score_vs_id = self.vector_store_manager.get_vector_store_by_id(
-        #     FilePurpose.BOX_SCORE
+        #     VectorStorePurpose.BOX_SCORE
         # )
         # openai_rules_vs_id = self.vector_store_manager.get_vector_store_by_id(
-        #     FilePurpose.RULES
+        #     VectorStorePurpose.RULES
         # )
 
         return [

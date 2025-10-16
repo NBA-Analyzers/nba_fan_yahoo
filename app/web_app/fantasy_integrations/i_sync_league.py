@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any
 
 class SyncLeagueData(ABC):
     """Abstract base class that all platform syncs must implement"""

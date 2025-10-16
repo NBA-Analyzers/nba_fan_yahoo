@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from model.chat import AssistantResponse
-from service.openai_agent_manager import OpenaiAgentManager
+from common.openai_agent_manager import OpenaiAgentManager
 
 
 class OpenaiAgentRouter:

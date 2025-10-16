@@ -10,8 +10,8 @@ import requests
 from yahoo_fantasy_api.league import yfa
 from fantasy_integrations.yahoo.sync_league.league_sync_manager import get_sync_manager
 from fantasy_integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
-from repository.azure.azure_blob_storage import AzureBlobStorage
-from repository.supaBase.repositories.yahoo_league_repository import (
+from common.repository.azure.azure_blob_storage import AzureBlobStorage
+from common.repository.supaBase.repositories.yahoo_league_repository import (
     YahooLeagueRepository,
 )
 from service.openai_file_manager import OpenaiFileManager

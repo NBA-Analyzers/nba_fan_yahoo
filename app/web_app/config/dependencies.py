@@ -1,12 +1,11 @@
 import os
+
 from openai import OpenAI
+from common.openai_file_manager import OpenaiFileManager
+from common.repository.supaBase.repositories.vector_metadata_repository import vector_store_matadata_repository
+from common.vector_store_manager import VectorStoreManager
 from service.chat_session_manager import ChatSessionManager
 from service.openai_agent_manager import OpenaiAgentManager
-from service.openai_file_manager import OpenaiFileManager
-from service.vector_store_manager import VectorStoreManager
-from repository.supaBase.repositories.vector_metadata_repository import (
-    vector_store_matadata_repository,
-)
 
 _openai_client = None
 _openai_agent_manager = None

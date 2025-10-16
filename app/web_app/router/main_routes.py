@@ -1,19 +1,20 @@
-from flask import (
-    Blueprint,
-    request,
-    render_template,
-    session,
-    redirect,
-    url_for,
-    jsonify,
-)
+import logging
 import time
 import uuid
-import logging
 
-from service.openai_file_manager import OpenaiFileManager
 from fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
+from flask import (
+    Blueprint,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from middleware.auth_decorators import require_google_auth
+
+from common.openai_file_manager import OpenaiFileManager
 
 logger = logging.getLogger(__name__)
 
