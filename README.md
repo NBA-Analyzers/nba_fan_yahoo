@@ -83,7 +83,7 @@ AI: "That trade would improve your rebounds and blocks but hurt your
 
 ```
 src/
-├── my_app/                    # Main Flask application
+├── appl/                    # Main Flask application
 │   ├── app.py                # Application entry point
 │   ├── routes/               # Route handlers
 │   ├── services/             # Business logic

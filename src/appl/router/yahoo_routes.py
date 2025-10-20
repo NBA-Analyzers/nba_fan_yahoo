@@ -144,7 +144,7 @@ class YahooRouter:
                 sc = OAuth2(
                     None,
                     None,
-                    from_file="src/my_app/fantasy_platforms_integration/yahoo/oauth22.json",
+                    from_file="src/a/fantasy_platforms_integration/yahoo/oauth22.json",
                 )
                 yahoo_game = yfa.Game(sc, "nba")
                 league = yahoo_game.to_league("428.l.41083")

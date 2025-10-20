@@ -237,20 +237,6 @@ def callback():
 
 @app.route("/select_league", methods=["POST"])
 def select_league():
-    if DEBUG:
-        sc = OAuth2(
-            None,
-            None,
-            from_file="src/my_app/fantasy_platforms_integration/yahoo/oauth22.json",
-        )
-        yahoo_game = yfa.Game(sc, "nba")
-        league = yahoo_game.to_league("428.l.41083")
-        yahoo_league = YahooLeague(league)
-        results = yahoo_league.sync_full_league(
-            azure_blob_storage=AzureBlobStorage(container_name="fantasy1")
-        )
-        return f"You synced: {results}"
-
     league_id = request.form["league_id"]
     yahoo_game = get_yahoo_sdk()
     league = yahoo_game.to_league(league_id)
@@ -357,7 +343,7 @@ def debug_league():
     sc = OAuth2(
         None,
         None,
-        from_file="src/my_app/fantasy_platforms_integration/yahoo/oauth22.json",
+        from_file="src/appl/fantasy_platforms_integration/yahoo/oauth22.json",
     )
     yahoo_game = yfa.Game(sc, "nba")
     league = yahoo_game.to_league("428.l.41083")

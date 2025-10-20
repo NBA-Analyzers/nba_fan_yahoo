@@ -11,7 +11,7 @@ from datetime import datetime
 # Add parent directory to path to import supaBase
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)  # agent directory
-grandparent_dir = os.path.dirname(parent_dir)  # my_app directory
+grandparent_dir = os.path.dirname(parent_dir)  # appl directory
 
 if grandparent_dir not in sys.path:
     sys.path.insert(0, grandparent_dir)

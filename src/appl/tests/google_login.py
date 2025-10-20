@@ -4,8 +4,8 @@ import os
 import sys
 from dotenv import load_dotenv
 
-# Ensure the 'supaBase' package (located under src/my_app) is importable
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src', 'my_app')))
+# Ensure the 'supaBase' package (located under src/appl/tests) is importable
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src', 'appl','tests')))
 
 # Import our database models and services
 from ..repository.supaBase.models.google_auth import GoogleAuth
