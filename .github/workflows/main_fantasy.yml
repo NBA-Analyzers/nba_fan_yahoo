@@ -59,3 +59,4 @@ jobs:
           app-name: 'fantasy'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_189C1B2217D04B1AB448D83E2047FC44 }}
+          startup-command: 'cd src && gunicorn --bind=0.0.0.0:$PORT --timeout 600 appl.app:app'
