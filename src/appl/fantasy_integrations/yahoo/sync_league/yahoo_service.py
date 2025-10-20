@@ -1,5 +1,3 @@
-# src/my_app/services/yahoo_service.py
-
 import logging
 import os
 import threading
