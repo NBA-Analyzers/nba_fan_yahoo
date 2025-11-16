@@ -43,7 +43,6 @@ class MainRouter:
             <hr>
             <p>Other options:</p>
             <ul>
-                <li><a href="/api/sync_league">Sync League (Debug)</a></li>
                 <li><a href="/health">Health Check</a></li>
             </ul>
             """
@@ -79,7 +78,8 @@ class MainRouter:
                             for league in user_leagues:
                                 league_items.append(f"""
                                 <div style="border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 8px; background: white;">
-                                    <h4>League: {league.get("league_id", "Unknown")}</h4>
+                                    <h4>League ID: {league.get("league_id", "Unknown")}</h4>
+                                    <h4>League Name: {league.get("league_name", "Unknown")}</h4>
                                     <p><strong>Team:</strong> {league.get("team_name", "Unknown Team")}</p>
                                     <p><strong>Added:</strong> {league.get("created_at", "Unknown")}</p>
                                     <a href="/ai-chat/{league.get("league_id", "unknown")}" style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; font-size: 14px;">AI Chat</a>

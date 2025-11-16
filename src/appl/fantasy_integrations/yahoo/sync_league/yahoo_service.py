@@ -32,7 +32,7 @@ class YahooService:
             if not yahoo_game:
                 return []
 
-            league_ids = yahoo_game.league_ids()
+            league_ids = yahoo_game.league_ids(year=2025)
             league_options = []
             for league_id in league_ids:
                 league = yahoo_game.to_league(league_id)
@@ -161,12 +161,10 @@ class YahooService:
                 league_name = league_settings.get("name", "Unknown League")
 
                 # Get user's team information
-                teams = league.teams()
-                user_team_name = None
-                if teams:
-                    first_team_key = list(teams.keys())[0]
-                    user_team_name = teams[first_team_key].get("name", "Unknown Team")
-
+                user_data = league.teams()[league.team_key()]
+                user_team_name = user_data.get("name", "Unknown Team")
+                user_team_id = user_data.get("team_id", "")
+                
                 # Get yahoo_user_id
                 yahoo_user_id = self.token_store[user_guid].get(
                     "xoauth_yahoo_guid"
@@ -176,7 +174,9 @@ class YahooService:
                 league_data = {
                     "yahoo_user_id": yahoo_user_id,
                     "league_id": league_id,
-                    "team_name": user_team_name or "Unknown Team",
+                    "team_name": user_team_name,
+                    "league_name": league_name,
+                    "team_id": user_team_id,
                 }
 
                 if existing_league:

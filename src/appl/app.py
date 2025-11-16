@@ -1,9 +1,9 @@
 from flask import Flask, request
 from werkzeug.middleware.proxy_fix import ProxyFix
-from .config.dependencies import set_services
-from .config.app_config import configure_app
-from .config.oauth_config import configure_oauth
-from .router import register_routes
+from appl.config.dependencies import set_services
+from appl.config.app_config import configure_app
+from appl.config.oauth_config import configure_oauth
+from appl.router import register_routes
 import os
 
 

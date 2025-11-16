@@ -12,6 +12,41 @@ from ..repository.supaBase.services.auth_services import AuthService
 from ..repository.supaBase.services.fantasy_services import FantasyService
 from ..service.openai_file_manager import OpenaiFileManager
 
+def get_user_guid_from_token(token, yahoo):
+    user_guid = token.get("xoauth_yahoo_guid")
+
+    if not user_guid:
+        resp = yahoo.get("fantasy/v2/users;use_login=1", token=token)
+        root = ET.fromstring(resp.text)
+        ns = {"ns": "http://fantasysports.yahooapis.com/fantasy/v2/base.rng"}
+        guid_elem = root.find(".//ns:guid", ns)
+        if guid_elem is None:
+            return "Could not retrieve user GUID", 500
+        user_guid = guid_elem.text
+
+    return user_guid
+
+def get_username_from_token(token, yahoo):
+    username = None
+    try:
+        # Option 1: Try to get from token (some Yahoo responses include profile)
+        if "profile" in token and "nickname" in token["profile"]:
+            username = token["profile"]["nickname"]
+        # Option 2: Fetch from Yahoo API
+        else:
+            resp = yahoo.get("fantasy/v2/users;use_login=1", token=token)
+            root = ET.fromstring(resp.text)
+            ns = {
+                "ns": "http://fantasysports.yahooapis.com/fantasy/v2/base.rng"
+            }
+            nickname_elem = root.find(".//ns:nickname", ns)
+            if nickname_elem is not None:
+                username = nickname_elem.text
+    except Exception as e:
+        print(f"⚠️ Could not fetch username: {e}")
+    
+    return username
+
 
 class AuthRouter:
     
@@ -89,9 +124,6 @@ class AuthRouter:
         @require_google_auth
         def yahoo_login():
             """Yahoo OAuth login - Requires Google authentication first"""
-            if DEBUG:
-                return redirect("/yahoo/debug_league")
-
             yahoo = current_app.oauth.create_client("yahoo")
 
             # Always use HTTPS when behind ngrok proxy, same as Google login
@@ -105,34 +137,12 @@ class AuthRouter:
             try:
                 yahoo = current_app.oauth.create_client("yahoo")
                 token = yahoo.authorize_access_token()
-                user_guid = token.get("xoauth_yahoo_guid")
+                
+                user_guid = get_user_guid_from_token(token, yahoo)
 
-                if not user_guid:
-                    resp = yahoo.get("fantasy/v2/users;use_login=1", token=token)
-                    root = ET.fromstring(resp.text)
-                    ns = {"ns": "http://fantasysports.yahooapis.com/fantasy/v2/base.rng"}
-                    guid_elem = root.find(".//ns:guid", ns)
-                    if guid_elem is None:
-                        return "Could not retrieve user GUID", 500
-                    user_guid = guid_elem.text
+                username = get_username_from_token(token, yahoo)
 
-                username = None
-                try:
-                    # Option 1: Try to get from token (some Yahoo responses include profile)
-                    if "profile" in token and "nickname" in token["profile"]:
-                        username = token["profile"]["nickname"]
-                    # Option 2: Fetch from Yahoo API
-                    else:
-                        resp = yahoo.get("fantasy/v2/users;use_login=1", token=token)
-                        root = ET.fromstring(resp.text)
-                        ns = {
-                            "ns": "http://fantasysports.yahooapis.com/fantasy/v2/base.rng"
-                        }
-                        nickname_elem = root.find(".//ns:nickname", ns)
-                        if nickname_elem is not None:
-                            username = nickname_elem.text
-                except Exception as e:
-                    print(f"⚠️ Could not fetch username: {e}")
+                
                 # Initialize token store in session if it doesn't exist
                 if "token_store" not in session:
                     session["token_store"] = {}
@@ -196,7 +206,6 @@ class AuthRouter:
                     )
 
                 # Get leagues for selection
-
                 yahoo_service = YahooService(
                     session["token_store"], self.openai_file_manager
                 )
