@@ -1,6 +1,6 @@
 import azure.functions as func
 app = func.FunctionApp()
-# from appl.repository.azure.azure_blob_storage import AzureBlobStorage
+from repository.azure.azure_blob_storage import AzureBlobStorage
 
 @app.function_name(name="sync_full_league")
 @app.route(route="sync_full_league", auth_level=func.AuthLevel.ANONYMOUS)
