@@ -37,7 +37,7 @@ jobs:
       - name: Copy shared code
         run: |
           mkdir -p functions/shared
-          cp -r appl/repository sync_general_data/appl/
+          cp -r src/appl/repository sync_general_data/appl/
 
 
       - name: Install dependencies
