@@ -175,8 +175,7 @@ def export_report_to_json(report: dict, output_path: Path):
         json.dump(report, f, indent=2)
 
 
-def main():
-    season = "2025-26"
+def generate_consolidated_player_stats(season: str = "2025-26") -> Path:
     output_dir = Path("player_reports")
     output_dir.mkdir(parents=True, exist_ok=True)
     output_file = output_dir / f"active_players_{season}.json"
@@ -200,6 +199,11 @@ def main():
 
     export_report_to_json(consolidated_report, output_file)
     print(f"Saved consolidated stats report -> {output_file}")
+    return output_file
+
+
+def main():
+    generate_consolidated_player_stats()
 
 
 if __name__ == "__main__":

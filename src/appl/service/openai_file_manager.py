@@ -1,6 +1,6 @@
 from io import BytesIO
 import json
-from typing import Dict
+from typing import Any, Dict
 
 from openai import OpenAI
 
@@ -10,7 +10,6 @@ from ..model.file import FilePurpose
 
 
 class OpenaiFileManager:
-
     def __init__(self, vector_store_manager: VectorStoreManager, openai_client: OpenAI):
         self.vector_store_manager = vector_store_manager
         self.openai_client = openai_client
@@ -26,21 +25,20 @@ class OpenaiFileManager:
 
     def update_rules(self, pdf_path: str):
         with open(pdf_path, "rb") as f:
-            openai_file = self.openai_client.files.create(
-            file=f,
-                purpose="assistants"
-            )
+            openai_file = self.openai_client.files.create(file=f, purpose="assistants")
 
         openai_file_id = openai_file.id
 
         vector_store_id = FilePurpose.RULES.value
-        vector_store_metadata = self.vector_store_manager.update_vector_store(vector_store_id, [openai_file_id])
+        vector_store_metadata = self.vector_store_manager.update_vector_store(
+            vector_store_id, [openai_file_id]
+        )
         return vector_store_metadata
 
-    def update_box_score(self, files: Dict[str, Dict[str, str]]):
+    def update_box_score(self, files: Dict[str, Any]):
         openai_file_ids = []
 
-        for file_name, file_content in files:
+        for file_name, file_content in files.items():
             openai_file_ids.append(self.upload_file_in_openai(file_name, file_content))
 
         vector_store_id = FilePurpose.BOX_SCORE.value
@@ -51,6 +49,6 @@ class OpenaiFileManager:
         file_object = BytesIO(json_content.encode("utf-8"))
         file_object.name = f"{file_name}.json"
         openai_file = self.openai_client.files.create(
-            file=file_object, 
-            purpose="assistants")
+            file=file_object, purpose="assistants"
+        )
         return openai_file.id

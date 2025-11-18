@@ -65,9 +65,9 @@ class OpenaiAgentManager:
             return None
 
         vector_store_ids = [openai_league_vs.openai_vector_id]
-        # openai_box_score_vs_id = self.vector_store_manager.get_vector_store_by_id(
-        #     FilePurpose.BOX_SCORE
-        # )
+        openai_box_score_vs = self.vector_store_manager.get_vector_store_by_id(
+            FilePurpose.BOX_SCORE.value
+        )
 
         openai_rules_vs = self.vector_store_manager.get_vector_store_by_id(
             FilePurpose.RULES.value
@@ -78,6 +78,11 @@ class OpenaiAgentManager:
         else:
             vector_store_ids.append(openai_rules_vs.openai_vector_id)
 
+        if openai_box_score_vs is None:
+            logging.error("No box score vector store found")
+        else:
+            vector_store_ids.append(openai_box_score_vs.openai_vector_id)
+
         return [
             {
                 "type": "file_search",
@@ -87,7 +92,7 @@ class OpenaiAgentManager:
 
     def get_instructions(self):
         # Uri did it because he had a problem with the system prompt
-        
+
         default_prompt_path = (
             Path(__file__).resolve().parent.parent / "utils" / "system_prompt.md"
         )
