@@ -14,6 +14,11 @@ class OpenaiFileManager:
         self.vector_store_manager = vector_store_manager
         self.openai_client = openai_client
 
+    def _upload_local_file(self, file_path: str) -> str:
+        with open(file_path, "rb") as f:
+            openai_file = self.openai_client.files.create(file=f, purpose="assistants")
+        return openai_file.id
+
     def update_league_files(self, league_id: str, files: Dict[str, any]):
         openai_file_ids = []
 
@@ -24,14 +29,21 @@ class OpenaiFileManager:
         self.vector_store_manager.update_vector_store(vector_store_id, openai_file_ids)
 
     def update_rules(self, pdf_path: str):
-        with open(pdf_path, "rb") as f:
-            openai_file = self.openai_client.files.create(file=f, purpose="assistants")
-
-        openai_file_id = openai_file.id
-
+        openai_file_id = self._upload_local_file(pdf_path)
         vector_store_id = FilePurpose.RULES.value
         vector_store_metadata = self.vector_store_manager.update_vector_store(
             vector_store_id, [openai_file_id]
+        )
+        return vector_store_metadata
+
+    def update_player_stats(self, json_path: str, pdf_path: str | None = None):
+        openai_file_ids = [self._upload_local_file(json_path)]
+        if pdf_path:
+            openai_file_ids.append(self._upload_local_file(pdf_path))
+
+        vector_store_id = FilePurpose.RULES.value
+        vector_store_metadata = self.vector_store_manager.update_vector_store(
+            vector_store_id, openai_file_ids
         )
         return vector_store_metadata
 

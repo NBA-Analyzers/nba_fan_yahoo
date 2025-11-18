@@ -23,7 +23,6 @@ from appl.service.vector_store_manager import VectorStoreManager
 from appl.repository.supaBase.repositories.vector_metadata_repository import (
     VectorStoreMetadataRepository,
 )
-from appl.model.file import FilePurpose
 
 load_dotenv()
 
@@ -80,24 +79,20 @@ def upload_rules(
         return error_msg
 
 
-def upload_player_stats(openai_file_manager: OpenaiFileManager, season: str) -> str:
+def upload_player_stats(
+    openai_file_manager: OpenaiFileManager, stats_path: Path, season: str
+) -> str:
     """
     Upload the consolidated player stats JSON into the vector store.
     """
 
     try:
-        print("♻️ Regenerating consolidated player stats JSON...")
-        stats_path = player_stats.generate_consolidated_player_stats(season)
+        script_dir = Path(__file__).parent
+        pdf_path = script_dir / "Yahoo_Fantasy_Basketball_Rules_With_Comparison.pdf"
 
-        print(
-            "📊 Uploading consolidated player stats JSON to box score vector store..."
-        )
-        with stats_path.open("r", encoding="utf-8") as f:
-            stats_payload = json.load(f)
-
-        file_key = stats_path.stem
-        vector_store_metadata = openai_file_manager.update_box_score(
-            {file_key: stats_payload}
+        print("📊 Uploading rules PDF + player stats JSON to rules vector store...")
+        vector_store_metadata = openai_file_manager.update_player_stats(
+            str(stats_path), str(pdf_path)
         )
         print("✅ Player stats successfully updated in vector store!")
         return vector_store_metadata
@@ -127,8 +122,11 @@ def main():
         print(f"Rules update result: {rules_result}")
 
         season = "2025-26"
+        print("\n♻️ Regenerating consolidated player stats JSON...")
+        stats_path = player_stats.generate_consolidated_player_stats(season)
+
         print("\n📊 Uploading consolidated player stats JSON...")
-        stats_result = upload_player_stats(openai_file_manager, season)
+        stats_result = upload_player_stats(openai_file_manager, stats_path, season)
         print(f"Player stats update result: {stats_result}")
 
         print("\n🎉 Script completed successfully!")

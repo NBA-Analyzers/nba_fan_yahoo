@@ -78,11 +78,6 @@ class OpenaiAgentManager:
         else:
             vector_store_ids.append(openai_rules_vs.openai_vector_id)
 
-        if openai_box_score_vs is None:
-            logging.error("No box score vector store found")
-        else:
-            vector_store_ids.append(openai_box_score_vs.openai_vector_id)
-
         return [
             {
                 "type": "file_search",
