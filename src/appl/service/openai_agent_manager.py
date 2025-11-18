@@ -57,7 +57,6 @@ class OpenaiAgentManager:
         )
 
     def create_tools(self, league_id: str):
-
         openai_league_vs = self.vector_store_manager.get_vector_store_by_id(
             generate_league_vector_store_id(league_id)
         )
@@ -75,7 +74,7 @@ class OpenaiAgentManager:
         )
 
         if openai_rules_vs is None:
-            logging.error(f"No rules vector store found")
+            logging.error("No rules vector store found")
         else:
             vector_store_ids.append(openai_rules_vs.openai_vector_id)
 
@@ -87,5 +86,16 @@ class OpenaiAgentManager:
         ]
 
     def get_instructions(self):
-        instructions_path = Path(os.environ["SYSTEM_PROMPT_PATH"])
+        # Uri did it because he had a problem with the system prompt
+        
+        default_prompt_path = (
+            Path(__file__).resolve().parent.parent / "utils" / "system_prompt.md"
+        )
+        env_prompt_path = os.environ.get("SYSTEM_PROMPT_PATH")
+
+        instructions_path = (
+            Path(env_prompt_path).expanduser()
+            if env_prompt_path is not None
+            else default_prompt_path
+        )
         return instructions_path.read_text(encoding="utf-8")

@@ -188,7 +188,7 @@ class YahooLeague(SyncLeagueData):
                 print(f"finished team: {team_key}")
             return self._export_daily_to_json_simple(all_teams_data)
 
-        except Exception as e:
+        except Exception:
             return {}
 
     def _export_daily_to_json_simple(self, data, filename_prefix="daily_roster"):
@@ -450,8 +450,8 @@ class YahooLeague(SyncLeagueData):
 
         # 7. Daily roster
         try:
-            end_date = "2024-03-03"  # datetime.now().strftime('%Y-%m-%d')
-            start_date = "2024-03-03"  # (datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
+            end_date = datetime.now().strftime("%Y-%m-%d")
+            start_date = "2025-22-10"  # (datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
             daily_roster = self._daily_roster(start_date, end_date)
             success = azure_blob_storage.upload_json_with_retries(
                 daily_roster, f"{directory_name}/daily_roster.json"
@@ -460,6 +460,18 @@ class YahooLeague(SyncLeagueData):
                 results["daily_roster"] = daily_roster
         except Exception as e:
             logger.error(f"Error preparing daily_roster: {e}")
+
+
+        # 8. Player stats
+        try:
+            player_stats = self._player_stats()
+            success = azure_blob_storage.upload_json_with_retries(
+                player_stats, f"{directory_name}/player_stats.json"
+            )
+            if success:
+                results["player_stats"] = player_stats
+        except Exception as e:
+            logger.error(f"Error preparing player_stats: {e}")
 
         # Log summary
         total_blobs = len(results)
