@@ -15,12 +15,11 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 # Add the parent directory to the path so we can import our modules
-sys.path.append(str(Path(__file__).parent.parent.parent))
+# sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from service.openai_file_manager import OpenaiFileManager
-from service.vector_store_manager import VectorStoreManager
-from repository.supaBase.repositories.vector_metadata_repository import VectorStoreMetadataRepository
-from model.file import FilePurpose
+from appl.service.openai_file_manager import OpenaiFileManager
+from appl.service.vector_store_manager import VectorStoreManager
+from appl.repository.supaBase.repositories.vector_metadata_repository import VectorStoreMetadataRepository
 
 load_dotenv()
 

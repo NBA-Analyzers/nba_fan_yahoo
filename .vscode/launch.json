@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "App",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "appl.app",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src:${workspaceFolder}"
+            }
+        },
+        {
+            "name": "Fantasy Rules Script",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "appl.scripts.fantasy_rules.fantasy_rule",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/src",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
+        }
+    ]
+}
