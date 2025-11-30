@@ -24,6 +24,19 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/src"
             }
+        },
+        {
+            "name": "Box Score Script",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "appl.scripts.fantasy_rules.box_score",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "cwd": "${workspaceFolder}/src",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            }
         }
     ]
 }

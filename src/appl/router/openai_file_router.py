@@ -18,11 +18,6 @@ class OpenaiFilesRouter:
             files = request.get_json()
             self.openai_file_manager.update_league_files(league_id, files)
 
-        @openai_file_bp.route("/update_box_score", methods=["POST"])
-        def update_box_score():
-            files = request.get_json()
-            self.openai_file_manager.update_box_score(files)
-
         @openai_file_bp.route("/update_rules", methods=["POST"])
         def update_rules(file: Dict[str, str]):
             file = request.get_json()

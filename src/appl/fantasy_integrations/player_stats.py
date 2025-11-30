@@ -178,14 +178,16 @@ def export_report_to_json(report: dict, output_path: Path):
 def generate_consolidated_player_stats(season: str = "2025-26") -> Path:
     output_dir = Path("player_reports")
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_file = output_dir / f"active_players_{season}.json"
+    output_file = output_dir / f"player_stats_{season}.json"
 
     active_players = players.get_active_players()
     print(f"Found {len(active_players)} active players. Generating reports...")
 
     consolidated_report: dict[str, dict] = {}
 
-    for player in sorted(active_players, key=lambda p: p["full_name"]):
+    for i, player in enumerate(sorted(active_players, key=lambda p: p["full_name"])):
+        if i >= 10:
+            break
         player_name = player["full_name"]
         player_id = player["id"]
         try:

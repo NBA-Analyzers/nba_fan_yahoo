@@ -4,8 +4,7 @@ from typing import Optional
 
 
 class FilePurpose(Enum):
-    BOX_SCORE = "box_score"
-    RULES = "rules"
+    GENERAL = "general"
     LEAGUE = "league"
 
 

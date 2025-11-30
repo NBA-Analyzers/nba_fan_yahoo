@@ -50,6 +50,19 @@ class BaseRepository(ABC):
         except Exception as e:
             raise DatabaseError(f"Failed to update record in {self.table_name}: {str(e)}")
     
+    def update_by_two_fields(self, field1_name: str, field1_value: Any, field2_name: str, field2_value: Any, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update record by two field values"""
+        try:
+            # Remove None values and empty strings for updates
+            clean_data = {k: v for k, v in data.items() if v is not None and v != ""}
+            if not clean_data:
+                raise DatabaseError("No valid data provided for update")
+                
+            response = self.db.table(self.table_name).update(clean_data).eq(field1_name, field1_value).eq(field2_name, field2_value).execute()
+            return response.data[0] if response.data else {}
+        except Exception as e:
+            raise DatabaseError(f"Failed to update record in {self.table_name}: {str(e)}")
+        
     def delete_by_field(self, field_name: str, value: Any) -> bool:
         """Delete record by field value"""
         try:
@@ -73,3 +86,11 @@ class BaseRepository(ABC):
             return len(response.data) > 0
         except Exception as e:
             raise DatabaseError(f"Failed to check existence in {self.table_name}: {str(e)}")
+    
+    def get_by_two_fields(self, field1_name: str, field1_value: Any, field2_name: str, field2_value: Any) -> Optional[Dict[str, Any]]:
+        """Get single record by two field values"""
+        try:
+            response = self.db.table(self.table_name).select("*").eq(field1_name, field1_value).eq(field2_name, field2_value).execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            raise DatabaseError(f"Failed to get record from {self.table_name}: {str(e)}")
