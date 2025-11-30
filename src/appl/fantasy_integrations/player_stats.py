@@ -42,6 +42,32 @@ ORDERED_SEASON_FIELDS = [
     "MIN",
 ]
 
+FRIENDLY_FIELD_NAMES = {
+    "GP": "Games Played",
+    "FGM": "Field Goals Made",
+    "FGA": "Field Goals Attempted",
+    "FG_PCT": "Field Goal Percentage",
+    "FTA": "Free Throws Attempted",
+    "FTM": "Free Throws Made",
+    "FT_PCT": "Free Throw Percentage",
+    "FG3M": "3PT Made",
+    "PTS": "Points",
+    "REB": "Rebounds",
+    "AST": "Assists",
+    "STL": "Steals",
+    "BLK": "Blocks",
+    "TOV": "Turnovers",
+    "MIN": "Minutes",
+    "GAMES_PLAYED": "Games Played",
+    "AVG_MIN": "Average Minutes",
+}
+
+
+def _rename_stat_keys(stats: dict | None):
+    if stats is None:
+        return None
+    return {FRIENDLY_FIELD_NAMES.get(key, key): value for key, value in stats.items()}
+
 
 def find_player_id(player_name: str):
     """Find a player's ID by full name."""
@@ -67,7 +93,8 @@ def get_season_stats(player_id, season="2024-25"):
 
         columns = ORDERED_SEASON_FIELDS
         existing_columns = [col for col in columns if col in player_stats.columns]
-        return player_stats[existing_columns].iloc[0].to_dict()
+        raw_stats = player_stats[existing_columns].iloc[0].to_dict()
+        return _rename_stat_keys(raw_stats)
     except Exception as e:
         print(f"Error getting season stats: {e}")
         return None
@@ -114,7 +141,7 @@ def _aggregate_period_stats(player_id, season: str, days_back: int):
             value = window_df[field].mean()
             stats[field] = round(float(value), 2) if pd.notnull(value) else None
 
-    return stats
+    return _rename_stat_keys(stats)
 
 
 def get_monthly_stats(player_id, season="2024-25"):
