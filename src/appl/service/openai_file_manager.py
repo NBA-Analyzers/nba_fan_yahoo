@@ -30,7 +30,7 @@ class OpenaiFileManager:
 
     def update_rules(self, pdf_path: str):
         openai_file_id = self._upload_local_file(pdf_path)
-        vector_store_id = FilePurpose.RULES.value
+        vector_store_id = FilePurpose.GENERAL.value
         vector_store_metadata = self.vector_store_manager.update_vector_store(
             vector_store_id, [openai_file_id]
         )
@@ -41,20 +41,11 @@ class OpenaiFileManager:
         if pdf_path:
             openai_file_ids.append(self._upload_local_file(pdf_path))
 
-        vector_store_id = FilePurpose.RULES.value
+        vector_store_id = FilePurpose.GENERAL.value
         vector_store_metadata = self.vector_store_manager.update_vector_store(
             vector_store_id, openai_file_ids
         )
         return vector_store_metadata
-
-    def update_box_score(self, files: Dict[str, Any]):
-        openai_file_ids = []
-
-        for file_name, file_content in files.items():
-            openai_file_ids.append(self.upload_file_in_openai(file_name, file_content))
-
-        vector_store_id = FilePurpose.BOX_SCORE.value
-        self.vector_store_manager.update_vector_store(vector_store_id, openai_file_ids)
 
     def upload_file_in_openai(self, file_name: str, file_content: any):
         json_content = json.dumps(file_content, ensure_ascii=False)

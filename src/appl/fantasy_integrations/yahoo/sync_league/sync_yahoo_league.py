@@ -448,18 +448,18 @@ class YahooLeague(SyncLeagueData):
         except Exception as e:
             logger.error(f"Error preparing schedule: {e}")
 
-        # 7. Daily roster
-        try:
-            end_date = datetime.now().strftime("%Y-%m-%d")
-            start_date = "2025-22-10"  # (datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
-            daily_roster = self._daily_roster(start_date, end_date)
-            success = azure_blob_storage.upload_json_with_retries(
-                daily_roster, f"{directory_name}/daily_roster.json"
-            )
-            if success:
-                results["daily_roster"] = daily_roster
-        except Exception as e:
-            logger.error(f"Error preparing daily_roster: {e}")
+        # # 7. Daily roster
+        # try:
+        #     end_date = datetime.now().strftime("%Y-%m-%d")
+        #     start_date = "2025-22-10"  # (datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
+        #     daily_roster = self._daily_roster(start_date, end_date)
+        #     success = azure_blob_storage.upload_json_with_retries(
+        #         daily_roster, f"{directory_name}/daily_roster.json"
+        #     )
+        #     if success:
+        #         results["daily_roster"] = daily_roster
+        # except Exception as e:
+        #     logger.error(f"Error preparing daily_roster: {e}")
 
 
         # 8. Player stats

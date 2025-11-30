@@ -12,13 +12,13 @@ Waiver wire opportunities and streaming strategies
 Playoff preparation and championship strategies
 
 ##Resources##
-1. rules.pdf
+Yahoo_Fantasy_Basketball_Rules_With_Comparison.pdf
 - Contains the official Yahoo Fantasy Basketball rules and league-specific policies.
 - Use it to clarify roster construction rules, player eligibility, acquisition/drop limits, league scoring categories, tie-breakers, and playoff qualification criteria.
 - Helps resolve any disputes or ambiguities about league governance.
 - Ensures that recommendations respect official constraints.
 
-2. league_settings.csv
+league_settings.json
 - Shows the customized configuration of your league, including:
 - Scoring format (categories tracked, points vs. rotisserie, etc.)
 - Number and type of roster positions (starters, bench, utility, IL spots)
@@ -26,34 +26,32 @@ Playoff preparation and championship strategies
 - Playoff dates and seedings
 - Allows tailoring advice to your league’s exact settings (for example, streaming category pickups based on category scoring emphasis, or recommending trade targets based on playoff timing).
 
-3. team_rosters.json
+team_rosters.json
 - Provides detailed information on each team’s current players, their eligible positions, and injury statuses.
 - Essential to evaluate roster depth, positional flexibility, and injury impact.
 - Used to identify strong/weak areas and potential waiver wire targets fitting positional needs.
 - Useful to analyze trade partners’ roster composition.
 
-4. league_matchups.json
+league_matchups.json
 - Contains weekly head-to-head matchup results broken down by fantasy categories.
 - Allows performance trend analysis both weekly and season-long by team.
 - Can reveal your strengths and weaknesses relative to opponents.
 - Supports tactical decisions for upcoming weeks (which categories you need to target via adds or streaming players).
 
-5. free_agents.json
+free_agents.json
 - Lists all players currently available on waivers or free agency pool.
 - Enables targeted pickup recommendations, especially for streaming or injury replacements in categories you want to improve.
 - Critical for exploiting emerging breakout players or favorable schedule spots.
 
-6. daily_roster.json
-- Shows day-by-day changes in team lineups, including who is starting versus on the bench, and which players are on the injured list.
-- Facilitates daily management such as activating players returning from injury, optimizing playing time slots, or streaming based on NBA schedules and back-to-back games.
-- Helps avoid benching active starters or wasting roster spots on players who are unlikely to play.
-
-7. standing.json
+standing.json
 - Displays current league standings with win-loss records or category standings depending on format.
 - Provides context for your team’s playoff chances and urgency level.
 - Useful for prioritizing moves: if you’re borderline for playoffs, aggressive streaming and trading; if locked in, focus on long-term value or prospects.
 
-8. Live data from nba.com and statmuse.com
+player_stats_2025_26.json
+- Displays all the stats of each player this year.
+
+Live data from nba.com and statmuse.com
 - Real-time stats, injury updates, player usage trends, and upcoming schedules.
 - Crucial to monitor player health, recent performance trends, and matchup difficulties.
 - Supports advanced decisions like timing add/drops or setting lineups optimally before lock deadlines.

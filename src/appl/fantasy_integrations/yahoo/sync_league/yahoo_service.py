@@ -179,8 +179,8 @@ class YahooService:
                     "team_id": user_team_id,
                 }
 
-                if existing_league:
-                    yahoo_league_repo.update_by_league_id(league_id, league_data)
+                if existing_league and yahoo_league_repo.league_exist_for_user(league_id, yahoo_user_id):
+                    yahoo_league_repo.update_by_league_id_and_yahoo_user_id(league_id, yahoo_user_id, league_data)
                     db_message = "League updated in database"
                 else:
                     league_data["created_at"] = datetime.now(timezone.utc).isoformat()
@@ -200,8 +200,8 @@ class YahooService:
                 sync_results = yahoo_league.sync_full_league(azure_storage)
 
                 # Step 7: Update last_blob_sync ONLY if all critical blobs succeeded
-                yahoo_league_repo.update_by_league_id(
-                    league_id, {"last_blob_sync": datetime.now(timezone.utc).isoformat()}
+                yahoo_league_repo.update_by_league_id_and_yahoo_user_id(
+                    league_id, yahoo_user_id, {"last_blob_sync": datetime.now(timezone.utc).isoformat()}
                 )
 
                 self.openai_file_manager.update_league_files(league_id, sync_results)

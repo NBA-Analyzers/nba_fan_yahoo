@@ -79,7 +79,7 @@ def upload_rules(
         return error_msg
 
 
-def upload_player_stats(
+def upload_general_to_openai(
     openai_file_manager: OpenaiFileManager, stats_path: Path, season: str
 ) -> str:
     """
@@ -116,17 +116,13 @@ def main():
         openai_file_manager, vector_store_manager = setup_services()
         print("✅ Services initialized successfully")
 
-        # Update rules
-        print("\n📋 Uploading Fantasy Rules from PDF...")
-        rules_result = upload_rules(openai_file_manager, vector_store_manager)
-        print(f"Rules update result: {rules_result}")
-
+        # Update rules + Player Stats
         season = "2025-26"
         print("\n♻️ Regenerating consolidated player stats JSON...")
         stats_path = player_stats.generate_consolidated_player_stats(season)
 
         print("\n📊 Uploading consolidated player stats JSON...")
-        stats_result = upload_player_stats(openai_file_manager, stats_path, season)
+        stats_result = upload_general_to_openai(openai_file_manager, stats_path, season)
         print(f"Player stats update result: {stats_result}")
 
         print("\n🎉 Script completed successfully!")

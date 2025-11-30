@@ -65,12 +65,9 @@ class OpenaiAgentManager:
             return None
 
         vector_store_ids = [openai_league_vs.openai_vector_id]
-        openai_box_score_vs = self.vector_store_manager.get_vector_store_by_id(
-            FilePurpose.BOX_SCORE.value
-        )
 
         openai_rules_vs = self.vector_store_manager.get_vector_store_by_id(
-            FilePurpose.RULES.value
+            FilePurpose.GENERAL.value
         )
 
         if openai_rules_vs is None:
