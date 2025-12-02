@@ -49,7 +49,7 @@ class OpenaiAgentManager:
         instructions = self.get_instructions()
 
         return self.openai_client.responses.create(
-            model="gpt-4.1-mini",
+            model="gpt-5.1-mini",
             instructions=instructions,
             input=new_user_message,
             previous_response_id=previous_response_id,

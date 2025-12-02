@@ -36,10 +36,14 @@ class OpenaiFileManager:
         )
         return vector_store_metadata
 
-    def update_player_stats(self, json_path: str, pdf_path: str | None = None):
+    def update_player_stats(
+        self, json_path: str, pdf_path: str | None = None, schedule_path: str | None = None
+    ):
         openai_file_ids = [self._upload_local_file(json_path)]
         if pdf_path:
             openai_file_ids.append(self._upload_local_file(pdf_path))
+        if schedule_path:
+            openai_file_ids.append(self._upload_local_file(schedule_path))
 
         vector_store_id = FilePurpose.GENERAL.value
         vector_store_metadata = self.vector_store_manager.update_vector_store(

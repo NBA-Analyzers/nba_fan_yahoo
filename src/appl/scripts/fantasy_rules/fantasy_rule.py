@@ -17,7 +17,7 @@ from openai import OpenAI
 # Add the parent directory to the path so we can import our modules
 # sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from appl.fantasy_integrations import player_stats
+from appl.scripts.player_stats import player_stats
 from appl.service.openai_file_manager import OpenaiFileManager
 from appl.service.vector_store_manager import VectorStoreManager
 from appl.repository.supaBase.repositories.vector_metadata_repository import (
@@ -89,12 +89,18 @@ def upload_general_to_openai(
     try:
         script_dir = Path(__file__).parent
         pdf_path = script_dir / "Yahoo_Fantasy_Basketball_Rules_With_Comparison.pdf"
+        
+        # Path to schedule file: ../../../data/schedule/NBA_schedule.json
+        # script_dir = src/appl/scripts/fantasy_rules
+        # script_dir.parent = src/appl/scripts
+        # script_dir.parent.parent = src/appl
+        schedule_path = script_dir.parent.parent / "data" / "schedule" / "NBA_schedule.json"
 
-        print("📊 Uploading rules PDF + player stats JSON to rules vector store...")
+        print("📊 Uploading rules PDF + player stats JSON + schedule JSON to rules vector store...")
         vector_store_metadata = openai_file_manager.update_player_stats(
-            str(stats_path), str(pdf_path)
+            str(stats_path), str(pdf_path), str(schedule_path)
         )
-        print("✅ Player stats successfully updated in vector store!")
+        print("✅ Player stats and schedule successfully updated in vector store!")
         return vector_store_metadata
 
     except Exception as e:

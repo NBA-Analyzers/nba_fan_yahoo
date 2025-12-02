@@ -203,7 +203,12 @@ def export_report_to_json(report: dict, output_path: Path):
 
 
 def generate_consolidated_player_stats(season: str = "2025-26") -> Path:
-    output_dir = Path("player_reports")
+    # Output to src/appl/data/player_reports
+    # File is now in src/appl/scripts/player_stats/player_stats.py
+    # .parent = player_stats dir
+    # .parent.parent = scripts dir
+    # .parent.parent.parent = appl dir
+    output_dir = Path(__file__).parent.parent.parent / "data" / "player_reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_file = output_dir / f"player_stats_{season}.json"
 
@@ -213,8 +218,8 @@ def generate_consolidated_player_stats(season: str = "2025-26") -> Path:
     consolidated_report: dict[str, dict] = {}
 
     for i, player in enumerate(sorted(active_players, key=lambda p: p["full_name"])):
-        if i >= 10:
-            break
+        # if i >= 10:
+        #     break
         player_name = player["full_name"]
         player_id = player["id"]
         try:
