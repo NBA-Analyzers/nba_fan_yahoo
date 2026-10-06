@@ -2,7 +2,7 @@
 """
 Fantasy Rules Upload Script
 
-This script handles uploading Yahoo Fantasy Basketball rules to OpenAI vector stores
+This script handles uploading Yahoo Fantasy Basketball rules into the retrieval index (Firestore vectors)
 for use with AI assistants in fantasy basketball analysis.
 """
 
@@ -12,53 +12,29 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-from openai import OpenAI
 
 # Add the parent directory to the path so we can import our modules
 # sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from appl.scripts.player_stats import player_stats
-from appl.service.openai_file_manager import OpenaiFileManager
-from appl.service.vector_store_manager import VectorStoreManager
-from appl.repository.supaBase.repositories.vector_metadata_repository import (
-    VectorStoreMetadataRepository,
-)
+from appl.config.dependencies import build_retrieval_service
+from appl.ai.document_indexer import DocumentIndexer
 
 load_dotenv()
 
 
-def setup_services() -> tuple[OpenaiFileManager, VectorStoreManager]:
-    """
-    Initialize the required services for file management and vector stores.
-
-    Returns:
-        Tuple of (OpenaiFileManager, VectorStoreManager)
-    """
-    # Load environment variables
-
-    # Initialize OpenAI client
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-    if not openai_api_key:
-        raise ValueError("OPENAI_API_KEY environment variable is required")
-
-    openai_client = OpenAI(api_key=openai_api_key)
-
-    # Initialize repositories and services
-    vector_store_repo = VectorStoreMetadataRepository()
-    vector_store_manager = VectorStoreManager(vector_store_repo, openai_client)
-    openai_file_manager = OpenaiFileManager(vector_store_manager, openai_client)
-
-    return openai_file_manager, vector_store_manager
+def setup_services() -> DocumentIndexer:
+    """Build the document indexer (needs EMBEDDING_MODEL's provider key, e.g. GEMINI_API_KEY,
+    and Google credentials / GOOGLE_CLOUD_PROJECT for Firestore)."""
+    return DocumentIndexer(build_retrieval_service())
 
 
-def upload_rules(
-    openai_file_manager: OpenaiFileManager, vector_store_manager: VectorStoreManager
-) -> str:
+def upload_rules(document_indexer: DocumentIndexer) -> str:
     """
     Update the fantasy rules in the vector store.
 
     Args:
-        openai_file_manager: The file manager instance
+        document_indexer: The document indexer instance
 
     Returns:
         String indicating success/failure
@@ -68,8 +44,7 @@ def upload_rules(
         script_dir = Path(__file__).parent
         pdf_path = script_dir / "Yahoo_Fantasy_Basketball_Rules_With_Comparison.pdf"
 
-        vector_store_metadata = openai_file_manager.update_rules(pdf_path)
-        # openai_file.id
+        vector_store_metadata = document_indexer.update_rules(pdf_path)
         print("✅ Rules successfully updated in vector store!")
         return vector_store_metadata
 
@@ -79,8 +54,8 @@ def upload_rules(
         return error_msg
 
 
-def upload_general_to_openai(
-    openai_file_manager: OpenaiFileManager, stats_path: Path, season: str
+def upload_general(
+    document_indexer: DocumentIndexer, stats_path: Path, season: str
 ) -> str:
     """
     Upload the consolidated player stats JSON into the vector store.
@@ -97,7 +72,7 @@ def upload_general_to_openai(
         schedule_path = script_dir.parent.parent / "data" / "schedule" / "NBA_schedule.json"
 
         print("📊 Uploading rules PDF + player stats JSON + schedule JSON to rules vector store...")
-        vector_store_metadata = openai_file_manager.update_player_stats(
+        vector_store_metadata = document_indexer.update_player_stats(
             str(stats_path), str(pdf_path), str(schedule_path)
         )
         print("✅ Player stats and schedule successfully updated in vector store!")
@@ -119,7 +94,7 @@ def main():
     try:
         # Setup services
         print("🔧 Setting up services...")
-        openai_file_manager, vector_store_manager = setup_services()
+        document_indexer = setup_services()
         print("✅ Services initialized successfully")
 
         # Update rules + Player Stats
@@ -128,7 +103,7 @@ def main():
         stats_path = player_stats.generate_consolidated_player_stats(season)
 
         print("\n📊 Uploading consolidated player stats JSON...")
-        stats_result = upload_general_to_openai(openai_file_manager, stats_path, season)
+        stats_result = upload_general(document_indexer, stats_path, season)
         print(f"Player stats update result: {stats_result}")
 
         print("\n🎉 Script completed successfully!")

@@ -1,56 +1,62 @@
 import os
-from openai import OpenAI
-from ..service.chat_session_manager import ChatSessionManager
-from ..service.openai_agent_manager import OpenaiAgentManager
-from ..service.openai_file_manager import OpenaiFileManager
-from ..service.vector_store_manager import VectorStoreManager
-from ..repository.supaBase.repositories.vector_metadata_repository import (
-    VectorStoreMetadataRepository,
-)
+from pathlib import Path
 
-_openai_client = None
-_openai_agent_manager = None
-_openai_file_manager = None
-_vector_store_manager = None
+from ..ai.chat_service import ChatService
+from ..ai.document_indexer import DocumentIndexer
+from ..ai.firestore_store import FirestoreVectorStore
+from ..ai.litellm_adapters import LiteLLMClient, LiteLLMEmbedder
+from ..ai.retrieval import RetrievalService
+from ..service.chat_session_manager import ChatSessionManager
+
 _chat_session_manager = None
+_retrieval_service = None
+_chat_service = None
+_document_indexer = None
+
+
+def load_system_prompt() -> str:
+    default_prompt_path = Path(__file__).resolve().parent.parent / "utils" / "system_prompt.md"
+    env_prompt_path = os.environ.get("SYSTEM_PROMPT_PATH")
+    path = Path(env_prompt_path).expanduser() if env_prompt_path else default_prompt_path
+    return path.read_text(encoding="utf-8")
+
+
+def build_retrieval_service() -> RetrievalService:
+    from google.cloud import firestore
+
+    client = firestore.Client(project=os.environ.get("GOOGLE_CLOUD_PROJECT"))
+    return RetrievalService(
+        embedder=LiteLLMEmbedder.from_env(),
+        store=FirestoreVectorStore(client),
+        top_k=int(os.environ.get("RETRIEVAL_TOP_K", 5)),
+    )
 
 
 def set_services():
-    global \
-        _openai_client, \
-        _openai_agent_manager, \
-        _openai_file_manager, \
-        _vector_store_manager, \
-        _chat_session_manager
+    global _chat_session_manager, _retrieval_service, _chat_service, _document_indexer
 
-    _openai_client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
     _chat_session_manager = ChatSessionManager()
-    _vector_store_manager = VectorStoreManager(
-        VectorStoreMetadataRepository(), _openai_client
+    _retrieval_service = build_retrieval_service()
+    _document_indexer = DocumentIndexer(_retrieval_service)
+    _chat_service = ChatService(
+        llm=LiteLLMClient.from_env(),
+        retrieval=_retrieval_service,
+        sessions=_chat_session_manager,
+        system_prompt=load_system_prompt(),
     )
-    _openai_file_manager = OpenaiFileManager(_vector_store_manager, _openai_client)
-    _openai_agent_manager = OpenaiAgentManager(
-        _chat_session_manager, _vector_store_manager, _openai_client
-    )
 
 
-def openai_client() -> OpenAI:
-    return _openai_client
+def chat_service() -> ChatService:
+    return _chat_service
 
 
-def openai_agent_manager() -> OpenaiAgentManager:
-    return _openai_agent_manager
+def document_indexer() -> DocumentIndexer:
+    return _document_indexer
 
 
-def openai_file_manager() -> OpenaiFileManager:
-    return _openai_file_manager
-
-
-def vector_store_manager() -> VectorStoreManager:
-    return _vector_store_manager
+def retrieval_service() -> RetrievalService:
+    return _retrieval_service
 
 
 def chat_session_manager() -> ChatSessionManager:
     return _chat_session_manager
-
-

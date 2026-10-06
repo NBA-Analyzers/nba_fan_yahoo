@@ -2,7 +2,7 @@ from datetime import datetime
 from urllib.parse import quote
 
 import yahoo_fantasy_api as yfa
-from ..service.openai_file_manager import OpenaiFileManager
+from ..ai.document_indexer import DocumentIndexer
 from ..config.app_config import DEBUG
 from ..fantasy_integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import (
@@ -20,8 +20,8 @@ from yahoo_oauth import OAuth2
 
 class YahooRouter:
     
-    def __init__(self, openai_file_manager: OpenaiFileManager):
-        self.openai_file_manager = openai_file_manager
+    def __init__(self, document_indexer: DocumentIndexer):
+        self.document_indexer = document_indexer
         self._blueprint = self._create_blueprint()
 
     def _create_blueprint(self):
@@ -44,7 +44,7 @@ class YahooRouter:
                     return "User not authenticated", 401
 
                 # Use Yahoo service to sync league
-                yahoo_service = YahooService(session["token_store"], self.openai_file_manager)
+                yahoo_service = YahooService(session["token_store"], self.document_indexer)
                 result = yahoo_service.sync_league_data(league_id, user_guid)
 
                 if "error" in result:
@@ -100,7 +100,7 @@ class YahooRouter:
                     return "User not authenticated", 401
 
                 # Use Yahoo service to get synced leagues
-                yahoo_service = YahooService(session["token_store"], self.openai_file_manager)
+                yahoo_service = YahooService(session["token_store"], self.document_indexer)
                 user_leagues = yahoo_service.get_user_synced_leagues(user_guid)
 
                 if not user_leagues:

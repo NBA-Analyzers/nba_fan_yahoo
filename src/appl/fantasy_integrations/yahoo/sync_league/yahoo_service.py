@@ -12,17 +12,17 @@ from ....repository.azure.azure_blob_storage import AzureBlobStorage
 from ....repository.supaBase.repositories.yahoo_league_repository import (
     YahooLeagueRepository,
 )
-from ....service.openai_file_manager import OpenaiFileManager
+from ....ai.document_indexer import DocumentIndexer
 
 logger = logging.getLogger(__name__)
 
 
 class YahooService:
-    def __init__(self, token_store, openai_file_manager: OpenaiFileManager):
+    def __init__(self, token_store, document_indexer: DocumentIndexer):
         self.token_store = token_store
         # Get global sync manager with 15-minute TTL
         self.sync_manager = get_sync_manager(ttl_minutes=15)
-        self.openai_file_manager = openai_file_manager
+        self.document_indexer = document_indexer
 
     def get_user_leagues(self, user_guid):
         """Get user's leagues from Yahoo API"""
@@ -204,7 +204,7 @@ class YahooService:
                     league_id, yahoo_user_id, {"last_blob_sync": datetime.now(timezone.utc).isoformat()}
                 )
 
-                self.openai_file_manager.update_league_files(league_id, sync_results)
+                self.document_indexer.update_league_files(league_id, sync_results)
 
                 logger.info(f"League {league_id}: Sync completed successfully")
 

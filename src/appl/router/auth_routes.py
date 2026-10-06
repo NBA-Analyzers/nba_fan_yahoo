@@ -10,7 +10,7 @@ from ..repository.supaBase.models.google_fantasy import GoogleFantasy
 from ..repository.supaBase.models.yahoo_auth import YahooAuth
 from ..repository.supaBase.services.auth_services import AuthService
 from ..repository.supaBase.services.fantasy_services import FantasyService
-from ..service.openai_file_manager import OpenaiFileManager
+from ..ai.document_indexer import DocumentIndexer
 
 def get_user_guid_from_token(token, yahoo):
     user_guid = token.get("xoauth_yahoo_guid")
@@ -50,8 +50,8 @@ def get_username_from_token(token, yahoo):
 
 class AuthRouter:
     
-    def __init__(self, openai_file_manager: OpenaiFileManager):
-        self.openai_file_manager = openai_file_manager
+    def __init__(self, document_indexer: DocumentIndexer):
+        self.document_indexer = document_indexer
         self._blueprint = self._create_blueprint()
 
     def _create_blueprint(self):
@@ -207,7 +207,7 @@ class AuthRouter:
 
                 # Get leagues for selection
                 yahoo_service = YahooService(
-                    session["token_store"], self.openai_file_manager
+                    session["token_store"], self.document_indexer
                 )
                 league_options = yahoo_service.get_user_leagues(user_guid)
 

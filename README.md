@@ -38,7 +38,7 @@ Unlike conventional fantasy tools that rely purely on statistical analysis, this
 ## 🛠 Tech Stack
 
 - **Backend**: Python (Flask)
-- **AI Engine**: OpenAI GPT API
+- **AI Engine**: LiteLLM (Gemini by default, any provider by config)
 - **Database**: Supabase
 - **Authentication**: Google OAuth + Yahoo Fantasy OAuth
 - **APIs**: Yahoo Fantasy Sports API, NBA API
@@ -104,8 +104,15 @@ src/
 
 Create a `.env` file with the following variables:
 ```env
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key_here
+# LLM (via LiteLLM - swap provider by changing the model string)
+LLM_MODEL=gemini/gemini-2.5-flash          # e.g. openai/gpt-4o-mini
+EMBEDDING_MODEL=gemini/text-embedding-004
+GEMINI_API_KEY=your_gemini_api_key         # or OPENAI_API_KEY etc. for other providers
+
+# Retrieval vectors live in Firestore (uses Google application-default credentials)
+GOOGLE_CLOUD_PROJECT=your_gcp_project_id
+# One-time: create the vector index (768 = text-embedding-004 dimension)
+#   gcloud firestore indexes composite create --collection-group=chunks #     --query-scope=COLLECTION #     --field-config=field-path=embedding,vector-config='{"dimension":"768","flat":"{}"}'
 
 # Supabase Configuration
 SUPABASE_URL=your_supabase_url
@@ -171,3 +178,10 @@ Having issues or questions?
 ---
 
 **Ready to dominate your fantasy league with AI? [Get Started Now!](#quick-start)**
+
+
+## 🧪 Tests
+```
+pytest                         # offline unit tests
+FIRESTORE_TEST_PROJECT=<id> pytest -m integration   # Firestore contract tests
+```

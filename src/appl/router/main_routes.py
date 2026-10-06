@@ -11,7 +11,7 @@ import time
 import uuid
 import logging
 
-from ..service.openai_file_manager import OpenaiFileManager
+from ..ai.document_indexer import DocumentIndexer
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
 from ..middleware.auth_decorators import require_google_auth
 
@@ -19,8 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class MainRouter:
-    def __init__(self, openai_file_manager: OpenaiFileManager):
-        self.openai_file_manager = openai_file_manager
+    def __init__(self, document_indexer: DocumentIndexer):
+        self.document_indexer = document_indexer
         self._blueprint = self._create_blueprint()
 
     def _create_blueprint(self):
@@ -66,7 +66,7 @@ class MainRouter:
                 if yahoo_authenticated:
                     try:
                         yahoo_service = YahooService(
-                            session["token_store"], self.openai_file_manager
+                            session["token_store"], self.document_indexer
                         )
                         user_leagues = yahoo_service.get_user_synced_leagues(
                             session["user"]
@@ -83,6 +83,7 @@ class MainRouter:
                                     <p><strong>Team:</strong> {league.get("team_name", "Unknown Team")}</p>
                                     <p><strong>Added:</strong> {league.get("created_at", "Unknown")}</p>
                                     <a href="/ai-chat/{league.get("league_id", "unknown")}" style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; font-size: 14px;">AI Chat</a>
+                                    <a href="/draft/{league.get("league_id", "unknown")}" style="background: #fd7e14; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; font-size: 14px; margin-left: 8px;">Draft Assistant</a>
                                 </div>
                                 """)
 
@@ -172,7 +173,7 @@ class MainRouter:
 
                     if user_guid and "token_store" in session:
                         yahoo_service = YahooService(
-                            session["token_store"], self.openai_file_manager
+                            session["token_store"], self.document_indexer
                         )
 
                         # ✨ NEW: Start background sync (non-blocking)
