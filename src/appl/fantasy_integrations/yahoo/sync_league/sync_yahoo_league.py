@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 import yahoo_fantasy_api as yfa
 from ...i_sync_league import SyncLeagueData
-from ....repository.azure.azure_blob_storage import AzureBlobStorage
+from ....storage.blob_storage import BlobStorage
 
 logger = logging.getLogger(__name__)
 STAT_ID_TO_NAME = {
@@ -348,7 +348,7 @@ class YahooLeague(SyncLeagueData):
 
     def sync_full_league(
         self,
-        azure_blob_storage: AzureBlobStorage,
+        azure_blob_storage: BlobStorage,
         start_week: int = 1,
         end_week: int = 20,
         days_back: int = 7,

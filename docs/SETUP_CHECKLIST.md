@@ -117,6 +117,12 @@ EMBEDDING_DIMENSIONS=768
 GEMINI_API_KEY=<from Step 1>
 GOOGLE_CLOUD_PROJECT=<project id from Step 3>
 
+# --- Optional: archive copy of synced league JSON ---
+# Leave all of these out and no archive is kept (the AI index in Firestore is what the chat uses).
+# BLOB_STORAGE=gcs            # gcs | azure | none  (auto: gcs if GCS_BUCKET set, azure if AZURE_STORAGE_CONNECTION_STRING set)
+# GCS_BUCKET=<bucket name>    # see 'Optional: Cloud Storage bucket' below
+# LLM_FALLBACK_MODEL=gemini/gemini-3.7-flash
+
 # --- Supabase (existing) ---
 SUPABASE_URL=<Supabase → Project Settings → API → Project URL>
 SUPABASE_KEY=<same page → anon public key>
@@ -181,9 +187,7 @@ $env:FIRESTORE_TEST_PROJECT="<project id>"; python -m pytest -m integration -q
 **Check:** `9 passed`. If it fails with "requires an index", wait for the index to be READY (Step 4)
 and make sure the dimension matches. These tests create a temporary `test_rag_*` collection and delete it.
 
-> Heads up: the integration tests use 2-number vectors, so they need an index of dimension 2.
-> If they fail only with a dimension error, that's expected with a 768-index; tell me and I'll
-> make the test dimension configurable. The unit tests already cover the logic.
+> The tests pad their tiny vectors to `EMBEDDING_DIMENSIONS` (768 by default), so they work against the 768-dim index from Step 4.
 
 ---
 
@@ -233,6 +237,15 @@ In `.env` set `LLM_MODEL=openai/gpt-4o-mini` and `OPENAI_API_KEY=...`, restart, 
 (Embeddings stay on Gemini, so no re-index is needed. Changing `EMBEDDING_MODEL` **does** require re-running Step 10 and every league sync, and a new index if the dimension differs.)
 
 ---
+
+## Optional: Cloud Storage bucket for the league-data archive
+
+Azure is **no longer required**: league sync works with no blob storage at all. If you want an archive copy of each synced JSON file in Google Cloud:
+
+```
+gcloud storage buckets create gs://<unique-bucket-name> --location=eur3
+```
+then set `GCS_BUCKET=<unique-bucket-name>` in `.env` (uses the same `gcloud auth application-default login` credentials; files are stored under `<container>/<leagueId>/…`, and unchanged files are not re-uploaded).
 
 ## Troubleshooting
 

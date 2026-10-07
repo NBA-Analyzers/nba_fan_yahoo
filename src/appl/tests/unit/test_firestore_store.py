@@ -159,6 +159,33 @@ def test_search_converts_cosine_distance_to_score_and_merges_collections(fs_stor
 
 
 # ---------- real Firestore, shared contract ----------
+class PaddedVectors:
+    """The contract uses tiny 2-D vectors; real indexes have a fixed size (EMBEDDING_DIMENSIONS,
+    768 by default). Zero-padding keeps cosine similarity identical."""
+
+    def __init__(self, store, dim):
+        self.store, self.dim = store, dim
+
+    def _pad(self, v):
+        return list(v) + [0.0] * (self.dim - len(v))
+
+    def replace_collection(self, collection_id, records):
+        self.store.replace_collection(
+            collection_id, [VectorRecord(r.chunk, self._pad(r.vector)) for r in records]
+        )
+
+    def search(self, collection_ids, query_vector, k):
+        return self.store.search(collection_ids, self._pad(query_vector), k)
+
+    def last_synced(self, collection_id):
+        return self.store.last_synced(collection_id)
+
+
+def test_padding_helper_keeps_vectors_equivalent():
+    padded = PaddedVectors(None, 5)
+    assert padded._pad([1.0, 2.0]) == [1.0, 2.0, 0.0, 0.0, 0.0]
+
+
 @pytest.mark.integration
 @pytest.mark.skipif(
     not os.environ.get("FIRESTORE_TEST_PROJECT"),
@@ -171,8 +198,8 @@ class TestRealFirestore(VectorStoreContract):
 
         client = firestore.Client(project=os.environ["FIRESTORE_TEST_PROJECT"])
         root = f"test_rag_{uuid.uuid4().hex[:8]}"
-        store = FirestoreVectorStore(client, root=root)
-        yield store
+        dim = int(os.environ.get("EMBEDDING_DIMENSIONS", 768))
+        yield PaddedVectors(FirestoreVectorStore(client, root=root), dim)
         for coll in client.collection(root).stream():
             for chunk in coll.reference.collection("chunks").stream():
                 chunk.reference.delete()

@@ -143,10 +143,23 @@ LiteLLM adapters → session history → ChatService → DocumentIndexer → rou
 2. **Provider hiccups** — handled by retries, timeout and the optional fallback model; if all fail the user gets a 502 and retries. Retries happen inside the request, so a bad outage can make one request take up to ~(timeout × attempts) seconds.
 2. **Indexing is synchronous** — a league sync now waits for embedding calls (OpenAI upload was also synchronous, but check latency). Follow-up: run indexing in a background task.
 3. **Firestore dimension cap (2048)** — handled: `EMBEDDING_DIMENSIONS` (default 768) is passed to the provider, and the embedder raises `LLMError` if a vector comes back with another size. Models that can't shorten their output can't be used with Firestore.
-4. **Integration tests use 2-D vectors**, so they need a matching test index; make test dimension configurable if you want to run them against your 768-D index.
+4. **Integration tests** zero-pad their 2-D test vectors to `EMBEDDING_DIMENSIONS`, so they run against the real 768-D index (cosine similarity is unchanged by padding).
 5. **No re-embedding guard** — nothing stops you from changing `EMBEDDING_MODEL` and querying old vectors. Idea: store the model name in the collection doc and refuse/warn on mismatch.
 6. **Pre-existing bug, untouched:** the `/update_rules` route in `router/document_router.py` declares `update_rules(file: Dict)` as a Flask view and doesn't return a response.
 7. **Login still requires an HTTPS tunnel locally** (`_scheme="https"` in `auth_routes.py`); unrelated to this change.
+
+## 10b. Archive storage (Azure no longer required)
+
+League sync used to stop with "Azure Storage not configured" *before* the new indexing ran, so Azure was a hard requirement for league-aware answers.
+`appl/storage/blob_storage.py` now provides a `BlobStorage` interface with three backends, picked by `build_blob_storage()`:
+
+| `BLOB_STORAGE` | Behavior |
+|---|---|
+| `none` (default when nothing is configured) | no archive; sync + indexing still run |
+| `gcs` (auto when `GCS_BUCKET` is set) | `GcsBlobStorage`: JSON saved to the bucket under `<container>/<leagueId>/<file>.json`, retries with backoff, skips unchanged content via a SHA-256 stored in object metadata (same semantics as the Azure class) |
+| `azure` (auto when `AZURE_STORAGE_CONNECTION_STRING` is set) | the existing `AzureBlobStorage`, loaded lazily so the Azure SDK is optional |
+
+The archive is a backup/audit copy only; the chat reads from the Firestore index, not from blobs.
 
 ## 11. What was removed
 

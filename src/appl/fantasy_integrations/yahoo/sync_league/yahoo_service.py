@@ -8,7 +8,7 @@ import requests
 from yahoo_fantasy_api.league import yfa
 from .league_sync_manager import get_sync_manager
 from ....fantasy_integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
-from ....repository.azure.azure_blob_storage import AzureBlobStorage
+from ....storage.blob_storage import build_blob_storage
 from ....repository.supaBase.repositories.yahoo_league_repository import (
     YahooLeagueRepository,
 )
@@ -187,17 +187,12 @@ class YahooService:
                     yahoo_league_repo.create(league_data)
                     db_message = "League added to database"
 
-                # Step 5: Sync to Azure using new upload method
-                azure_connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
-                if not azure_connection_string:
-                    logger.warning("Azure Storage not configured")
-                    return {"success": False, "error": "Azure Storage not configured", "db_message": "No database update - Azure Storage not configured"}
-
-                azure_storage = AzureBlobStorage(container_name=azure_container)
+                # Step 5: Archive the synced JSON (GCS / Azure / none, see BLOB_STORAGE)
+                blob_storage = build_blob_storage(azure_container)
                 yahoo_league = YahooLeague(league)
 
                 # Call sync - returns Dict[str, bool]
-                sync_results = yahoo_league.sync_full_league(azure_storage)
+                sync_results = yahoo_league.sync_full_league(blob_storage)
 
                 # Step 7: Update last_blob_sync ONLY if all critical blobs succeeded
                 yahoo_league_repo.update_by_league_id_and_yahoo_user_id(
