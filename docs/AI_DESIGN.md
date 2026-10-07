@@ -93,8 +93,9 @@ Body: `{"session_id": "...", "user_message": "...", "league_id": "42" | null}`
 
 | Env var | Default | Meaning |
 |---|---|---|
-| `LLM_MODEL` | `gemini/gemini-2.5-flash` | any LiteLLM model string, e.g. `openai/gpt-4o-mini`, `anthropic/...` |
-| `EMBEDDING_MODEL` | `gemini/text-embedding-004` | embedding model; **its dimension must match the Firestore index** |
+| `LLM_MODEL` | `gemini/gemini-3.8-flash` | any LiteLLM model string, e.g. `openai/gpt-4o-mini`, `anthropic/...` |
+| `EMBEDDING_MODEL` | `gemini/gemini-embedding-001` | embedding model |
+| `EMBEDDING_DIMENSIONS` | `768` | vector size requested from the model (the model natively returns 3072, above Firestore's 2048 limit). **Must match the Firestore index.** The embedder rejects any vector of a different size. |
 | `GEMINI_API_KEY` (or the provider's key) | — | read by LiteLLM |
 | `GOOGLE_CLOUD_PROJECT` | — | Firestore project; auth via Application Default Credentials |
 | `RETRIEVAL_TOP_K` | 5 | chunks retrieved |
@@ -136,8 +137,9 @@ LiteLLM adapters → session history → ChatService → DocumentIndexer → rou
 ## 10. Known limitations (and suggested follow-ups)
 
 1. **Sessions are in process memory** — lost on restart; not shared across gunicorn workers. Follow-up: store history in Firestore (small change behind `ChatSessionManager`).
+2. **Provider hiccups** — Gemini sometimes answers 503 "high demand"; today that becomes a 502 from `/chat` and the user retries. Follow-up: retries with backoff in `LiteLLMClient`.
 2. **Indexing is synchronous** — a league sync now waits for embedding calls (OpenAI upload was also synchronous, but check latency). Follow-up: run indexing in a background task.
-3. **Firestore dimension cap (2048)** — models that output more need an `output_dimensionality` option in `LiteLLMEmbedder` (not implemented yet).
+3. **Firestore dimension cap (2048)** — handled: `EMBEDDING_DIMENSIONS` (default 768) is passed to the provider, and the embedder raises `LLMError` if a vector comes back with another size. Models that can't shorten their output can't be used with Firestore.
 4. **Integration tests use 2-D vectors**, so they need a matching test index; make test dimension configurable if you want to run them against your 768-D index.
 5. **No re-embedding guard** — nothing stops you from changing `EMBEDDING_MODEL` and querying old vectors. Idea: store the model name in the collection doc and refuse/warn on mismatch.
 6. **Pre-existing bug, untouched:** the `/update_rules` route in `router/document_router.py` declares `update_rules(file: Dict)` as a Flask view and doesn't return a response.

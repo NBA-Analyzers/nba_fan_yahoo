@@ -42,7 +42,7 @@ def test_client_rejects_empty_answer(monkeypatch):
 
 def test_client_from_env_uses_defaults_and_overrides(monkeypatch):
     monkeypatch.delenv("LLM_MODEL", raising=False)
-    assert LiteLLMClient.from_env().model == "gemini/gemini-2.5-flash"
+    assert LiteLLMClient.from_env().model == "gemini/gemini-3.8-flash"
     monkeypatch.setenv("LLM_MODEL", "openai/gpt-4o-mini")
     assert LiteLLMClient.from_env().model == "openai/gpt-4o-mini"
 
@@ -86,4 +86,44 @@ def test_embedder_wraps_errors_and_reads_env(monkeypatch):
         LiteLLMEmbedder(model="e").embed(["x"])
 
     monkeypatch.delenv("EMBEDDING_MODEL", raising=False)
-    assert LiteLLMEmbedder.from_env().model == "gemini/text-embedding-004"
+    monkeypatch.delenv("EMBEDDING_DIMENSIONS", raising=False)
+    embedder = LiteLLMEmbedder.from_env()
+    assert embedder.model == "gemini/gemini-embedding-001"
+    assert embedder.dimensions == 768
+
+
+def test_embedder_passes_dimensions_to_provider(monkeypatch):
+    seen = {}
+
+    def fake_embedding(**kwargs):
+        seen.update(kwargs)
+        return SimpleNamespace(data=[{"embedding": [0.0] * 768}])
+
+    monkeypatch.setattr(litellm, "embedding", fake_embedding)
+    LiteLLMEmbedder(model="e", dimensions=768).embed(["x"])
+    assert seen["dimensions"] == 768
+
+
+def test_embedder_omits_dimensions_when_not_set(monkeypatch):
+    seen = {}
+
+    def fake_embedding(**kwargs):
+        seen.update(kwargs)
+        return SimpleNamespace(data=[{"embedding": [0.0]}])
+
+    monkeypatch.setattr(litellm, "embedding", fake_embedding)
+    LiteLLMEmbedder(model="e").embed(["x"])
+    assert "dimensions" not in seen
+
+
+def test_embedder_dimensions_come_from_env(monkeypatch):
+    monkeypatch.setenv("EMBEDDING_DIMENSIONS", "1536")
+    assert LiteLLMEmbedder.from_env().dimensions == 1536
+
+
+def test_embedder_rejects_vectors_of_the_wrong_size(monkeypatch):
+    monkeypatch.setattr(
+        litellm, "embedding", lambda **kw: SimpleNamespace(data=[{"embedding": [0.0] * 3}])
+    )
+    with pytest.raises(LLMError, match="dimension"):
+        LiteLLMEmbedder(model="e", dimensions=768).embed(["x"])

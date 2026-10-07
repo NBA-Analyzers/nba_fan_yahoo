@@ -37,29 +37,24 @@ pip install -r requirements.txt
 
 **Check the key works** (replace `YOUR_KEY`):
 ```
-python -c "import litellm; print(litellm.completion(model='gemini/gemini-2.5-flash', messages=[{'role':'user','content':'say hi'}], api_key='YOUR_KEY').choices[0].message.content)"
+python -c "import litellm; print(litellm.completion(model='gemini/gemini-3.8-flash', messages=[{'role':'user','content':'say hi'}], api_key='YOUR_KEY').choices[0].message.content)"
 ```
-It should print a greeting. If it says the model isn't found, open the model list in AI Studio and use the current Flash model name in `LLM_MODEL` (Step 5).
+It should print a greeting. (Verified on 2026-10-07 with `gemini-3.8-flash`; `gemini-2.5-flash` is no longer available to new keys.) If it says the model isn't found, use the current Flash model name from AI Studio in `LLM_MODEL` (Step 5). A 503 "high demand" is temporary; retry in a minute.
 
 ---
 
-## Step 2 — Find the embedding model's vector size (2 min) ⚠️ do this before Step 4
+## Step 2 — Embedding model and vector size (nothing to do, just know it)
 
-Firestore needs to be told the exact vector length when you create its index, and it
-**supports at most 2048 dimensions**. Find out what your embedding model returns:
+Firestore needs the exact vector length when you create its index and **supports at most 2048 dimensions**.
+Tested with a real key: `gemini/text-embedding-004` no longer exists, and `gemini/gemini-embedding-001`
+natively returns 3072 numbers (too many), but it accepts a shorter size. So the app is configured to use
 
 ```
-python -c "import litellm; r=litellm.embedding(model='gemini/text-embedding-004', input=['hello'], api_key='YOUR_KEY'); print(len(r.data[0]['embedding']))"
+EMBEDDING_MODEL=gemini/gemini-embedding-001
+EMBEDDING_DIMENSIONS=768
 ```
 
-- Prints **768** → use 768 in Step 4. 
-- Error "model not found" → the model name changed. Look up Google's current embedding model
-  in AI Studio / https://ai.google.dev/gemini-api/docs/embeddings, put it in `EMBEDDING_MODEL`,
-  and re-run the command with that name.
-- Prints a number **above 2048** (e.g. 3072) → that model can't be used as-is with Firestore.
-  Tell me and I'll add an `output_dimensionality` setting to the embedder (small change).
-
-Write the number down: this is `DIM`.
+**So `DIM` = 768** for the index in Step 4. If you ever change either value, you must recreate the index and re-run Step 10.
 
 ---
 
@@ -95,7 +90,7 @@ Write the number down: this is `DIM`.
 
 ## Step 4 — Create the vector index (1 min + a few minutes to build)
 
-Replace `768` with your `DIM` from Step 2:
+Use `768` (the `DIM` from Step 2):
 
 ```
 gcloud firestore indexes composite create --collection-group=chunks --query-scope=COLLECTION --field-config=field-path=embedding,vector-config='{"dimension":"768","flat":"{}"}'
@@ -116,8 +111,9 @@ Create the file `nba_fan_yahoo/src/.env` (it is git-ignored, never commit it):
 
 ```env
 # --- AI (new) ---
-LLM_MODEL=gemini/gemini-2.5-flash
-EMBEDDING_MODEL=gemini/text-embedding-004
+LLM_MODEL=gemini/gemini-3.8-flash
+EMBEDDING_MODEL=gemini/gemini-embedding-001
+EMBEDDING_DIMENSIONS=768
 GEMINI_API_KEY=<from Step 1>
 GOOGLE_CLOUD_PROJECT=<project id from Step 3>
 
