@@ -38,7 +38,8 @@ in `config/dependencies.py`. That is what makes it swappable and testable.
 | `ports.py` | `LLMClient.complete(messages)`, `Embedder.embed(texts)`, `VectorStore.{replace_collection, search, last_synced}`, plus `VectorRecord`, `SearchResult`. | Tiny interfaces = easy fakes in tests, easy new backends. |
 | `chunker.py` | `chunk_text` (size 800, overlap 100) and `chunk_json` (one chunk per record of a list; nested JSON flattened to `a.b: value` lines; oversized records split). | Models retrieve better from small focused pieces. A player-stats list becomes one chunk per player, so "how is Curry doing" finds exactly Curry. |
 | `pdf.py` | `extract_pdf_text` via `pypdf`. | The rules are a PDF; we now read it ourselves instead of uploading it to OpenAI. |
-| `litellm_adapters.py` | `LiteLLMClient` (chat) and `LiteLLMEmbedder` (batches of 100). Model strings come from env. Provider errors are wrapped in `LLMError`. | LiteLLM gives one call format for every provider; wrapping errors means the rest of the app never imports provider exceptions. |
+| `litellm_adapters.py` | `LiteLLMClient` (chat) and `LiteLLMEmbedder` (batches of 100). Model strings come from env. Transient errors (503, timeout, rate limit, connection) are retried with backoff (1s, 2s); a request timeout is always set; an optional fallback model is tried if the main one still fails. Every failure becomes an `LLMError` with secrets removed. |
+| `redact.py` | `scrub_secrets(text)`: strips `key=...`, bearer tokens, `sk-`/`AIza` keys and the value of any `*_KEY/_SECRET/_TOKEN` env var from error text. | LiteLLM gives one call format for every provider; wrapping errors means the rest of the app never imports provider exceptions. |
 | `memory_store.py` | `InMemoryVectorStore` (cosine similarity). | Fast offline tests / local experiments. |
 | `firestore_store.py` | `FirestoreVectorStore` using Firestore native vector search (`find_nearest`, cosine). | Free tier, no keys on Google hosting, and vectors live in one Google database. |
 | `retrieval.py` | `Document` (text *or* JSON), `RetrievalService.index(collection, docs)` and `.retrieve(query, collections, k)`. | The only place that knows "chunk → embed → store" and "embed query → search". |
@@ -95,6 +96,8 @@ Body: `{"session_id": "...", "user_message": "...", "league_id": "42" | null}`
 |---|---|---|
 | `LLM_MODEL` | `gemini/gemini-3.8-flash` | any LiteLLM model string, e.g. `openai/gpt-4o-mini`, `anthropic/...` |
 | `EMBEDDING_MODEL` | `gemini/gemini-embedding-001` | embedding model |
+| `LLM_FALLBACK_MODEL` | none | optional second model tried when `LLM_MODEL` fails after its retries |
+| `LLM_TIMEOUT_SECONDS` | 30 | per-request timeout |
 | `EMBEDDING_DIMENSIONS` | `768` | vector size requested from the model (the model natively returns 3072, above Firestore's 2048 limit). **Must match the Firestore index.** The embedder rejects any vector of a different size. |
 | `GEMINI_API_KEY` (or the provider's key) | — | read by LiteLLM |
 | `GOOGLE_CLOUD_PROJECT` | — | Firestore project; auth via Application Default Credentials |
@@ -110,7 +113,7 @@ Changing `LLM_MODEL` needs no re-index. Changing `EMBEDDING_MODEL` (or its dimen
 |---|---|
 | Body isn't JSON | 400 `{"error": "JSON body required"}` |
 | Missing/blank `session_id` or `user_message` | 400 with message |
-| Provider/network/quota/key problem, empty model answer | `LLMError` → 502 `{"error": "The AI service is unavailable…"}` (details stay in the server, not shown to users) |
+| Provider/network/quota/key problem, empty model answer (after retries and the fallback model) | `LLMError` → 502 `{"error": "The AI service is unavailable…"}` (details stay in the server log, with keys scrubbed; the original exception is deliberately not chained, because provider errors can contain the request URL with the API key) |
 | No documents indexed | Chat still works, just without context |
 
 ## 8. How it was built (TDD) and how to test
@@ -137,7 +140,7 @@ LiteLLM adapters → session history → ChatService → DocumentIndexer → rou
 ## 10. Known limitations (and suggested follow-ups)
 
 1. **Sessions are in process memory** — lost on restart; not shared across gunicorn workers. Follow-up: store history in Firestore (small change behind `ChatSessionManager`).
-2. **Provider hiccups** — Gemini sometimes answers 503 "high demand"; today that becomes a 502 from `/chat` and the user retries. Follow-up: retries with backoff in `LiteLLMClient`.
+2. **Provider hiccups** — handled by retries, timeout and the optional fallback model; if all fail the user gets a 502 and retries. Retries happen inside the request, so a bad outage can make one request take up to ~(timeout × attempts) seconds.
 2. **Indexing is synchronous** — a league sync now waits for embedding calls (OpenAI upload was also synchronous, but check latency). Follow-up: run indexing in a background task.
 3. **Firestore dimension cap (2048)** — handled: `EMBEDDING_DIMENSIONS` (default 768) is passed to the provider, and the embedder raises `LLMError` if a vector comes back with another size. Models that can't shorten their output can't be used with Firestore.
 4. **Integration tests use 2-D vectors**, so they need a matching test index; make test dimension configurable if you want to run them against your 768-D index.

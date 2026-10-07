@@ -108,6 +108,8 @@ Create a `.env` file with the following variables:
 LLM_MODEL=gemini/gemini-3.8-flash          # e.g. openai/gpt-4o-mini
 EMBEDDING_MODEL=gemini/gemini-embedding-001
 EMBEDDING_DIMENSIONS=768                    # must match the Firestore vector index
+LLM_FALLBACK_MODEL=gemini/gemini-3.7-flash # optional: tried if the main model keeps failing
+LLM_TIMEOUT_SECONDS=30                     # optional
 GEMINI_API_KEY=your_gemini_api_key         # or OPENAI_API_KEY etc. for other providers
 
 # Retrieval vectors live in Firestore (uses Google application-default credentials)
