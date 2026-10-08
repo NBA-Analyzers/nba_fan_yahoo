@@ -1,0 +1,15 @@
+{% extends "pages/base.html" %}
+{% block title %}League ready · Fantasy Basketball Helper{% endblock %}
+{% block page_class %}narrow{% endblock %}
+{% block content %}
+<div class="card center" style="margin-top: 24px;">
+  <div class="big-emoji">🎉</div>
+  <h1>{{ league_name }} is ready</h1>
+  <p class="muted" style="margin-top: 8px;">Your league is synced. What would you like to do?</p>
+  <div class="btn-row">
+    <a class="btn big" href="/ai-chat/{{ league_id }}">💬 Ask a question</a>
+    <a class="btn big secondary" href="/draft/{{ league_id }}">📋 Draft help</a>
+  </div>
+  <p style="margin-top: 18px;"><a class="small" href="/dashboard">Go to my leagues</a></p>
+</div>
+{% endblock %}

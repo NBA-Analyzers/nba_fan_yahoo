@@ -1,5 +1,4 @@
 from datetime import datetime
-from urllib.parse import quote
 
 import yahoo_fantasy_api as yfa
 from ..ai.document_indexer import DocumentIndexer
@@ -9,12 +8,16 @@ from ..fantasy_integrations.yahoo.sync_league.yahoo_service import (
     YahooService,
     get_yahoo_sdk,
 )
-from flask import Blueprint, request, session
+from flask import Blueprint, redirect, render_template, request, session, url_for
 from ..middleware.auth_decorators import require_google_auth
 from ..repository.supaBase.repositories.yahoo_league_repository import (
     YahooLeagueRepository,
 )
 from yahoo_oauth import OAuth2
+
+
+def _problem(title, text):
+    return render_template("pages/message.html", title=title, text=text), 500
 
 
 class YahooRouter:
@@ -47,10 +50,7 @@ class YahooRouter:
                 result = yahoo_service.sync_league_data(league_id, user_guid)
 
                 if "error" in result:
-                    return (
-                        f"<h2>Error</h2><p>{result['error']}</p><br><a href='/dashboard'>← Back to Dashboard</a>",
-                        500,
-                    )
+                    return _problem("We couldn't sync that league", result["error"])
 
                 # Get league name for the redirect
                 try:
@@ -61,78 +61,19 @@ class YahooRouter:
                 except Exception:
                     league_name = "Unknown League"
 
-                # URL encode the league name to handle special characters
-
-                encoded_league_name = quote(league_name)
-
-                # Redirect to league-specific AI chat page after successful league sync
-                return f"""
-                <h2>🎉 League Connected Successfully!</h2>
-                <p>{result.get("db_message", "League sync completed")}</p>
-                <p><strong>League:</strong> {league_name}</p>
-                <p>Your league data has been synced and you're ready to use the AI Assistant!</p>
-                <br>
-                <a href='/ai-chat/{league_id}' style="background: #28a745; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-size: 18px;">🚀 Go to AI Chat for {league_name}</a>
-                <br><br>
-                <a href='/dashboard'>← Back to Dashboard</a>
-                """
+                return render_template(
+                    "pages/league_ready.html", league_id=league_id, league_name=league_name
+                )
 
             except Exception as e:
-                print(f"❌ Error during league selection: {e.message}")
-                return (
-                    f"<h2>Error</h2><p>Failed to process league selection: {str(e)}</p><br><a href='/dashboard'>← Back to Dashboard</a>",
-                    500,
-                )
+                print(f"❌ Error during league selection: {e}")
+                return _problem("We couldn't sync that league", "Something went wrong. Please try again in a moment.")
 
 
         @yahoo_bp.route("/my_leagues")
-        @require_google_auth
         def my_leagues():
-            """Get user's leagues from database - Requires Google authentication first"""
-            try:
-                user_guid = session.get("user")
-                if (
-                    not user_guid
-                    or "token_store" not in session
-                    or user_guid not in session["token_store"]
-                ):
-                    return "User not authenticated", 401
-
-                # Use Yahoo service to get synced leagues
-                yahoo_service = YahooService(session["token_store"], self.document_indexer)
-                user_leagues = yahoo_service.get_user_synced_leagues(user_guid)
-
-                if not user_leagues:
-                    return f"<h2>No Leagues Found</h2><p>You haven't synced any leagues yet.</p><br><a href='/dashboard'>← Back to Dashboard</a>"
-
-                # Display leagues
-                leagues_html = ""
-                for league in user_leagues:
-                    leagues_html += f"""
-                    <div style="border: 1px solid #ccc; padding: 15px; margin: 15px 0; border-radius: 8px; background: white;">
-                        <h3>League ID: {league.get("league_id", "Unknown")}</h3>
-                        <p><strong>Team:</strong> {league.get("team_name", "Unknown Team")}</p>
-                        <p><strong>Added:</strong> {league.get("created_at", "Unknown")}</p>
-                        <div style="margin-top: 15px;">
-                            <a href="/ai-chat/{league.get("league_id", "unknown")}" style="background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px;">🚀 AI Chat</a>
-                            <a href="/dashboard" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">← Dashboard</a>
-                        </div>
-                    </div>
-                    """
-
-                return f"""
-                <h2>Your Synced Leagues</h2>
-                {leagues_html}
-                <br>
-                <a href='/dashboard'>← Back to Dashboard</a>
-                """
-
-            except Exception as e:
-                print(f"❌ Error retrieving user leagues: {e}")
-                return (
-                    f"<h2>Error</h2><p>Failed to retrieve leagues: {str(e)}</p><br><a href='/dashboard'>← Back to Dashboard</a>",
-                    500,
-                )
+            """Synced leagues now live on the dashboard"""
+            return redirect(url_for("main.dashboard"))
 
 
         @yahoo_bp.route("/debug_league")

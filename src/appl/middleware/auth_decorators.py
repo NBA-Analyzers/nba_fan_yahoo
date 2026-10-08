@@ -6,6 +6,6 @@ def require_google_auth(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'google_user' not in session:
-            return redirect(url_for('google_login'))
+            return redirect(url_for('auth.google_login'))
         return f(*args, **kwargs)
     return decorated_function

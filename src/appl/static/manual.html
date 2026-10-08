@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual league · Fantasy Basketball Helper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/theme.css">
+<style>
+  .page { max-width: 880px; }
+  .card { padding: 20px; margin-bottom: 18px; }
+  .card h2 { margin: 0 0 12px; font-size: 1.1rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; }
+  label, .label { display: block; font-weight: 700; margin-bottom: 4px; }
+  .help { color: var(--muted); font-size: .85rem; margin-bottom: 6px; }
+  .field { width: 100%; font: inherit; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); }
+  .field:focus { border-color: var(--accent); outline: none; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1.5px solid var(--line); border-radius: 999px; font-weight: 700; font-size: .85rem; cursor: pointer; background: var(--surface); }
+  .chip input { accent-color: var(--accent); }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: 0; }
+  .row small { color: var(--muted); display: block; }
+  .row a.name { font-weight: 800; color: var(--accent-strong); text-decoration: none; }
+  .error { display: none; margin-bottom: 16px; }
+  .btn.mini { font-size: .78rem; padding: 6px 11px; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-ball">&#127936;</span> <span class="brand-name">Fantasy Basketball Helper</span></a>
+  <nav><a href="/dashboard">My leagues</a></nav>
+</header>
+
+<main class="page">
+  <div class="notice bad error" id="error"></div>
+  <div class="page-head"><h1>Manual leagues</h1><p>No Yahoo needed. Describe your league, then log picks as the draft happens.</p></div>
+
+  <section class="card"><h2>Your manual leagues</h2><div id="leagues"><span class="help">Loading&hellip;</span></div></section>
+
+  <form class="card" id="form">
+    <h2>New league</h2>
+    <div class="grid">
+      <div><label for="name">League name</label><input class="field" id="name" maxlength="60" placeholder="Friends league"></div>
+      <div><label for="num_teams">Teams</label><input class="field" id="num_teams" type="number" min="2" max="30" value="12"></div>
+      <div><label for="roster_size">Roster spots per team</label><div class="help">Starters + bench</div><input class="field" id="roster_size" type="number" min="1" max="30" value="13"></div>
+      <div><label for="my_slot">Your draft slot</label><div class="help">1 = first pick</div><input class="field" id="my_slot" type="number" min="1" max="30" value="1"></div>
+      <div>
+        <label for="is_auction">Draft type</label>
+        <select class="field" id="is_auction"><option value="0">Snake</option><option value="1">Auction</option></select>
+      </div>
+      <div id="budget_box" style="display:none"><label for="budget">Auction budget ($)</label><input class="field" id="budget" type="number" min="1" value="200"></div>
+    </div>
+    <div style="margin-top: 16px;">
+      <span class="label">Scoring categories</span>
+      <div class="chips" id="cats"></div>
+    </div>
+    <div class="btn-row" style="margin-top: 18px;"><button class="btn" type="submit">Create league</button></div>
+    <p class="help" style="margin-top:10px">Team names, notes and everything else can be changed on the draft page.</p>
+  </form>
+</main>
+
+<script>
+const CATS = ["FG%", "FT%", "3PTM", "PTS", "REB", "AST", "STL", "BLK", "TO"];
+const $ = (id) => document.getElementById(id);
+const el = (tag, text, cls) => { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; if (cls) n.className = cls; return n; };
+
+function showError(msg) { $("error").textContent = msg; $("error").style.display = msg ? "block" : "none"; }
+
+CATS.forEach((c) => {
+  const label = el("label", undefined, "chip");
+  const box = document.createElement("input");
+  box.type = "checkbox"; box.value = c; box.checked = true;
+  label.append(box, c);
+  $("cats").append(label);
+});
+$("is_auction").onchange = (e) => { $("budget_box").style.display = e.target.value === "1" ? "" : "none"; };
+
+async function api(url, options) {
+  const res = await fetch(url, options);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+async function loadLeagues() {
+  const box = $("leagues");
+  try {
+    const { leagues } = await api("/manual/api/leagues");
+    box.textContent = "";
+    if (!leagues.length) { box.append(el("span", "None yet. Create one below.", "help")); return; }
+    leagues.forEach((l) => {
+      const row = el("div", undefined, "row");
+      const info = el("div");
+      const link = el("a", l.name, "name");
+      link.href = `/manual/${l.id}`;
+      info.append(link, el("small", `${l.is_auction ? "Auction" : "Snake"} · ${l.num_teams} teams · ${l.picks}/${l.total_picks} picks · ${l.status === "finished" ? "draft finished" : "drafting"}`));
+      const del = el("button", "Delete", "btn secondary mini");
+      del.onclick = async () => {
+        if (!confirm(`Delete "${l.name}" and all its picks and notes?`)) return;
+        try { await api(`/manual/${l.id}`, { method: "DELETE" }); loadLeagues(); } catch (e) { showError(e.message); }
+      };
+      row.append(info, del);
+      box.append(row);
+    });
+  } catch (e) { box.textContent = ""; showError("Could not load leagues: " + e.message); }
+}
+
+$("form").onsubmit = async (e) => {
+  e.preventDefault();
+  showError("");
+  const body = {
+    name: $("name").value, num_teams: $("num_teams").value, roster_size: $("roster_size").value,
+    my_slot: $("my_slot").value, is_auction: $("is_auction").value === "1", budget: $("budget").value,
+    categories: [...document.querySelectorAll("#cats input:checked")].map((b) => b.value),
+  };
+  try {
+    const { id } = await api("/manual/api/leagues", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    location.href = `/manual/${id}`;
+  } catch (err) { showError(err.message); }
+};
+
+loadLeagues();
+</script>
+</body>
+</html>

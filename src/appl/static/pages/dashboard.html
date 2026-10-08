@@ -1,0 +1,70 @@
+{% extends "pages/base.html" %}
+{% block title %}My leagues · Fantasy Basketball Helper{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Hi {{ first_name }} 👋</h1>
+  {% if leagues %}
+  <p>Pick a league to ask questions or get draft help.</p>
+  {% elif yahoo_connected %}
+  <p>You're almost there. Choose a league to get started.</p>
+  {% else %}
+  <p>One more step and you're ready.</p>
+  {% endif %}
+</div>
+
+<div class="card" style="margin-bottom: 18px;">
+  <h3>Drafting without Yahoo?</h3>
+  <p class="muted small">Enter your league settings by hand, log picks as they happen and keep notes.</p>
+  <div class="btn-row" style="margin-top: 14px;"><a class="btn secondary" href="/manual">✍️ Manual league</a></div>
+</div>
+
+{% if not yahoo_connected %}
+<div class="card">
+  <div class="steps">
+    <div class="step done">
+      <div class="step-num">✓</div>
+      <div><h3>Signed in</h3><p class="muted small">You're signed in with Google.</p></div>
+    </div>
+    <div class="step current">
+      <div class="step-num">2</div>
+      <div>
+        <h3>Connect your Yahoo account</h3>
+        <p class="muted small">We read your league so the helper knows your team, rules and opponents.</p>
+        <div class="btn-row" style="margin-top: 14px;">
+          <a class="btn" href="/auth/yahoo/login">Connect Yahoo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+
+  {% if leagues_error %}
+  <div class="notice bad">We couldn't load your leagues right now. Please refresh the page.</div>
+  {% elif leagues %}
+  <div class="league-grid">
+    {% for league in leagues %}
+    <div class="card league-card">
+      <h2>{{ league.league_name or "Your league" }}</h2>
+      <p class="muted">{{ league.team_name or "Your team" }}</p>
+      <div class="btn-row">
+        <a class="btn" href="/ai-chat/{{ league.league_id }}">💬 Ask</a>
+        <a class="btn secondary" href="/draft/{{ league.league_id }}">📋 Draft help</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card center">
+    <div class="big-emoji">🗂️</div>
+    <h2>No leagues yet</h2>
+    <p class="muted" style="margin-top: 6px;">Choose one of your Yahoo leagues to add it here.</p>
+    <div class="btn-row"><a class="btn" href="/auth/yahoo/login">Choose a league</a></div>
+  </div>
+  {% endif %}
+
+  <p class="muted small" style="margin-top: 24px;">
+    Missing a league? <a href="/auth/yahoo/login">Add another league</a>
+  </p>
+{% endif %}
+{% endblock %}

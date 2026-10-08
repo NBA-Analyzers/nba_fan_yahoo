@@ -1,0 +1,15 @@
+{% extends "pages/base.html" %}
+{% block page_class %}narrow{% endblock %}
+{% block content %}
+<div class="card center" style="margin-top: 32px;">
+  <div class="big-emoji">🏀</div>
+  <h1>Your fantasy basketball helper</h1>
+  <p class="muted" style="margin-top: 10px;">
+    Ask questions about your Yahoo league and get calm, clear advice on draft night.
+  </p>
+  <div class="btn-row">
+    <a class="btn big" href="/auth/google/login">Sign in with Google</a>
+  </div>
+  <p class="muted small" style="margin-top: 16px;">Next you'll connect Yahoo. It takes about a minute.</p>
+</div>
+{% endblock %}

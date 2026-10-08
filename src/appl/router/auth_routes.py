@@ -1,9 +1,9 @@
 import time
 import xml.etree.ElementTree as ET
 
-from ..config.app_config import DEBUG
+from ..config.app_config import DEBUG, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
-from flask import Blueprint, current_app, redirect, session, url_for
+from flask import Blueprint, current_app, redirect, render_template, session, url_for
 from ..middleware.auth_decorators import require_google_auth
 from ..repository.supaBase.models.google_auth import GoogleAuth
 from ..repository.supaBase.models.google_fantasy import GoogleFantasy
@@ -17,11 +17,16 @@ def get_user_guid_from_token(token, yahoo):
 
     if not user_guid:
         resp = yahoo.get("fantasy/v2/users;use_login=1", token=token)
-        root = ET.fromstring(resp.text)
+        try:
+            root = ET.fromstring(resp.text)
+        except ET.ParseError:
+            root = None
         ns = {"ns": "http://fantasysports.yahooapis.com/fantasy/v2/base.rng"}
-        guid_elem = root.find(".//ns:guid", ns)
+        guid_elem = root.find(".//ns:guid", ns) if root is not None else None
         if guid_elem is None:
-            return "Could not retrieve user GUID", 500
+            raise RuntimeError(
+                f"Could not retrieve Yahoo user GUID (HTTP {resp.status_code}): {resp.text[:300]}"
+            )
         user_guid = guid_elem.text
 
     return user_guid
@@ -66,9 +71,12 @@ class AuthRouter:
             if google is None:
                 print("ERROR: Google OAuth client is not available!")
                 return "Google OAuth client not configured", 500
+            if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+                print("ERROR: GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are not set in .env")
+                return "Google OAuth credentials not configured", 500
 
-            # Always use HTTPS when behind ngrok proxy
-            redirect_uri = url_for("auth.google_callback", _external=True, _scheme="https")
+            # ProxyFix already reports https behind ngrok; forcing it breaks plain http://localhost
+            redirect_uri = url_for("auth.google_callback", _external=True)
             return google.authorize_redirect(redirect_uri)
 
         @auth_bp.route("/google/callback")
@@ -118,7 +126,13 @@ class AuthRouter:
 
             except Exception as e:
                 print(f"❌ Error during Google callback: {e}")
-                return "Google login failed. Please try again.", 500
+                return render_template(
+                    "pages/message.html",
+                    title="Sign-in didn't work",
+                    text="Something went wrong signing in with Google. Please try again.",
+                    link="/auth/google/login",
+                    link_text="Try again",
+                ), 500
 
         @auth_bp.route("/yahoo/login")
         @require_google_auth
@@ -211,41 +225,17 @@ class AuthRouter:
                 )
                 league_options = yahoo_service.get_user_leagues(user_guid)
 
-                # Get Google user info for personalization
-                user_info = session.get("google_user", {})
-                user_name = user_info.get("name", "User")
-
-                # Build league options HTML dynamically
-                league_html = ""
-                if league_options and len(league_options) > 0:
-                    for league in league_options:
-                        league_html += f'<input type="radio" name="league_id" value="{league.get("id", "")}" required> {league.get("name", "Unknown League")}<br>'
-                else:
-                    league_html = (
-                        "<p>No leagues found. Please check your Yahoo account.</p>"
-                    )
-
-                # Render a simple HTML form for league selection
-                html = f"""
-                <h2>Hello {user_name}!</h2>
-                <h3>Your Yahoo Fantasy Leagues</h3>
-                <p>Yahoo account connected successfully! Select your league:</p>
-                <form id="leagueForm" action="/yahoo/select_league" method="post">
-                    {league_html}
-                    <br>
-                    <button type="submit" id="submitBtn">
-                        <span id="btnText">Connect League & Go to AI Chat</span>
-                        <span id="loadingSpinner" style="display: none;">⏳ Loading...</span>
-                    </button>
-                </form>
-                <br>
-                <a href="/dashboard">← Back to Dashboard</a>
-                """
-                return html
+                return render_template("pages/choose_league.html", leagues=league_options or [])
 
             except Exception as e:
                 print(f"❌ Error during Yahoo callback: {e}")
-                return "Yahoo login failed. Please try again.", 500
+                return render_template(
+                    "pages/message.html",
+                    title="Yahoo didn't connect",
+                    text="Something went wrong talking to Yahoo. Please try again.",
+                    link="/auth/yahoo/login",
+                    link_text="Try again",
+                ), 500
 
         @auth_bp.route("/logout")
         def logout():

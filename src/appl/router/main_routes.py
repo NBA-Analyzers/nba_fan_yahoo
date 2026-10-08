@@ -33,19 +33,7 @@ class MainRouter:
             if "google_user" in session:
                 return redirect(url_for("main.dashboard"))
 
-            # Show homepage with login options
-            return """
-            <h1>Fantasy League App</h1>
-            <p>Welcome! Please login to get started:</p>
-            <ul>
-                <li><a href="/auth/google/login">Login with Google</a></li>
-            </ul>
-            <hr>
-            <p>Other options:</p>
-            <ul>
-                <li><a href="/health">Health Check</a></li>
-            </ul>
-            """
+            return render_template("pages/home.html")
 
         @main_bp.route("/dashboard")
         def dashboard():
@@ -54,7 +42,7 @@ class MainRouter:
             @require_google_auth
             def dashboard_content():
                 user_info = session.get("google_user", {})
-                user_name = user_info.get("name", "User")
+                first_name = (user_info.get("given_name") or user_info.get("name") or "there").split()[0]
 
                 # Check if user also has Yahoo authentication
                 yahoo_authenticated = "user" in session and session[
@@ -62,75 +50,24 @@ class MainRouter:
                 ] in session.get("token_store", {})
 
                 # Get user's synced leagues if they have Yahoo auth
-                synced_leagues_html = ""
+                leagues, leagues_error = [], False
                 if yahoo_authenticated:
                     try:
                         yahoo_service = YahooService(
                             session["token_store"], self.document_indexer
                         )
-                        user_leagues = yahoo_service.get_user_synced_leagues(
-                            session["user"]
-                        )
-
-                        if user_leagues:
-                            # Build league HTML dynamically
-                            league_items = []
-                            for league in user_leagues:
-                                league_items.append(f"""
-                                <div style="border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 8px; background: white;">
-                                    <h4>League ID: {league.get("league_id", "Unknown")}</h4>
-                                    <h4>League Name: {league.get("league_name", "Unknown")}</h4>
-                                    <p><strong>Team:</strong> {league.get("team_name", "Unknown Team")}</p>
-                                    <p><strong>Added:</strong> {league.get("created_at", "Unknown")}</p>
-                                    <a href="/ai-chat/{league.get("league_id", "unknown")}" style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; font-size: 14px;">AI Chat</a>
-                                    <a href="/draft/{league.get("league_id", "unknown")}" style="background: #fd7e14; color: white; padding: 8px 16px; text-decoration: none; border-radius: 5px; font-size: 14px; margin-left: 8px;">Draft Assistant</a>
-                                </div>
-                                """)
-
-                            synced_leagues_html = f"""
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
-                                <h3>Your Synced Leagues</h3>
-                                <p>Click on any league to access its AI Assistant:</p>
-                                {"".join(league_items)}
-                            </div>
-                            """
-                        else:
-                            synced_leagues_html = """
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
-                                <h3>Your Synced Leagues</h3>
-                                <p>No leagues synced yet. Connect your Yahoo account to get started!</p>
-                            </div>
-                            """
+                        leagues = yahoo_service.get_user_synced_leagues(session["user"]) or []
                     except Exception as e:
                         print(f"Error getting synced leagues: {e}")
-                        synced_leagues_html = """
-                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
-                            <h3>Your Synced Leagues</h3>
-                            <p>Error loading leagues. Please try refreshing the page.</p>
-                        </div>
-                        """
+                        leagues_error = True
 
-                html = f"""
-                <h1>Welcome, {user_name}!</h1>
-                <p>You are logged in with Google.</p>
-                
-                <h2>Connect to Yahoo Fantasy</h2>
-                <p>To access your fantasy leagues, please connect your Yahoo account:</p>
-                
-                {"<p>Yahoo account connected!</p>" if yahoo_authenticated else ""}
-                
-                <ul>
-                    <li><a href="/auth/yahoo/login">{"Re-connect" if yahoo_authenticated else "Connect"} Yahoo Account</a></li>
-                    {'<li><a href="/yahoo/my_leagues">View My Synced Leagues</a></li>' if yahoo_authenticated else ""}
-                    <li><a href="/api/sync_league">Sync League (Debug)</a></li>
-                    <li><a href="/health">Health Check</a></li>
-                    <li><a href="/auth/logout">Logout</a></li>
-                </ul>
-                
-                {synced_leagues_html}
-                """
-
-                return html
+                return render_template(
+                    "pages/dashboard.html",
+                    first_name=first_name,
+                    yahoo_connected=yahoo_authenticated,
+                    leagues=leagues,
+                    leagues_error=leagues_error,
+                )
 
             return dashboard_content()
 

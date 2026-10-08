@@ -1,0 +1,835 @@
+{% extends "pages/base.html" %}
+{% set active_tab = "draft" %}
+{% block title %}Draft · Fantasy Basketball Helper{% endblock %}
+{% block head %}
+<style>
+  :root { --punt: #c9c2b8; }
+  @media (prefers-color-scheme: dark) { :root { --punt: #575049; } }
+  body { font-size: 15px; }
+  .topbar, .page.draft-page { max-width: 1240px; }
+  .error { display: none; margin-bottom: 16px; }
+  .draft-head { margin: 4px 0 18px; }
+  .status { color: var(--muted); margin-top: 6px; }
+  .status strong { display: inline-block; color: var(--accent-strong); background: var(--accent-soft); padding: 2px 12px; border-radius: 999px; font-weight: 800; }
+  .warn { display: none; margin-bottom: 16px; }
+
+  .settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px 24px; margin-bottom: 18px; }
+  .setting label, .setting .label { display: block; font-weight: 700; margin-bottom: 4px; }
+  .setting .help { color: var(--muted); font-size: .85rem; margin-bottom: 8px; }
+  .setting.wide { grid-column: 1 / -1; }
+  .field { width: 100%; font: inherit; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); }
+  .field:focus { border-color: var(--accent); outline: none; }
+  #slot { width: 90px; }
+  .setting .toggle { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; margin: 0; }
+  .toggle input { accent-color: var(--accent); width: 18px; height: 18px; }
+
+  #punts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .punt { display: inline-flex; align-items: center; padding: 5px 12px; border: 1.5px solid var(--line); border-radius: 999px; cursor: pointer; user-select: none; font-weight: 700; font-size: .85rem; background: var(--surface); }
+  .punt:hover { border-color: var(--accent); }
+  .punt.on { background: var(--surface-soft); color: var(--muted); text-decoration: line-through; }
+  .hint { color: var(--muted); font-size: .9rem; margin-top: 8px; }
+  .hint:empty { display: none; }
+  .hint a { color: var(--accent-strong); cursor: pointer; font-weight: 700; }
+
+  .layout { display: grid; grid-template-columns: 1fr 300px; gap: 18px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+  .card { padding: 18px; }
+  .card.table-card { overflow-x: auto; }
+  .card h2 { margin: 0 0 10px; font-size: 1.05rem; }
+  .side { display: flex; flex-direction: column; gap: 18px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: .82rem; margin-bottom: 10px; }
+  .legend .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: .78rem; color: var(--muted); font-weight: 700; }
+  tbody tr:hover td { background: var(--surface-soft); }
+  th.cat, td.cat { text-align: center; padding: 8px 2px; }
+  td.name { font-weight: 700; }
+  td.name small { display: block; font-weight: 400; color: var(--muted); }
+  .z { display: inline-block; min-width: 36px; padding: 2px 4px; border-radius: 6px; font-size: .78rem; text-align: center; }
+  .z.punted { background: transparent !important; color: var(--punt); text-decoration: line-through; }
+  .badge { font-size: .7rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--good-soft); color: var(--good); }
+  .btn.mini { font-size: .78rem; padding: 6px 11px; }
+
+  .decision { background: var(--accent-soft); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 14px; }
+  .decision .pick { font-size: 1.15rem; font-weight: 800; }
+  .decision .tag { font-size: .72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; margin-left: 8px; color: #fff; background: var(--good); vertical-align: middle; }
+  .decision .tag.manager { background: var(--accent); }
+  .decision .meta { color: var(--muted); margin-top: 4px; font-size: .92rem; }
+  tr.picked td { background: var(--accent-soft); }
+
+  .bar { display: grid; grid-template-columns: 46px 1fr 36px; gap: 8px; align-items: center; margin: 5px 0; font-size: .82rem; }
+  .bar .track { height: 8px; background: var(--surface-soft); border-radius: 4px; position: relative; }
+  .bar .fill { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+  .bar .mid { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--muted); }
+  #roster h2 { margin-top: 16px; font-size: .9rem; color: var(--muted); }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { padding: 6px 0; border-bottom: 1px solid var(--line); font-size: .92rem; }
+  li:last-child { border-bottom: 0; }
+  li.mine { color: var(--accent-strong); font-weight: 700; }
+
+  .nominee-row { display: flex; gap: 8px; align-items: center; }
+  .nominee-row .field { flex: 1; font-size: 1.05rem; }
+  #nominee-card { margin-top: 14px; }
+  .bidcard .who { font-weight: 800; font-size: 1.1rem; }
+  .bidcard .who small { color: var(--muted); font-weight: 600; margin-left: 8px; }
+  .bidcard .big { font-size: 2.4rem; font-weight: 800; line-height: 1.15; margin: 6px 0 4px; }
+  .bidcard .big.target { color: var(--good); }
+  .bidcard .big.fair { color: var(--accent-strong); }
+  .bidcard .big.overpriced { color: var(--bad); }
+  .bidcard .verdict { font-size: .85rem; font-weight: 700; margin-left: 12px; vertical-align: middle; padding: 3px 12px; border-radius: 999px; background: var(--surface-soft); color: var(--text); }
+  .bidcard .line { margin-top: 8px; }
+  .facts { display: flex; flex-wrap: wrap; gap: 4px 22px; color: var(--muted); }
+  .facts b { color: var(--text); }
+  .mini-btns { margin-top: 12px; display: flex; gap: 8px; }
+  .money-big { font-size: 1.7rem; font-weight: 800; color: var(--accent-strong); }
+  .money-line { margin-top: 6px; color: var(--muted); font-size: .92rem; }
+  .rivals { margin-top: 6px; }
+  .rivals th, .rivals td { padding: 5px 4px; font-size: .85rem; }
+  .rivals td:not(:first-child), .rivals th:not(:first-child) { text-align: right; }
+  details summary { cursor: pointer; color: var(--accent-strong); font-weight: 700; margin-top: 10px; }
+  tbody tr.clickable { cursor: pointer; }
+  .need { margin-top: 10px; font-size: .92rem; }
+  .need b { color: var(--accent-strong); }
+  .manual-only { display: none; }
+  .pickform { display: grid; grid-template-columns: 2fr 1.4fr 110px auto auto; gap: 10px; align-items: center; }
+  @media (max-width: 900px) { .pickform { grid-template-columns: 1fr 1fr; } .pickform .field:first-child { grid-column: 1 / -1; } }
+  .logrow { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 12px; }
+  .msg { color: var(--bad); font-size: .9rem; margin-top: 8px; min-height: 1em; }
+  .note { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .92rem; white-space: pre-wrap; }
+  .note:last-child { border-bottom: 0; }
+  .note small { display: flex; justify-content: space-between; color: var(--muted); white-space: normal; }
+  .note small a { cursor: pointer; color: var(--muted); }
+  textarea.field { resize: vertical; min-height: 64px; }
+  .teamrow { padding: 6px 0; border-bottom: 1px solid var(--line); font-size: .88rem; }
+  .teamrow:last-child { border-bottom: 0; }
+  .teamrow b { display: block; }
+  .teamrow.mine b { color: var(--accent-strong); }
+  .teamrow span { color: var(--muted); }
+  details summary { cursor: pointer; font-weight: 700; margin-bottom: 8px; }
+  details .field { margin-bottom: 8px; }
+</style>
+{% endblock %}
+{% block page_class %}draft-page{% endblock %}
+{% block content %}
+  <div class="notice bad error" id="error"></div>
+
+  <div class="draft-head">
+    <h1 id="title">Draft help</h1>
+    <div class="status" id="status">Loading&hellip;</div>
+  </div>
+  <div class="notice info warn" id="warn"></div>
+
+  <section class="card" id="nomineebox" style="display:none; margin-bottom: 18px" aria-label="Player up for bid">
+    <h2>Who is up for bid?</h2>
+    <div class="nominee-row">
+      <input id="nominee" class="field" list="playernames" autocomplete="off"
+             placeholder="Type a name, press Enter">
+      <datalist id="playernames"></datalist>
+      <button class="btn secondary mini" id="nominee-clear">Clear</button>
+    </div>
+    <div id="nominee-card"></div>
+  </section>
+
+  <section class="card settings" aria-label="Settings">
+    <div class="setting wide">
+      <span class="label">Categories to skip (punt)</span>
+      <div class="help">Tap a category you don't plan to compete in. Rankings will ignore it.</div>
+      <div id="punts"></div>
+      <div class="hint" id="suggest"></div>
+    </div>
+    <div class="setting">
+      <label for="mode">Who makes the pick?</label>
+      <div class="help">Jev is the AI that can suggest or choose for you.</div>
+      <select id="mode" class="field">
+        <option value="manual">I do (just show the ranking)</option>
+        <option value="assist">Jev suggests, I decide</option>
+        <option value="auto">Jev picks for me</option>
+      </select>
+    </div>
+    <div class="setting">
+      <label for="pref">Looking for something?</label>
+      <div class="help">Optional. Jev will take it into account.</div>
+      <input id="pref" class="field" type="text" maxlength="500" placeholder="e.g. a big who blocks shots">
+    </div>
+    <div class="setting" id="slotbox" style="display:none">
+      <label for="slot">Your draft slot</label>
+      <div class="help">Yahoo didn't tell us, so enter it here.</div>
+      <input id="slot" class="field" type="number" min="1" max="30">
+    </div>
+    <div class="setting">
+      <span class="label">Practice</span>
+      <div class="help">Mark picks yourself, without a live Yahoo draft.</div>
+      <label class="toggle"><input type="checkbox" id="mock"> Practice mode</label>
+      <button class="btn secondary mini" id="reset" style="display:none; margin-left: 8px;">Start over</button>
+    </div>
+  </section>
+
+  <section class="card manual-only" id="manualbox" aria-label="Log a pick">
+    <h2>Log a pick</h2>
+    <form class="pickform" id="pickform">
+      <input class="field" id="pk_player" list="playernames" placeholder="Player name" autocomplete="off" required>
+      <select class="field" id="pk_team" aria-label="Team"></select>
+      <input class="field" id="pk_cost" type="number" min="0" placeholder="$ price" aria-label="Price">
+      <button class="btn" type="submit">Add pick</button>
+      <button class="btn secondary" type="button" id="pk_undo">Undo last</button>
+    </form>
+    <div class="msg" id="pk_msg"></div>
+    <div class="logrow">
+      <label class="toggle"><input type="checkbox" id="finished"> The draft is finished</label>
+      <span class="hint" id="clock"></span>
+    </div>
+  </section>
+
+  <div class="layout">
+    <div class="card table-card">
+      <h2>Best players for your team</h2>
+      <div class="decision" id="decision" style="display:none"></div>
+      <div class="legend">
+        <span><i class="sw" style="background: rgba(31,157,85,.55)"></i>helps you</span>
+        <span><i class="sw" style="background: rgba(214,69,69,.55)"></i>hurts you</span>
+        <span>Score = overall value for your build</span>
+      </div>
+      <table>
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="side">
+      <div class="card" id="moneycard" style="display:none"><h2>Your money</h2><div id="money"></div></div>
+      <div class="card"><h2>Your team</h2><div id="roster"></div></div>
+      <div class="card"><h2>Latest picks</h2><ul id="picks"></ul></div>
+      <div class="card manual-only">
+        <h2>League notes</h2>
+        <textarea class="field" id="note_text" maxlength="1000" placeholder="What's happening? e.g. Team 4 is going big men, trade offer received&hellip;"></textarea>
+        <button class="btn mini" id="note_add" style="margin: 8px 0 10px">Add note</button>
+        <div id="notes"></div>
+      </div>
+      <div class="card manual-only"><h2>All teams</h2><div id="teams"></div></div>
+      <div class="card manual-only">
+        <details>
+          <summary>League settings</summary>
+          <label for="s_name">Name</label><input class="field" id="s_name" maxlength="60">
+          <label for="s_teams">Teams</label><input class="field" id="s_teams" type="number" min="2" max="30">
+          <label for="s_roster">Roster spots</label><input class="field" id="s_roster" type="number" min="1" max="30">
+          <label for="s_slot">Your draft slot</label><input class="field" id="s_slot" type="number" min="1" max="30">
+          <label for="s_budget">Auction budget ($)</label><input class="field" id="s_budget" type="number" min="1">
+          <label for="s_cats">Categories (comma separated)</label><input class="field" id="s_cats">
+          <label for="s_names">Team names (one per line, in draft order)</label><textarea class="field" id="s_names" rows="6"></textarea>
+          <div class="msg" id="s_msg"></div>
+          <button class="btn mini" id="s_save">Save settings</button>
+        </details>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+<script>
+const pathParts = location.pathname.split("/").filter(Boolean);
+const leagueId = pathParts[1];
+// /manual/<id> is a hand-entered league; /draft/<id> follows Yahoo
+const manual = pathParts[0] === "manual";
+const base = `/${manual ? "manual" : "draft"}/${leagueId}`;
+const POLL_MS = 10000;
+const AUCTION_POLL_MS = 4000; // bid clocks are short, so check Yahoo more often
+const store = {
+  get(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(`draft:${leagueId}:${key}`)) ?? fallback; }
+    catch (e) { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(`draft:${leagueId}:${key}`, JSON.stringify(value)); } catch (e) {}
+  },
+};
+
+let punts = store.get("punts", []);
+let mock = manual ? false : store.get("mock", false);
+let jevMode = store.get("jevMode", "manual");
+let preference = store.get("preference", "");
+let draftPosition = store.get("draftPosition", "");
+let mockTaken = store.get("mockTaken", []);
+let mockMine = store.get("mockMine", []);
+let mockCosts = store.get("mockCosts", {});
+let nominee = store.get("nominee", "");
+let lastData = null;
+let timer = null;
+let activePoll = null;
+let playerListLoaded = false;
+
+const $ = (id) => document.getElementById(id);
+const el = (tag, text, cls) => {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (cls) node.className = cls;
+  return node;
+};
+
+function zColor(z) {
+  const strength = Math.min(Math.abs(z) / 2.5, 1);
+  const rgb = z >= 0 ? "31,157,85" : "214,69,69";
+  return `rgba(${rgb},${(0.12 + strength * 0.55).toFixed(2)})`;
+}
+
+async function fetchState() {
+  const punted = encodeURIComponent(punts.join(","));
+  const url = `${base}/state`;
+  const res = mock
+    ? await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mock: true, punts, mock_taken: mockTaken, mock_mine: mockMine,
+          mode: jevMode, preference, draft_position: draftPosition,
+          nominee, mock_costs: mockCosts,
+        }),
+      })
+    : await fetch(`${url}?punts=${punted}&mode=${jevMode}&preference=${encodeURIComponent(preference)}&draft_position=${draftPosition}&nominee=${encodeURIComponent(nominee)}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+async function refresh() {
+  try {
+    lastData = await fetchState();
+    $("error").style.display = "none";
+    render(lastData);
+    if (!mock && pollInterval() !== activePoll) applyMode();
+  } catch (e) {
+    $("error").textContent = "Could not load draft data: " + e.message;
+    $("error").style.display = "block";
+  }
+}
+
+function render(d) {
+  $("title").textContent = d.league_name ? `Draft help · ${d.league_name}` : "Draft help";
+  renderStatus(d);
+  renderWarnings(d);
+  renderPunts(d);
+  renderNominee(d);
+  renderMoney(d);
+  renderDecision(d);
+  renderTable(d);
+  renderRoster(d);
+  renderPicks(d);
+  if (manual) renderManual(d);
+}
+
+function renderStatus(d) {
+  const s = $("status");
+  s.textContent = "";
+  const parts = [];
+  if (manual) parts.push(d.draft_status === "finished" ? "Draft finished" : "Manual league");
+  else if (d.mock) parts.push("Practice mode");
+  else if (d.draft_status) parts.push(`Draft: ${d.draft_status}`);
+  parts.push(`${d.taken_names.length} players taken`);
+  s.append(parts.join(" · "));
+  if (d.is_auction) {
+    s.append(" · Your budget left: ", el("strong", `$${d.my_budget_left}`));
+  } else if (d.my_next_pick) {
+    const n = d.picks_until_my_turn;
+    s.append(" · ", el("strong", n === 0 ? "You're on the clock!" : `You pick in ${n} pick${n === 1 ? "" : "s"}`),
+      ` (pick #${d.my_next_pick})`);
+  }
+}
+
+function renderWarnings(d) {
+  const lines = [];
+  if (d.taken_unmatched && d.taken_unmatched.length) {
+    lines.push(`No stats match for drafted players: ${d.taken_unmatched.join(", ")}. If they are in the pool under another spelling, they may still show as available.`);
+  }
+  const warn = $("warn");
+  warn.textContent = lines.join(" ");
+  warn.style.display = lines.length ? "block" : "none";
+  // Snake drafts: ask for the manager's slot if Yahoo doesn't expose it
+  $("slotbox").style.display = !manual && !d.is_auction && (d.needs_draft_position || draftPosition) ? "" : "none";
+}
+
+function renderPunts(d) {
+  const box = $("punts");
+  box.textContent = "";
+  for (const cat of d.categories) {
+    const chip = el("label", cat, "punt" + (punts.includes(cat) ? " on" : ""));
+    chip.onclick = () => togglePunt(cat);
+    box.append(chip);
+  }
+  const hint = $("suggest");
+  hint.textContent = "";
+  const open = d.suggested_punts.filter((c) => !punts.includes(c));
+  if (open.length) {
+    hint.append("Tip: your team is weakest in ");
+    open.forEach((c, i) => {
+      const a = el("a", c);
+      a.onclick = () => togglePunt(c);
+      hint.append(i ? " and " : "", a);
+    });
+    hint.append(". Tap to skip it.");
+  }
+}
+
+function togglePunt(cat) {
+  punts = punts.includes(cat) ? punts.filter((c) => c !== cat) : [...punts, cat];
+  store.set("punts", punts);
+  refresh();
+}
+
+function renderDecision(d) {
+  const box = $("decision");
+  box.textContent = "";
+  const dec = d.decision;
+  if (!dec) { box.style.display = "none"; return; }
+  box.style.display = "";
+
+  const title = el("div");
+  const label = dec.source === "jev" ? "Jev picks " : "Top pick: ";
+  title.append(label, el("span", dec.pick, "pick"));
+  if (dec.confidence != null) title.append(` (${Math.round(dec.confidence * 100)}% sure)`);
+  title.append(el("span", dec.needs_manager ? "you decide" : "auto-pick", "tag" + (dec.needs_manager ? " manager" : "")));
+  box.append(title);
+
+  if (dec.reason) box.append(el("div", dec.reason, "meta"));
+  if (dec.note) box.append(el("div", dec.note, "meta"));
+  if (dec.needs_manager && dec.options.length > 1) {
+    box.append(el("div", "Likeliest: " + dec.options.map((o) => `${o.name} ${Math.round(o.probability * 100)}%`).join(" · "), "meta"));
+  }
+  if (!dec.agrees_with_engine) box.append(el("div", `The ranking's #1 is ${dec.engine_pick}.`, "meta"));
+}
+
+function setNominee(name, scroll) {
+  nominee = name;
+  store.set("nominee", nominee);
+  $("nominee").value = name;
+  if (scroll) window.scrollTo({ top: 0, behavior: "smooth" });
+  refresh();
+}
+
+async function ensurePlayerList() {
+  if (playerListLoaded) return;
+  playerListLoaded = true;
+  try {
+    const res = await fetch(`${base}/players`);
+    const data = await res.json();
+    const list = $("playernames");
+    list.textContent = "";
+    (data.players || []).forEach((n) => { const o = document.createElement("option"); o.value = n; list.append(o); });
+  } catch (e) { playerListLoaded = false; }
+}
+
+function fact(label, value) {
+  const s = el("span", label + " ");
+  s.append(el("b", value));
+  return s;
+}
+
+function renderNominee(d) {
+  $("nomineebox").style.display = d.is_auction ? "" : "none";
+  if (!d.is_auction) return;
+  ensurePlayerList();
+  if (document.activeElement !== $("nominee")) $("nominee").value = nominee;
+
+  const box = $("nominee-card");
+  box.textContent = "";
+  const c = d.nominee_card;
+  if (!c) {
+    box.append(el("div", "Type the name of the player who was just nominated. You will see how much to bid. Tip: press / to jump to this box.", "hint"));
+    return;
+  }
+  if (!c.found) {
+    box.append(el("div", `No player called "${c.query}" in the list. Check the spelling.`, "notice bad"));
+    return;
+  }
+
+  const card = el("div", undefined, "bidcard");
+  const who = el("div", c.name, "who");
+  who.append(el("small", `${c.team || "FA"}${c.my_rank ? ` · #${c.my_rank} for your team` : ""}`));
+  card.append(who);
+
+  if (c.sold) {
+    card.append(el("div", c.sold_to ? `Sold to ${c.sold_to}${c.cost ? ` for $${c.cost}` : ""}.` : "Already drafted.", "big fair"));
+    box.append(card);
+    return;
+  }
+
+  const words = { target: "Good deal for you", fair: "Fair price", overpriced: "Probably too pricey" };
+  const big = el("div", undefined, `big ${c.verdict}`);
+  big.append(`Bid up to $${c.bid_up_to}`, el("span", words[c.verdict], "verdict"));
+  card.append(big);
+
+  const facts = el("div", undefined, "facts");
+  facts.append(fact("Worth to you", `$${c.my_value}`), fact("Others will likely pay", `about $${c.market}`));
+  if (c.yahoo_avg_cost != null) facts.append(fact("Yahoo's average", `$${Math.round(c.yahoo_avg_cost)}`));
+  facts.append(fact("You can bid at most", `$${c.max_bid}`));
+  card.append(facts);
+  if (c.bid_up_to < c.my_value) card.append(el("div", "Your money limits this bid.", "line hint"));
+
+  if (c.strengths.length || c.weaknesses.length) {
+    const line = el("div", undefined, "line");
+    if (c.strengths.length) line.append("Strong in ", el("b", c.strengths.join(", ")), ". ");
+    if (c.weaknesses.length) line.append("Weak in ", el("b", c.weaknesses.join(", ")), ".");
+    card.append(line);
+  }
+  if (c.fills_open_slot === true) card.append(el("div", "He fills one of your open starting spots.", "line"));
+  else if (c.fills_open_slot === false) card.append(el("div", "No open starting spot for him. He would be bench or flex.", "line hint"));
+
+  if (c.rivals_who_can_pay_market != null) {
+    const total = (d.teams || []).filter((t) => !t.is_mine).length;
+    const richest = c.richest_rivals.map((r) => `${r.name} ($${r.max_bid})`).join(", ");
+    card.append(el("div", `${c.rivals_who_can_pay_market} of ${total} rivals can afford about $${c.market}. Most money: ${richest}.`, "line hint"));
+  }
+
+  if (mock) {
+    const btns = el("div", undefined, "mini-btns");
+    const lost = el("button", "Someone else won", "btn secondary mini");
+    lost.onclick = () => markMock(c.name, false);
+    const won = el("button", "I won him", "btn mini");
+    won.onclick = () => markMock(c.name, true);
+    btns.append(lost, won);
+    card.append(btns);
+  }
+  box.append(card);
+}
+
+function renderMoney(d) {
+  const card = $("moneycard");
+  card.style.display = d.is_auction ? "" : "none";
+  if (!d.is_auction) return;
+  const box = $("money");
+  box.textContent = "";
+  box.append(el("div", `$${d.my_budget_left} left`, "money-big"));
+  box.append(el("div", `You can bid at most $${d.auction.max_bid}. ${d.my_open_spots} roster spots still open.`, "money-line"));
+
+  const p = d.auction.inflation_pct;
+  box.append(el("div", Math.abs(p) < 1 ? "Prices are about where they started."
+    : `Players now cost about ${Math.abs(p)}% ${p > 0 ? "more" : "less"} than before the draft.`, "money-line"));
+
+  if (d.teams && d.teams.length) {
+    const rivals = d.teams.filter((t) => !t.is_mine).sort((a, b) => b.max_bid - a.max_bid);
+    const table = (rows) => {
+      const t = el("table", undefined, "rivals");
+      const head = el("tr");
+      ["Team", "Left", "Max bid", "Spots"].forEach((h) => head.append(el("th", h)));
+      t.append(head);
+      rows.forEach((r) => {
+        const row = el("tr");
+        row.append(el("td", r.name), el("td", `$${r.budget_left}`), el("td", `$${r.max_bid}`), el("td", r.spots_left));
+        t.append(row);
+      });
+      return t;
+    };
+    box.append(el("h2", "Richest rivals"));
+    box.append(table(rivals.slice(0, 5)));
+    if (rivals.length > 5) {
+      const more = el("details");
+      more.append(el("summary", `All ${rivals.length} rivals`), table(rivals.slice(5)));
+      box.append(more);
+    }
+  }
+}
+
+function renderTable(d) {
+  const head = $("thead");
+  head.textContent = "";
+  const row = el("tr");
+  const cols = ["#", "Player", "Score"];
+  if (d.is_auction) cols.push("Worth to you", "Others pay");
+  cols.forEach((c) => row.append(el("th", c)));
+  d.categories.forEach((c) => row.append(el("th", c, "cat")));
+  if (d.has_yahoo_ranks) ["Y! rank", "ADP"].forEach((c) => row.append(el("th", c)));
+  if (mock || manual) row.append(el("th", ""));
+  head.append(row);
+
+  const body = $("tbody");
+  body.textContent = "";
+  d.recommendations.forEach((r, i) => {
+    const tr = el("tr");
+    if (d.decision && d.decision.pick === r.name) tr.className = "picked";
+    if (d.is_auction) {
+      tr.className += " clickable";
+      tr.title = "Click to see the bid card";
+      tr.onclick = (ev) => { if (!ev.target.closest("button")) setNominee(r.name, true); };
+    }
+    tr.append(el("td", i + 1));
+    const name = el("td", r.name, "name");
+    const sub = el("small", `${r.team || "FA"} · ${r.games_played} GP · ${r.minutes} min`);
+    if (r.value) sub.append(" ", el("span", "value", "badge"));
+    name.append(sub);
+    tr.append(name, el("td", r.score.toFixed(1)));
+    if (d.is_auction) {
+      tr.append(el("td", r.bid != null ? `$${r.bid}` : "–"), el("td", r.market != null ? `$${r.market}` : "–"));
+    }
+    d.categories.forEach((c) => {
+      const cell = el("td", undefined, "cat");
+      const z = r.z[c];
+      const chip = el("span", z.toFixed(1), "z" + (punts.includes(c) ? " punted" : ""));
+      if (!punts.includes(c)) chip.style.background = zColor(z);
+      cell.append(chip);
+      tr.append(cell);
+    });
+    if (d.has_yahoo_ranks) {
+      tr.append(el("td", r.yahoo_rank ?? "–"), el("td", r.adp != null ? r.adp.toFixed(1) : "–"));
+    }
+    if (manual) {
+      const cell = el("td");
+      const log = el("button", "Log", "btn secondary mini");
+      log.onclick = () => { $("pk_player").value = r.name; $("pk_player").focus(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+      cell.append(log);
+      tr.append(cell);
+    }
+    if (mock) {
+      const cell = el("td");
+      const taken = el("button", "Taken", "btn secondary mini");
+      taken.onclick = () => markMock(r.name, false);
+      const mine = el("button", "Mine", "btn mini");
+      mine.style.marginLeft = "4px";
+      mine.onclick = () => markMock(r.name, true);
+      cell.append(taken, mine);
+      tr.append(cell);
+    }
+    body.append(tr);
+  });
+}
+
+function renderRoster(d) {
+  const box = $("roster");
+  box.textContent = "";
+  if (!d.my_roster.length) {
+    box.append(el("div", "No players yet. Your picks will show up here.", "hint"));
+    return;
+  }
+  const names = el("ul");
+  d.my_roster.forEach((n) => names.append(el("li", n)));
+  box.append(names);
+  if (d.positions && d.positions.unfilled.length) {
+    const need = el("div", "Starting spots you still need: ", "need");
+    need.append(el("b", d.positions.unfilled.join(", ")));
+    if (d.positions.incomplete) need.append(" (Yahoo didn't list every player's positions)");
+    box.append(need);
+  }
+  if (d.roster_unmatched.length) {
+    box.append(el("div", `No stats for: ${d.roster_unmatched.join(", ")}`, "hint"));
+  }
+  box.append(el("h2", "Where your team is strong"));
+  d.categories.forEach((c) => {
+    const z = d.roster_profile[c];
+    const row = el("div", undefined, "bar");
+    const track = el("div", undefined, "track");
+    const fill = el("div", undefined, "fill");
+    const pct = Math.min(Math.abs(z) / 2, 1) * 50;
+    fill.style.cssText = `background:${z >= 0 ? "var(--good)" : "var(--bad)"};` +
+      (z >= 0 ? `left:50%;width:${pct}%` : `right:50%;width:${pct}%`);
+    track.append(el("div", undefined, "mid"), fill);
+    row.append(el("span", c), track, el("span", z.toFixed(1)));
+    if (punts.includes(c)) row.style.opacity = 0.4;
+    box.append(row);
+  });
+}
+
+function renderPicks(d) {
+  const list = $("picks");
+  list.textContent = "";
+  d.picks.slice(-12).reverse().forEach((p) => {
+    const cost = p.cost ? ` ($${p.cost})` : "";
+    list.append(el("li", `#${p.pick} ${p.player_name}${cost} — ${p.team_name}`, p.is_mine ? "mine" : ""));
+  });
+  if (!d.picks.length) list.append(el("li", d.mock ? "Practice picks aren't listed here." : "No picks yet."));
+}
+
+function markMock(name, isMine) {
+  if (lastData && lastData.is_auction) {
+    const rec = (lastData.recommendations || []).find((r) => r.name === name);
+    const card = lastData.nominee_card;
+    const guess = (card && card.name === name ? card.market : rec && rec.market) || 1;
+    const answer = prompt(`What did ${name} sell for? ($)`, guess);
+    if (answer === null) return;
+    mockCosts[name] = Math.max(1, parseInt(answer, 10) || 1);
+    store.set("mockCosts", mockCosts);
+  }
+  if (!mockTaken.includes(name)) mockTaken.push(name);
+  if (isMine && !mockMine.includes(name)) mockMine.push(name);
+  store.set("mockTaken", mockTaken);
+  store.set("mockMine", mockMine);
+  refresh();
+}
+
+function pollInterval() {
+  return lastData && lastData.is_auction ? AUCTION_POLL_MS : POLL_MS;
+}
+
+// --- hand-entered league ---------------------------------------------------
+
+let loggedTeam = "";
+
+async function manualApi(path, method, body) {
+  const res = await fetch(`${base}${path}`, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+function renderManual(d) {
+  const m = d.manual;
+  document.querySelectorAll(".manual-only").forEach((n) => { n.style.display = "block"; });
+  $("mock").closest(".setting").style.display = "none";
+
+  // Team picker: snake defaults to whoever is on the clock; auction needs an explicit team
+  const sel = $("pk_team");
+  const keep = sel.value || loggedTeam;
+  sel.textContent = "";
+  if (!d.is_auction) {
+    const clock = m.on_the_clock;
+    sel.append(new Option(clock ? `On the clock: ${clock.name}` : "Draft is full", ""));
+  }
+  m.rosters.forEach((t) => sel.append(new Option(t.name + (t.is_mine ? " (you)" : ""), t.index + 1)));
+  sel.value = [...sel.options].some((o) => o.value === keep) ? keep : (d.is_auction ? String(m.settings.my_slot) : "");
+  $("pk_cost").style.display = d.is_auction ? "" : "none";
+  $("pk_cost").required = d.is_auction;
+  $("clock").textContent = m.complete ? "Every roster spot is filled." : `${d.picks.length} of ${m.total_picks} picks logged`;
+  $("finished").checked = m.status === "finished";
+
+  const notes = $("notes");
+  notes.textContent = "";
+  [...m.notes].reverse().forEach((n) => {
+    const row = el("div", n.text, "note");
+    const meta = el("small");
+    const when = new Date(n.ts).toLocaleString([], { dateStyle: "short", timeStyle: "short" });
+    const phase = n.phase === "before" ? "Before the draft" : n.phase === "after" ? "After the draft" : `After pick ${n.pick_count}`;
+    meta.append(`${phase} · ${when}`);
+    const del = el("a", "delete");
+    del.onclick = async () => { try { await manualApi(`/notes/${n.id}`, "DELETE"); refresh(); } catch (e) { $("pk_msg").textContent = e.message; } };
+    meta.append(del);
+    row.prepend(meta);
+    notes.append(row);
+  });
+  if (!m.notes.length) notes.append(el("div", "Nothing yet. Notes are saved with the league.", "hint"));
+
+  const teams = $("teams");
+  teams.textContent = "";
+  m.rosters.forEach((t) => {
+    const row = el("div", undefined, "teamrow" + (t.is_mine ? " mine" : ""));
+    const left = d.is_auction ? d.teams[t.index].budget_left : null;
+    row.append(el("b", `${t.name}${left != null ? ` · $${left} left` : ""}`));
+    row.append(el("span", t.players.length ? t.players.map((p) => p.name + (p.cost != null ? ` ($${p.cost})` : "")).join(", ") : "No players yet"));
+    teams.append(row);
+  });
+
+  ensurePlayerList();
+  // Don't overwrite settings the manager is in the middle of editing
+  if (!document.querySelector("details[open]")) fillSettings(m.settings);
+}
+
+function fillSettings(s) {
+  $("s_name").value = s.name;
+  $("s_teams").value = s.num_teams;
+  $("s_roster").value = s.roster_size;
+  $("s_slot").value = s.my_slot;
+  $("s_budget").value = s.budget;
+  $("s_budget").disabled = !s.is_auction;
+  $("s_cats").value = s.categories.join(", ");
+  $("s_names").value = s.team_names.join("\n");
+}
+
+async function manualAction(fn) {
+  $("pk_msg").textContent = "";
+  try { await fn(); await refresh(); } catch (e) { $("pk_msg").textContent = e.message; }
+}
+
+function wireManual() {
+  $("pickform").onsubmit = (e) => {
+    e.preventDefault();
+    const team = $("pk_team").value;
+    manualAction(async () => {
+      await manualApi("/picks", "POST", { player_name: $("pk_player").value, team, cost: $("pk_cost").value });
+      loggedTeam = team;
+      $("pk_player").value = "";
+      $("pk_cost").value = "";
+      $("pk_player").focus();
+    });
+  };
+  $("pk_undo").onclick = () => manualAction(() => manualApi("/picks/last", "DELETE"));
+  $("finished").onchange = (e) => manualAction(() => manualApi("/status", "PUT", { status: e.target.checked ? "finished" : "drafting" }));
+  $("note_add").onclick = () => manualAction(async () => {
+    await manualApi("/notes", "POST", { text: $("note_text").value });
+    $("note_text").value = "";
+  });
+  $("s_save").onclick = async () => {
+    $("s_msg").textContent = "";
+    try {
+      await manualApi("/settings", "PUT", {
+        name: $("s_name").value, num_teams: $("s_teams").value, roster_size: $("s_roster").value,
+        my_slot: $("s_slot").value, budget: $("s_budget").value,
+        categories: $("s_cats").value.split(",").map((c) => c.trim()),
+        team_names: $("s_names").value.split("\n"),
+      });
+      document.querySelector("details").open = false;
+      await refresh();
+    } catch (e) { $("s_msg").textContent = e.message; }
+  };
+}
+
+function applyMode() {
+  $("mock").checked = mock;
+  $("reset").style.display = mock ? "" : "none";
+  clearInterval(timer);
+  activePoll = pollInterval();
+  if (!mock && !manual) timer = setInterval(refresh, activePoll);
+}
+
+$("mode").value = jevMode;
+$("pref").value = preference;
+$("mode").onchange = (e) => {
+  jevMode = e.target.value;
+  store.set("jevMode", jevMode);
+  refresh();
+};
+// Refresh when the preference is committed, not on every keystroke (each change is a Jev call)
+$("pref").onchange = (e) => {
+  preference = e.target.value.trim();
+  store.set("preference", preference);
+  refresh();
+};
+
+$("slot").value = draftPosition;
+$("slot").onchange = (e) => {
+  draftPosition = e.target.value;
+  store.set("draftPosition", draftPosition);
+  refresh();
+};
+
+$("mock").onchange = (e) => {
+  mock = e.target.checked;
+  store.set("mock", mock);
+  applyMode();
+  refresh();
+};
+$("reset").onclick = () => {
+  mockTaken = []; mockMine = []; mockCosts = {};
+  store.set("mockTaken", mockTaken); store.set("mockMine", mockMine); store.set("mockCosts", mockCosts);
+  refresh();
+};
+
+// Nominee box: Enter looks the player up, Esc or Clear empties it, / jumps to it from anywhere
+$("nominee").onkeydown = (e) => {
+  if (e.key === "Enter") { setNominee(e.target.value.trim()); e.target.select(); }
+  if (e.key === "Escape") { setNominee(""); e.target.blur(); }
+};
+$("nominee").onchange = (e) => { if (e.target.value.trim() !== nominee) setNominee(e.target.value.trim()); };
+$("nominee-clear").onclick = () => { setNominee(""); $("nominee").focus(); };
+document.addEventListener("keydown", (e) => {
+  const typing = ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement.tagName);
+  if (e.key === "/" && !typing && lastData && lastData.is_auction) {
+    e.preventDefault();
+    $("nominee").focus();
+    $("nominee").select();
+  }
+});
+
+if (manual) wireManual();
+applyMode();
+refresh();
+</script>
+{% endblock %}

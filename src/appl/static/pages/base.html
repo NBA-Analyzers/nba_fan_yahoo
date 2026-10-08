@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Fantasy Basketball Helper{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/theme.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-ball">🏀</span> <span class="brand-name">Fantasy Basketball Helper</span></a>
+    {% if session.get('google_user') %}
+    <nav>
+      <a href="/dashboard">My leagues</a>
+      <a href="/auth/logout">Log out</a>
+    </nav>
+    {% endif %}
+  </header>
+  <main class="page {% block page_class %}{% endblock %}">
+    {% if league_id and active_tab %}
+    <nav class="league-tabs" aria-label="League sections">
+      <a href="/ai-chat/{{ league_id | urlencode }}" {% if active_tab == 'ask' %}class="active" aria-current="page"{% endif %}>💬 Ask</a>
+      <a href="/draft/{{ league_id | urlencode }}" {% if active_tab == 'draft' %}class="active" aria-current="page"{% endif %}>📋 Draft</a>
+    </nav>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

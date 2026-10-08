@@ -1,0 +1,44 @@
+{% extends "pages/base.html" %}
+{% block title %}Choose a league · Fantasy Basketball Helper{% endblock %}
+{% block page_class %}narrow{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Which league?</h1>
+  <p>Yahoo is connected. Choose the league you want help with.</p>
+</div>
+<div class="card">
+  {% if leagues %}
+  <form id="leagueForm" action="/yahoo/select_league" method="post">
+    <div class="choices">
+      {% for league in leagues %}
+      <label class="choice">
+        <input type="radio" name="league_id" value="{{ league.id }}" required {% if loop.first %}checked{% endif %}>
+        {{ league.name or "Unnamed league" }}
+      </label>
+      {% endfor %}
+    </div>
+    <div class="btn-row">
+      <button class="btn big block" type="submit" id="submitBtn">Continue</button>
+    </div>
+    <p class="muted small" style="margin-top: 12px; text-align: center;">
+      We'll copy your league data. This can take up to a minute.
+    </p>
+  </form>
+  {% else %}
+  <p>We didn't find any basketball leagues on this Yahoo account.</p>
+  <div class="btn-row"><a class="btn secondary" href="/dashboard">Back</a></div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const form = document.getElementById("leagueForm");
+  if (form) {
+    form.addEventListener("submit", () => {
+      const btn = document.getElementById("submitBtn");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Getting your league ready…';
+    });
+  }
+</script>
+{% endblock %}
