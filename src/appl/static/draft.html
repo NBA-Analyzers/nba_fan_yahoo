@@ -27,6 +27,12 @@
   .punt { display: inline-flex; align-items: center; padding: 5px 12px; border: 1.5px solid var(--line); border-radius: 999px; cursor: pointer; user-select: none; font-weight: 700; font-size: .85rem; background: var(--surface); }
   .punt:hover { border-color: var(--accent); }
   .punt.on { background: var(--surface-soft); color: var(--muted); text-decoration: line-through; }
+  .punt.auto { border-color: var(--accent); color: var(--accent-strong); }
+  .idea { background: var(--accent-soft); border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 10px; font-size: .92rem; }
+  .idea b { color: var(--accent-strong); }
+  .idea .btn { margin-top: 8px; }
+  .advice li { padding: 8px 0; }
+  .advice li b { color: var(--accent-strong); }
   .hint { color: var(--muted); font-size: .9rem; margin-top: 8px; }
   .hint:empty { display: none; }
   .hint a { color: var(--accent-strong); cursor: pointer; font-weight: 700; }
@@ -140,6 +146,11 @@
       <div class="hint" id="suggest"></div>
     </div>
     <div class="setting">
+      <span class="label">Choose what to skip for me</span>
+      <div class="help">As your team grows, the agent picks one weak category to skip and re-ranks the players.</div>
+      <label class="toggle"><input type="checkbox" id="autopunt"> Choose for me</label>
+    </div>
+    <div class="setting">
       <label for="mode">Who makes the pick?</label>
       <div class="help">Jev is the AI that can suggest or choose for you.</div>
       <select id="mode" class="field">
@@ -198,6 +209,7 @@
     </div>
     <div class="side">
       <div class="card" id="moneycard" style="display:none"><h2>Your money</h2><div id="money"></div></div>
+      <div class="card" id="advicecard" style="display:none"><h2>What you can do</h2><ul class="advice" id="advice"></ul></div>
       <div class="card"><h2>Your team</h2><div id="roster"></div></div>
       <div class="card"><h2>Latest picks</h2><ul id="picks"></ul></div>
       <div class="card manual-only">
@@ -253,6 +265,7 @@ let mockTaken = store.get("mockTaken", []);
 let mockMine = store.get("mockMine", []);
 let mockCosts = store.get("mockCosts", {});
 let nominee = store.get("nominee", "");
+let autoPunts = store.get("autoPunts", false);
 let lastData = null;
 let timer = null;
 let activePoll = null;
@@ -282,10 +295,10 @@ async function fetchState() {
         body: JSON.stringify({
           mock: true, punts, mock_taken: mockTaken, mock_mine: mockMine,
           mode: jevMode, preference, draft_position: draftPosition,
-          nominee, mock_costs: mockCosts,
+          nominee, mock_costs: mockCosts, auto_punts: autoPunts,
         }),
       })
-    : await fetch(`${url}?punts=${punted}&mode=${jevMode}&preference=${encodeURIComponent(preference)}&draft_position=${draftPosition}&nominee=${encodeURIComponent(nominee)}`);
+    : await fetch(`${url}?punts=${punted}&mode=${jevMode}&preference=${encodeURIComponent(preference)}&draft_position=${draftPosition}&nominee=${encodeURIComponent(nominee)}&auto_punts=${autoPunts ? 1 : 0}`);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || res.statusText);
   return data;
@@ -310,6 +323,7 @@ function render(d) {
   renderPunts(d);
   renderNominee(d);
   renderMoney(d);
+  renderAdvice(d);
   renderDecision(d);
   renderTable(d);
   renderRoster(d);
@@ -347,26 +361,39 @@ function renderWarnings(d) {
   $("slotbox").style.display = !manual && !d.is_auction && (d.needs_draft_position || draftPosition) ? "" : "none";
 }
 
+// Categories skipped right now: the ones you tapped plus any the agent chose for you
+function isSkipped(cat) {
+  return ((lastData && lastData.effective_punts) || punts).includes(cat);
+}
+
 function renderPunts(d) {
   const box = $("punts");
   box.textContent = "";
   for (const cat of d.categories) {
-    const chip = el("label", cat, "punt" + (punts.includes(cat) ? " on" : ""));
+    const byYou = punts.includes(cat);
+    const byAgent = !byYou && (d.effective_punts || []).includes(cat);
+    const chip = el("label", cat, "punt" + (byYou ? " on" : byAgent ? " on auto" : ""));
+    if (byAgent) chip.title = "Chosen for you";
     chip.onclick = () => togglePunt(cat);
     box.append(chip);
   }
+
   const hint = $("suggest");
   hint.textContent = "";
-  const open = d.suggested_punts.filter((c) => !punts.includes(c));
-  if (open.length) {
-    hint.append("Tip: your team is weakest in ");
-    open.forEach((c, i) => {
-      const a = el("a", c);
-      a.onclick = () => togglePunt(c);
-      hint.append(i ? " and " : "", a);
-    });
-    hint.append(". Tap to skip it.");
+  const idea = d.build_suggestion;
+  if (!idea) return;
+  const note = el("div", undefined, "idea");
+  const avg = idea.avg_z.toFixed(1);
+  if (d.auto_punts) {
+    note.append("Skipping ", el("b", idea.category), ` for you, because your players average ${avg} there. Best available now: ${idea.if_skipped.join(", ")}.`);
+  } else {
+    note.append("Idea: skip ", el("b", idea.category), `. Your players average ${avg} there, your weakest category. `,
+      `If you skip it, the best available change from ${idea.now.join(", ")} to ${idea.if_skipped.join(", ")}.`);
+    const button = el("button", `Skip ${idea.category}`, "btn mini");
+    button.onclick = () => togglePunt(idea.category);
+    note.append(el("br"), button);
   }
+  hint.append(note);
 }
 
 function togglePunt(cat) {
@@ -491,6 +518,20 @@ function renderNominee(d) {
   box.append(card);
 }
 
+const ADVICE_LABELS = { cash: "Your cash", rivals: "Rivals", nominate: "Nominate", drain: "Make them spend" };
+
+function renderAdvice(d) {
+  const items = d.cash_advice || [];
+  $("advicecard").style.display = d.is_auction && items.length ? "" : "none";
+  const list = $("advice");
+  list.textContent = "";
+  items.forEach((item) => {
+    const li = el("li");
+    li.append(el("b", (ADVICE_LABELS[item.kind] || "Tip") + ": "), item.text);
+    list.append(li);
+  });
+}
+
 function renderMoney(d) {
   const card = $("moneycard");
   card.style.display = d.is_auction ? "" : "none";
@@ -562,8 +603,8 @@ function renderTable(d) {
     d.categories.forEach((c) => {
       const cell = el("td", undefined, "cat");
       const z = r.z[c];
-      const chip = el("span", z.toFixed(1), "z" + (punts.includes(c) ? " punted" : ""));
-      if (!punts.includes(c)) chip.style.background = zColor(z);
+      const chip = el("span", z.toFixed(1), "z" + (isSkipped(c) ? " punted" : ""));
+      if (!isSkipped(c)) chip.style.background = zColor(z);
       cell.append(chip);
       tr.append(cell);
     });
@@ -621,7 +662,7 @@ function renderRoster(d) {
       (z >= 0 ? `left:50%;width:${pct}%` : `right:50%;width:${pct}%`);
     track.append(el("div", undefined, "mid"), fill);
     row.append(el("span", c), track, el("span", z.toFixed(1)));
-    if (punts.includes(c)) row.style.opacity = 0.4;
+    if (isSkipped(c)) row.style.opacity = 0.4;
     box.append(row);
   });
 }
@@ -801,6 +842,13 @@ $("slot").value = draftPosition;
 $("slot").onchange = (e) => {
   draftPosition = e.target.value;
   store.set("draftPosition", draftPosition);
+  refresh();
+};
+
+$("autopunt").checked = autoPunts;
+$("autopunt").onchange = (e) => {
+  autoPunts = e.target.checked;
+  store.set("autoPunts", autoPunts);
   refresh();
 };
 

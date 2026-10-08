@@ -52,6 +52,11 @@
       </div>
       <div id="budget_box" style="display:none"><label for="budget">Auction budget ($)</label><input class="field" id="budget" type="number" min="1" value="200"></div>
     </div>
+    <details style="margin-top: 16px;">
+      <summary class="label" style="cursor: pointer;">Team names (optional)</summary>
+      <div class="help">One per line, in draft order. Leave empty to use Team 1, Team 2 and so on. You can change them later.</div>
+      <textarea class="field" id="team_names" rows="6" placeholder="Your team&#10;Dan's team&#10;..."></textarea>
+    </details>
     <div style="margin-top: 16px;">
       <span class="label">Roster spots by position</span>
       <div class="help">How many of each your team has. The agent uses this to tell you which positions you still need.</div>
@@ -119,6 +124,7 @@ $("form").onsubmit = async (e) => {
   showError("");
   const body = {
     name: $("name").value, num_teams: $("num_teams").value, slots: slots.get(),
+    team_names: $("team_names").value.split("\n").map((n) => n.trim()).filter(Boolean),
     my_slot: $("my_slot").value, is_auction: $("is_auction").value === "1", budget: $("budget").value,
     categories: [...document.querySelectorAll("#cats input:checked")].map((b) => b.value),
   };

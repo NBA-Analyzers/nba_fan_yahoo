@@ -126,6 +126,18 @@ Not checked against a real Yahoo league: Yahoo's average-cost field (the column 
 
 Inside a league, the Ask page and the Draft page share a tab bar (Ask | Draft) under the site header, so people can switch between asking questions and draft help without going back to My leagues. The Draft page now uses the same layout, theme and header as the rest of the site. The tab bar appears only on those two pages and only for Yahoo leagues; a manual league has no chat, so it shows the Draft page without tabs. Switching to Ask starts a new chat, as it already does from the dashboard.
 
+## Roster spots, punt ideas and cash advice
+
+**Roster spots by position.** A manual league takes a count for PG, SG, G, SF, PF, F, C, Util, Bench and Injured list, in the new-league form and in the league settings. The counts decide the roster size (the injured list is not drafted into), and the page lists the starting positions you still need and, in an auction, whether the nominated player fills one. Each player's position comes from ESPN's listing (Guard, Forward or Center for most, so the check is looser than Yahoo's) and it only warns. Yahoo leagues keep using Yahoo's eligibility. Leagues made before this keep a plain roster size and get no position check.
+
+**Team names are optional.** The new-league form has an optional list of team names; without it teams are Team 1, Team 2 and so on. Names can be changed later in the league settings.
+
+**Cash tracking (auctions).** Log each pick with the team and the price. The page keeps every team's money left, max bid and open spots, every player's price on each roster, and your own budget, and recalculates prices from the money left after each sale.
+
+**Punt idea.** Once two players are on your team, the page suggests the one category your players are weakest in (if they average below -0.4) and shows how the best available players change if you skip it. It suggests only one, and only while you are skipping nothing, because mock drafts showed one skipped category helps but two usually hurts. The switch "Choose for me" applies the idea automatically and re-ranks the list.
+
+**What you can do (auctions).** Plain advice from the cash: how your money per open spot compares with the league average, who has the most cash and who can hardly bid any more, a player to nominate for yourself (worth more to you than the room will pay, and few rivals can afford him), and a player to nominate to make rivals spend (the room pays a lot, he is worth little to you, and many rivals can afford him).
+
 ## Before draft night
 
 Four things need you, plus one decision. The Jev key and the player pool are done. Nothing is committed yet.
@@ -149,6 +161,6 @@ gcloud secrets add-iam-policy-binding jev-api-key --member=serviceAccount:fantas
 
 Then add `--update-secrets JEV_API_KEY=jev-api-key:latest` to your usual `gcloud run deploy` command (deploy from a clean copy of the committed branch, as in DEPLOY_CLOUD_RUN.md, so the committed `player_pool_2026-27.json` ships with it). Without the key the page still works and falls back to the plain ranking.
 
-**Manual leagues on Cloud Run.** They are stored in Firestore (collection `manual_leagues`, one document per league), so they survive restarts and redeploys. This switches on by itself when the app runs on Cloud Run (Cloud Run sets `K_SERVICE`); locally they stay as JSON files under `src/appl/data/draft/manual/`. Set `MANUAL_LEAGUE_STORE=file` or `=firestore` to force one. It uses the same `fantasy-app` service account and `roles/datastore.user` as the chat, so no new setup is needed, and changes run in Firestore transactions. Not yet verified on the live service; run `FIRESTORE_TEST_PROJECT=<project> pytest -m integration src/appl/tests/unit/test_manual_league_firestore.py` once to confirm.
+**Manual leagues on Cloud Run.** They are stored in Firestore (collection `manual_leagues`, one document per league), so they survive restarts and redeploys. This switches on by itself when the app runs on Cloud Run (Cloud Run sets `K_SERVICE`); locally they stay as JSON files under `src/appl/data/draft/manual/`. Set `MANUAL_LEAGUE_STORE=file` or `=firestore` to force one. It uses the same `fantasy-app` service account and `roles/datastore.user` as the chat, so no new setup is needed, and changes run in Firestore transactions. Verified on the live service on 2026-10-08: a league created there was still in Firestore after a redeploy. (Leagues created before that, on the old file storage, were lost when the server was replaced.)
 
 Known limits: the ranker covers the 9 standard categories only. Fuzzy name matching (similarity 0.88) is untested against Yahoo's real spellings, so the page warns when a drafted player has no stats match. The simulator's bots draft by z-score sum plus noise, which is only a rough stand-in for a real league.

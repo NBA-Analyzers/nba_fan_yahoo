@@ -11,7 +11,7 @@ from flask import (
     session,
 )
 
-from ..draft import jev_chooser, positions
+from ..draft import advice, jev_chooser, positions
 from ..draft.manual_league import (
     ManualDraftTracker,
     ManualLeagueError,
@@ -173,6 +173,7 @@ class DraftRouter:
             else [p for p in raw_punts.split(",") if p]
         )
         mock = bool(body.get("mock")) or request.args.get("mock") == "1"
+        auto_punts = body.get("auto_punts") in (True, "1", 1) or request.args.get("auto_punts") == "1"
         mode = body.get("mode", request.args.get("mode", "manual"))
         if mode not in jev_chooser.MODES:
             mode = "manual"
@@ -213,6 +214,14 @@ class DraftRouter:
                 state = tracker.state(draft_position)
                 taken, mine = state["taken_names"], state["my_roster"]
 
+            # Once a few players are on the team: which one category to skip, and what that
+            # does to the best available. With auto_punts it is applied to everything below.
+            suggestion = advice.build_suggestion(ranker, mine, punts, taken)
+            chosen_punts = punts
+            if auto_punts and suggestion:
+                chosen_punts = punts + [suggestion["category"]]
+            user_punts, punts = punts, chosen_punts
+
             recommendations = ranker.rank(
                 punts=punts, taken_names=taken, my_roster_names=mine
             )
@@ -234,6 +243,7 @@ class DraftRouter:
                     "inflation_pct": plan["inflation_pct"],
                     "max_bid": plan["max_bid"],
                 }
+                state["cash_advice"] = advice.cash_advice(plan, state)
 
             roster_profile = ranker.roster_profile(mine)
             decision = jev_chooser.decide(
@@ -252,7 +262,10 @@ class DraftRouter:
                     "decision": decision,
                     "jev_configured": jev_chooser.is_configured(),
                     "categories": ranker.categories,
-                    "punts": punts,
+                    "punts": user_punts,
+                    "effective_punts": punts,
+                    "auto_punts": auto_punts,
+                    "build_suggestion": suggestion,
                     "suggested_punts": ranker.suggest_punts(mine),
                     "roster_profile": roster_profile,
                     "roster_unmatched": ranker.unmatched(mine),
