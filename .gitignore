@@ -79,3 +79,6 @@ host.json
 # Yahoo OAuth token files (contain consumer secret and tokens)
 oauth22.json
 **/oauth*.json
+
+# Manual draft leagues are per-user data
+src/appl/data/draft/manual/

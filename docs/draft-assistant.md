@@ -122,14 +122,33 @@ Added on 2026-10-08 for auction leagues, built around Yahoo's rules: a 30-second
 
 Not checked against a real Yahoo league: Yahoo's average-cost field (the column is simply hidden if it is missing), the position lookup by player name, and whether Yahoo tolerates a 4-second refresh.
 
+## The Draft tab
+
+Inside a league, the Ask page and the Draft page share a tab bar (Ask | Draft) under the site header, so people can switch between asking questions and draft help without going back to My leagues. The Draft page now uses the same layout, theme and header as the rest of the site. The tab bar appears only on those two pages and only for Yahoo leagues; a manual league has no chat, so it shows the Draft page without tabs. Switching to Ask starts a new chat, as it already does from the dashboard.
+
 ## Before draft night
 
 Four things need you, plus one decision. The Jev key and the player pool are done. Nothing is committed yet.
 
 - [ ] **See the page with no login:** from `src/`, run `python -m appl.draft.demo_server` and open http://localhost:5055/demo (add `?auction=1` for an auction league). It uses the real player pool and the real Jev with a fake Yahoo draft.
 - [ ] **Try the page on your real league** before the draft: Dashboard, then Draft Assistant. Check the Yahoo rank and ADP columns, the snake countdown (type your draft slot if the box appears) and the "no stats match" warning. Practice in mock mode, and in a Yahoo mock draft if you can.
-- [ ] **Add `JEV_API_KEY` to the Azure App Service settings** (the app runs from environment variables; the GitHub workflow deploys on every push to `main`). `typesafe-sdk` is already in `requirements.txt`.
+- [ ] **Add `JEV_API_KEY` to Cloud Run** through Secret Manager, like your other secrets (commands below). `typesafe-sdk` is already in `requirements.txt`.
 - [ ] **Review and commit.** New files: `src/appl/draft/`, `router/draft_routes.py`, `static/draft.html`, the two test files, `docs/draft-assistant.md` and `src/appl/data/draft/player_pool_2026-27.json`. Edited: `router/__init__.py` and `requirements.txt`. To refresh the pool, run `python -m appl.draft.player_pool` from `src/` (about 10 seconds).
 - [ ] **Decide whether to keep Jev.** It works and is cheap ($0.042 per million input tokens), but the simulation shows no reliable gain over the ranker. Manual is the default; Assist is an optional second opinion.
+
+### Adding the Jev key on Cloud Run
+
+The service is `fantasy-ai` in `europe-west1` (project `nbafantasy-511015`), and it runs as `fantasy-app`. From the repo root, in Git Bash. The key must have no trailing newline, or TypeSafe rejects it:
+
+```
+grep '^JEV_API_KEY=' src/.env | cut -d= -f2- | tr -d '
+
+"' | gcloud secrets create jev-api-key --data-file=-
+gcloud secrets add-iam-policy-binding jev-api-key --member=serviceAccount:fantasy-app@nbafantasy-511015.iam.gserviceaccount.com --role=roles/secretmanager.secretAccessor
+```
+
+Then add `--update-secrets JEV_API_KEY=jev-api-key:latest` to your usual `gcloud run deploy` command (deploy from a clean copy of the committed branch, as in DEPLOY_CLOUD_RUN.md, so the committed `player_pool_2026-27.json` ships with it). Without the key the page still works and falls back to the plain ranking.
+
+**Manual leagues on Cloud Run.** They are stored in Firestore (collection `manual_leagues`, one document per league), so they survive restarts and redeploys. This switches on by itself when the app runs on Cloud Run (Cloud Run sets `K_SERVICE`); locally they stay as JSON files under `src/appl/data/draft/manual/`. Set `MANUAL_LEAGUE_STORE=file` or `=firestore` to force one. It uses the same `fantasy-app` service account and `roles/datastore.user` as the chat, so no new setup is needed, and changes run in Firestore transactions. Not yet verified on the live service; run `FIRESTORE_TEST_PROJECT=<project> pytest -m integration src/appl/tests/unit/test_manual_league_firestore.py` once to confirm.
 
 Known limits: the ranker covers the 9 standard categories only. Fuzzy name matching (similarity 0.88) is untested against Yahoo's real spellings, so the page warns when a drafted player has no stats match. The simulator's bots draft by z-score sum plus noise, which is only a rough stand-in for a real league.

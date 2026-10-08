@@ -53,6 +53,7 @@ Notes:
   (see AI_DESIGN.md §10.1). Move sessions to Firestore before scaling out.
 - Cloud Run URLs are already HTTPS, so login redirects work without a tunnel. Register
   `https://<service-url>/auth/google/callback` and `/auth/yahoo/callback` in the Google and Yahoo consoles.
+- Manual draft leagues are stored in Firestore (collection `manual_leagues`), switched on automatically when `K_SERVICE` is set. The container disk is wiped on every restart, so nothing the draft pages save may live there.
 - The first deploy prints the service URL; set `YAHOO_REDIRECT_URL` to match and redeploy.
 
 ## 4. Check

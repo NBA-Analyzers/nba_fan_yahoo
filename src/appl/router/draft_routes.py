@@ -16,6 +16,7 @@ from ..draft.manual_league import (
     ManualDraftTracker,
     ManualLeagueError,
     ManualLeagueStore,
+    default_store,
     user_key,
 )
 from ..draft.player_pool import load_player_pool
@@ -123,7 +124,7 @@ def _nominee_card(nominee, tracker, ranker, info, state, plan, punts, taken, min
 
 class DraftRouter:
     def __init__(self, store: ManualLeagueStore | None = None):
-        self._store = store or ManualLeagueStore()
+        self._store = store or default_store()
         self._blueprint = self._create_blueprint()
         self._manual_blueprint = self._create_manual_blueprint()
 

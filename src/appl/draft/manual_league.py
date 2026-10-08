@@ -23,7 +23,7 @@ DATA_DIR = Path(__file__).resolve().parents[1] / "data" / "draft" / "manual"
 STATUSES = ("drafting", "finished")
 MAX_NOTE_LENGTH = 1000
 _ID = re.compile(r"[0-9a-f]{12}")
-_lock = threading.Lock()
+_lock = threading.RLock()
 
 
 class ManualLeagueError(ValueError):
@@ -78,45 +78,149 @@ def clean_settings(raw: dict, current: dict | None = None) -> dict:
     }
 
 
-class ManualLeagueStore:
+def user_hash(user: str) -> str:
+    """Folder or document name for a user, so raw ids (emails) stay out of paths."""
+    return sha256(user.encode()).hexdigest()[:16]
+
+
+class FileBackend:
+    """One JSON file per league: <directory>/<user>/<id>.json.
+
+    Fine for local development. A Cloud Run container's disk is wiped on every
+    restart, so deployed apps use FirestoreBackend instead.
+    """
+
     def __init__(self, directory: Path = DATA_DIR):
         self.directory = Path(directory)
 
-    # --- files --------------------------------------------------------------
-
     def _user_dir(self, user: str) -> Path:
-        return self.directory / sha256(user.encode()).hexdigest()[:16]
+        return self.directory / user_hash(user)
 
     def _path(self, user: str, league_id: str) -> Path:
-        if not _ID.fullmatch(league_id or ""):
-            raise KeyError(league_id)
         return self._user_dir(user) / f"{league_id}.json"
 
-    def _write(self, user: str, league: dict) -> None:
-        path = self._path(user, league["id"])
-        path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_suffix(".tmp")
-        tmp.write_text(json.dumps(league, indent=1), encoding="utf-8")
-        os.replace(tmp, path)
+    def read(self, user: str, league_id: str) -> dict:
+        try:
+            return json.loads(self._path(user, league_id).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            raise KeyError(league_id) from None
 
-    # --- leagues ------------------------------------------------------------
+    def write(self, user: str, league: dict) -> None:
+        with _lock:
+            path = self._path(user, league["id"])
+            path.parent.mkdir(parents=True, exist_ok=True)
+            tmp = path.with_suffix(".tmp")
+            tmp.write_text(json.dumps(league, indent=1), encoding="utf-8")
+            os.replace(tmp, path)
 
     def list(self, user: str) -> list[dict]:
         leagues = []
         for path in self._user_dir(user).glob("*.json"):
             try:
-                league = json.loads(path.read_text(encoding="utf-8"))
+                leagues.append(json.loads(path.read_text(encoding="utf-8")))
             except (OSError, ValueError):
                 continue
-            leagues.append(summary(league))
+        return leagues
+
+    def delete(self, user: str, league_id: str) -> None:
+        with _lock:
+            self._path(user, league_id).unlink(missing_ok=True)
+
+    def modify(self, user: str, league_id: str, change) -> dict:
+        """Read, apply `change(league)`, write. If `change` raises, nothing is saved."""
+        with _lock:
+            league = self.read(user, league_id)
+            change(league)
+            self.write(user, league)
+        return league
+
+
+class FirestoreBackend:
+    """Layout: <root>/<user hash>/leagues/<league id> -> the league as one document.
+
+    Survives Cloud Run restarts and redeploys. Changes run in a Firestore
+    transaction, so two requests can't overwrite each other's picks, even with
+    more than one instance. The client is created on first use, so building the
+    backend needs no credentials.
+    """
+
+    def __init__(self, client=None, root: str = "manual_leagues", transactional=None):
+        self._client_obj = client
+        self.root = root
+        self._transactional = transactional
+
+    def _client(self):
+        if self._client_obj is None:
+            from google.cloud import firestore
+
+            self._client_obj = firestore.Client(project=os.environ.get("GOOGLE_CLOUD_PROJECT"))
+        return self._client_obj
+
+    def _leagues(self, user: str):
+        return self._client().collection(self.root).document(user_hash(user)).collection("leagues")
+
+    def read(self, user: str, league_id: str) -> dict:
+        snap = self._leagues(user).document(league_id).get()
+        if not snap.exists:
+            raise KeyError(league_id)
+        return snap.to_dict()
+
+    def write(self, user: str, league: dict) -> None:
+        self._leagues(user).document(league["id"]).set(league)
+
+    def list(self, user: str) -> list[dict]:
+        return [snap.to_dict() for snap in self._leagues(user).stream()]
+
+    def delete(self, user: str, league_id: str) -> None:
+        self._leagues(user).document(league_id).delete()
+
+    def modify(self, user: str, league_id: str, change) -> dict:
+        """Read, apply `change(league)`, write, all in one transaction. If `change`
+        raises, nothing is saved. Firestore may re-run it on contention, so `change`
+        must only depend on the league it is given."""
+        transactional = self._transactional
+        if transactional is None:
+            from google.cloud import firestore
+
+            transactional = firestore.transactional
+        ref = self._leagues(user).document(league_id)
+
+        def run(transaction):
+            snap = ref.get(transaction=transaction)
+            if not snap.exists:
+                raise KeyError(league_id)
+            league = snap.to_dict()
+            change(league)
+            transaction.set(ref, league)
+            return league
+
+        return transactional(run)(self._client().transaction())
+
+
+class ManualLeagueStore:
+    def __init__(self, directory: Path = DATA_DIR, backend=None):
+        self.backend = backend or FileBackend(directory)
+
+    @staticmethod
+    def _check(league_id: str) -> None:
+        if not _ID.fullmatch(league_id or ""):
+            raise KeyError(league_id)
+
+    # --- leagues ------------------------------------------------------------
+
+    def list(self, user: str) -> list[dict]:
+        leagues = []
+        for league in self.backend.list(user):
+            try:
+                leagues.append(summary(league))
+            except (KeyError, TypeError):
+                continue  # a malformed record shouldn't hide the others
         return sorted(leagues, key=lambda l: l["created"], reverse=True)
 
     def get(self, user: str, league_id: str) -> dict:
         """Raises KeyError for an unknown league."""
-        try:
-            return json.loads(self._path(user, league_id).read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            raise KeyError(league_id) from None
+        self._check(league_id)
+        return self.backend.read(user, league_id)
 
     def create(self, user: str, raw: dict) -> dict:
         league = {
@@ -127,20 +231,16 @@ class ManualLeagueStore:
             "notes": [],
             **clean_settings(raw),
         }
-        with _lock:
-            self._write(user, league)
+        self.backend.write(user, league)
         return league
 
     def delete(self, user: str, league_id: str) -> None:
-        with _lock:
-            self._path(user, league_id).unlink(missing_ok=True)
+        self._check(league_id)
+        self.backend.delete(user, league_id)
 
     def _modify(self, user: str, league_id: str, change) -> dict:
-        with _lock:
-            league = self.get(user, league_id)
-            change(league)
-            self._write(user, league)
-        return league
+        self._check(league_id)
+        return self.backend.modify(user, league_id, change)
 
     def update_settings(self, user: str, league_id: str, raw: dict) -> dict:
         def change(league):
@@ -338,3 +438,12 @@ def user_key(google_user: dict | None) -> str:
     """Stable id for the logged-in Google user (same field the chat access check uses)."""
     google_user = google_user or {}
     return str(google_user.get("sub") or google_user.get("email") or google_user.get("name") or "anonymous")
+
+
+def default_store() -> ManualLeagueStore:
+    """Firestore on Cloud Run (which sets K_SERVICE), files everywhere else.
+    Override with MANUAL_LEAGUE_STORE=firestore or =file."""
+    kind = os.environ.get("MANUAL_LEAGUE_STORE") or ("firestore" if os.environ.get("K_SERVICE") else "file")
+    if kind == "firestore":
+        return ManualLeagueStore(backend=FirestoreBackend())
+    return ManualLeagueStore()
