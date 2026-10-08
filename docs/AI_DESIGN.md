@@ -90,6 +90,19 @@ Body: `{"session_id": "...", "user_message": "...", "league_id": "42" | null}`
 6. Only **after success** are the question and answer saved to history (so a failed call doesn't pollute the session).
 7. The router returns the answer as plain text (the same as before: `/chat` still returns a bare string).
 
+### 5.3 Who may call `/chat` (access control)
+
+`/chat` requires a logged-in user (`ai/access.py`, `ai/chat_router.py`):
+
+| Situation | Result |
+|---|---|
+| No Google login in the session | 401 `Please log in first` (the AI is never called) |
+| `league_id` given but not linked to the session's Yahoo account in the `yahoo_league` table | 403 (a league is linked when it is synced, so right after first connecting it can take a few seconds) |
+| The ownership lookup itself fails | 503, fails closed (the AI is never called) |
+| No `league_id` (blank counts as none) | allowed; only the shared `general` data is searched |
+
+The client's `session_id` is prefixed with the Google user id (`<googleId>:<sessionId>`) before it reaches `ChatService`, so users cannot read or continue each other's chat history even by guessing an id. `Access` is an interface (`SessionAccess` reads the Flask session and `YahooLeagueRepository`), so tests use a fake.
+
 ## 6. Configuration
 
 | Env var | Default | Meaning |

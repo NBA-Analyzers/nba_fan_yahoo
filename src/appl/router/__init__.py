@@ -2,7 +2,9 @@ from ..config.dependencies import (
     chat_service,
     document_indexer,
 )
+from ..ai.access import SessionAccess
 from ..ai.chat_router import ChatRouter
+from ..repository.supaBase.repositories.yahoo_league_repository import YahooLeagueRepository
 from .auth_routes import AuthRouter
 from .main_routes import MainRouter
 from .yahoo_routes import YahooRouter
@@ -15,7 +17,7 @@ def register_routes(app):
     main_router = MainRouter(document_indexer())
     auth_router = AuthRouter(document_indexer())
     yahoo_router = YahooRouter(document_indexer())
-    chat_router = ChatRouter(chat_service())
+    chat_router = ChatRouter(chat_service(), SessionAccess(YahooLeagueRepository))
     document_router = DocumentRouter(document_indexer())
 
     # Register blueprints
