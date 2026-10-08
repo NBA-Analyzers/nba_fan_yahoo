@@ -45,13 +45,17 @@
     <div class="grid">
       <div><label for="name">League name</label><input class="field" id="name" maxlength="60" placeholder="Friends league"></div>
       <div><label for="num_teams">Teams</label><input class="field" id="num_teams" type="number" min="2" max="30" value="12"></div>
-      <div><label for="roster_size">Roster spots per team</label><div class="help">Starters + bench</div><input class="field" id="roster_size" type="number" min="1" max="30" value="13"></div>
       <div><label for="my_slot">Your draft slot</label><div class="help">1 = first pick</div><input class="field" id="my_slot" type="number" min="1" max="30" value="1"></div>
       <div>
         <label for="is_auction">Draft type</label>
         <select class="field" id="is_auction"><option value="0">Snake</option><option value="1">Auction</option></select>
       </div>
       <div id="budget_box" style="display:none"><label for="budget">Auction budget ($)</label><input class="field" id="budget" type="number" min="1" value="200"></div>
+    </div>
+    <div style="margin-top: 16px;">
+      <span class="label">Roster spots by position</span>
+      <div class="help">How many of each your team has. The agent uses this to tell you which positions you still need.</div>
+      <div id="slots_box"></div>
     </div>
     <div style="margin-top: 16px;">
       <span class="label">Scoring categories</span>
@@ -62,9 +66,11 @@
   </form>
 </main>
 
+<script src="/static/slots.js"></script>
 <script>
 const CATS = ["FG%", "FT%", "3PTM", "PTS", "REB", "AST", "STL", "BLK", "TO"];
 const $ = (id) => document.getElementById(id);
+const slots = slotsEditor(document.getElementById("slots_box"), DEFAULT_SLOTS);
 const el = (tag, text, cls) => { const n = document.createElement(tag); if (text !== undefined) n.textContent = text; if (cls) n.className = cls; return n; };
 
 function showError(msg) { $("error").textContent = msg; $("error").style.display = msg ? "block" : "none"; }
@@ -112,7 +118,7 @@ $("form").onsubmit = async (e) => {
   e.preventDefault();
   showError("");
   const body = {
-    name: $("name").value, num_teams: $("num_teams").value, roster_size: $("roster_size").value,
+    name: $("name").value, num_teams: $("num_teams").value, slots: slots.get(),
     my_slot: $("my_slot").value, is_auction: $("is_auction").value === "1", budget: $("budget").value,
     categories: [...document.querySelectorAll("#cats input:checked")].map((b) => b.value),
   };

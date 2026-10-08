@@ -212,7 +212,7 @@
           <summary>League settings</summary>
           <label for="s_name">Name</label><input class="field" id="s_name" maxlength="60">
           <label for="s_teams">Teams</label><input class="field" id="s_teams" type="number" min="2" max="30">
-          <label for="s_roster">Roster spots</label><input class="field" id="s_roster" type="number" min="1" max="30">
+          <label>Roster spots by position</label><div id="s_slots"></div>
           <label for="s_slot">Your draft slot</label><input class="field" id="s_slot" type="number" min="1" max="30">
           <label for="s_budget">Auction budget ($)</label><input class="field" id="s_budget" type="number" min="1">
           <label for="s_cats">Categories (comma separated)</label><input class="field" id="s_cats">
@@ -228,6 +228,7 @@
 <script>
 const pathParts = location.pathname.split("/").filter(Boolean);
 const leagueId = pathParts[1];
+<script src="/static/slots.js"></script>
 // /manual/<id> is a hand-entered league; /draft/<id> follows Yahoo
 const manual = pathParts[0] === "manual";
 const base = `/${manual ? "manual" : "draft"}/${leagueId}`;
@@ -725,7 +726,10 @@ function renderManual(d) {
 function fillSettings(s) {
   $("s_name").value = s.name;
   $("s_teams").value = s.num_teams;
-  $("s_roster").value = s.roster_size;
+let slotsUi = null;
+
+  const slots = s.slots || slotsFromRosterSize(s.roster_size);
+  if (slotsUi) slotsUi.set(slots); else slotsUi = slotsEditor($("s_slots"), slots);
   $("s_slot").value = s.my_slot;
   $("s_budget").value = s.budget;
   $("s_budget").disabled = !s.is_auction;
@@ -760,7 +764,7 @@ function wireManual() {
     $("s_msg").textContent = "";
     try {
       await manualApi("/settings", "PUT", {
-        name: $("s_name").value, num_teams: $("s_teams").value, roster_size: $("s_roster").value,
+        name: $("s_name").value, num_teams: $("s_teams").value, slots: slotsUi.get(),
         my_slot: $("s_slot").value, budget: $("s_budget").value,
         categories: $("s_cats").value.split(",").map((c) => c.trim()),
         team_names: $("s_names").value.split("\n"),

@@ -49,19 +49,33 @@ def _mock_auction_state(info: dict, taken: list, mine: list, costs) -> dict:
     }
 
 
-def _position_report(tracker, info: dict, mine: list) -> dict | None:
+def _eligibility_lookup(tracker, ranker):
+    """Spots a player can fill: Yahoo's answer for Yahoo leagues, otherwise (and when
+    Yahoo can't find the player) the position listed in the stats pool."""
+
+    def lookup(name):
+        found = tracker.eligible_positions(name) if hasattr(tracker, "eligible_positions") else None
+        if found:
+            return found
+        player = ranker.find(name)
+        return positions.eligible_from_listed_position(player.get("pos")) if player else None
+
+    return lookup
+
+
+def _position_report(lookup, info: dict, mine: list) -> dict | None:
     """Which starting slots the roster can't fill yet (warn-only). None if the
-    league's slots or the players' eligibility aren't available."""
+    league's slots aren't known."""
     slots = info.get("slots")
-    if not slots or not hasattr(tracker, "eligible_positions"):
+    if not slots:
         return None
-    eligible = [tracker.eligible_positions(name) for name in mine]
+    eligible = [lookup(name) for name in mine]
     report = positions.roster_report([e or {positions.FLEX_SLOT} for e in eligible], slots)
     report["incomplete"] = any(e is None for e in eligible)
     return report
 
 
-def _nominee_card(nominee, tracker, ranker, info, state, plan, punts, taken, mine) -> dict | None:
+def _nominee_card(nominee, lookup, ranker, info, state, plan, punts, taken, mine) -> dict | None:
     """Everything the manager needs while a player is on the block."""
     if not nominee or not state["is_auction"]:
         return None
@@ -112,9 +126,9 @@ def _nominee_card(nominee, tracker, ranker, info, state, plan, punts, taken, min
     )
 
     slots = info.get("slots")
-    if slots and hasattr(tracker, "eligible_positions"):
-        roster = [tracker.eligible_positions(n) or {positions.FLEX_SLOT} for n in mine]
-        nominee_slots = tracker.eligible_positions(name)
+    if slots:
+        roster = [lookup(n) or {positions.FLEX_SLOT} for n in mine]
+        nominee_slots = lookup(name)
         if nominee_slots:
             report = positions.roster_report(roster, slots, nominee_slots)
             card["fills_open_slot"] = report["fills_open_slot"]
@@ -178,6 +192,7 @@ class DraftRouter:
 
             ranker = self._get_ranker(league_id, tracker)
             info = tracker.league_info()
+            lookup = _eligibility_lookup(tracker, ranker)
 
             if mock:
                 taken = body.get("mock_taken") or []
@@ -244,9 +259,9 @@ class DraftRouter:
                     "taken_unmatched": ranker.unmatched(taken),
                     "has_yahoo_ranks": bool(ranker.yahoo_ranks),
                     "recommendations": recommendations,
-                    "positions": _position_report(tracker, info, mine),
+                    "positions": _position_report(lookup, info, mine),
                     "nominee_card": _nominee_card(
-                        nominee, tracker, ranker, info, state, plan, punts, taken, mine
+                        nominee, lookup, ranker, info, state, plan, punts, taken, mine
                     ),
                 }
             )

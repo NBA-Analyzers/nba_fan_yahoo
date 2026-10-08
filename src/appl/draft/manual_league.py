@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
 
+from .positions import clean_slots, roster_size as slots_roster_size, starting_slots
 from .ranker import CATEGORIES
 from .yahoo_draft import next_snake_pick
 
@@ -65,11 +66,27 @@ def clean_settings(raw: dict, current: dict | None = None) -> dict:
     names += [""] * (num_teams - len(names))
     names = [n or f"Team {i + 1}" for i, n in enumerate(names)]
 
+    # Roster spots by position. When they are given, they decide the roster size;
+    # leagues made before this existed keep a plain roster size and no position checks.
+    slots = cur.get("slots")
+    if raw.get("slots") is not None:
+        try:
+            slots = clean_slots(raw["slots"], cur.get("slots"))
+        except ValueError as e:
+            raise ManualLeagueError(str(e)) from None
+        if not 1 <= slots_roster_size(slots) <= 30:
+            raise ManualLeagueError("A team needs between 1 and 30 roster spots (the injured list doesn't count)")
+    roster_size = (
+        slots_roster_size(slots) if slots
+        else _int(raw.get("roster_size"), "Roster size", 1, 30, cur.get("roster_size", 13))
+    )
+
     is_auction = bool(raw.get("is_auction", cur.get("is_auction", False)))
     return {
         "name": (str(raw.get("name", cur.get("name", ""))).strip() or "My league")[:60],
         "num_teams": num_teams,
-        "roster_size": _int(raw.get("roster_size"), "Roster size", 1, 30, cur.get("roster_size", 13)),
+        "roster_size": roster_size,
+        "slots": slots,
         "categories": categories,
         "is_auction": is_auction,
         "budget": _int(raw.get("budget"), "Auction budget", 1, 10000, cur.get("budget", 200)),
@@ -352,7 +369,7 @@ class ManualDraftTracker:
             "is_auction": lg["is_auction"],
             "draft_status": lg["status"],
             "stat_categories": [{"display_name": c} for c in lg["categories"]],
-            "slots": {},
+            "slots": starting_slots(lg["slots"]) if lg.get("slots") else {},
         }
 
     def yahoo_ranks(self) -> dict:
@@ -390,7 +407,7 @@ class ManualDraftTracker:
             "manual": {
                 "settings": {k: lg[k] for k in (
                     "name", "num_teams", "roster_size", "categories", "is_auction",
-                    "budget", "my_slot", "team_names")},
+                    "budget", "my_slot", "team_names")} | {"slots": lg.get("slots")},
                 "status": lg["status"],
                 "notes": lg["notes"],
                 "total_picks": total_picks,

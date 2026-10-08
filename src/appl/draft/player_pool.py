@@ -71,6 +71,7 @@ def parse_espn_athletes(payload: dict) -> dict[int, dict]:
             players[int(athlete["id"])] = {
                 "name": athlete["displayName"],
                 "team": athlete.get("teamShortName"),
+                "pos": (athlete.get("position") or {}).get("abbreviation"),
                 "GP": float(stats["gamesPlayed"]),
                 "MIN": float(stats["avgMinutes"]),
                 "PTS": float(stats["avgPoints"]),
@@ -167,6 +168,8 @@ def blend_seasons(seasons: list[tuple[dict[int, dict], float]]) -> list[dict]:
             "nba_id": pid,
             "name": latest["name"],
             "team": latest["team"],
+            # Listed position from the newest season that has one
+            "pos": next((stats.get("pos") for stats, _ in entries if stats.get("pos")), None),
             # Most recent season's games played drives the durability factor
             "GP": latest["GP"],
         }
