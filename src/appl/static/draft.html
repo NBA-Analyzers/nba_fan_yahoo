@@ -225,10 +225,10 @@
   </div>
 {% endblock %}
 {% block scripts %}
+<script src="/static/slots.js"></script>
 <script>
 const pathParts = location.pathname.split("/").filter(Boolean);
 const leagueId = pathParts[1];
-<script src="/static/slots.js"></script>
 // /manual/<id> is a hand-entered league; /draft/<id> follows Yahoo
 const manual = pathParts[0] === "manual";
 const base = `/${manual ? "manual" : "draft"}/${leagueId}`;
