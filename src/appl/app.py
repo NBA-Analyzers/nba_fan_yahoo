@@ -54,4 +54,10 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8000)), debug=True)
+    # The auto-reloader restarts the server on every .py change (including tests); opt in with RELOAD=true
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 8000)),
+        debug=True,
+        use_reloader=os.environ.get("RELOAD", "").lower() == "true",
+    )
