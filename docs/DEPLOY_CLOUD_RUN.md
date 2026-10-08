@@ -1,13 +1,22 @@
-# Deploying to Google Cloud Run (draft — NOT tested)
+# Deploying to Google Cloud Run
 
-Prepared while the Google project did not exist yet, so nothing here has been run. Treat it as a starting
-point; expect to fix small things on the first deploy. Do this **after** `SETUP_CHECKLIST.md` Steps 1–4 work locally.
+**Status:** deployed and verified on 2026-10-08 (project `nbafantasy-511015`, service `fantasy-ai`, region `europe-west1`,
+URL `https://fantasy-ai-276008835589.europe-west1.run.app`). Verified: landing page, `/health`, anonymous `/chat` -> 401, no errors in logs,
+one instance, runs as the `fantasy-app` service account. **Not yet verified:** a logged-in chat on the live site (needs the Google/Yahoo
+client IDs below) and the service account actually reading Firestore (the `roles/datastore.user` grant exists).
 
-> ⚠️ `.github/workflows/main_fantasy.yml` deploys to the existing **Azure** web app on every push to `main`.
-> Merging this branch to `main` before the Azure app has the new settings (`GEMINI_API_KEY`, Firestore credentials,
-> `GOOGLE_CLOUD_PROJECT`) will break the running production app. Either configure those first, or switch hosting to
-> Cloud Run and disable that workflow in the same change.
+## What was actually run
+1. Enabled `run`, `cloudbuild`, `artifactregistry`, `secretmanager`, `iam` APIs.
+2. Created service account `fantasy-app` + `roles/datastore.user`.
+3. Secrets `gemini-api-key`, `supabase-key`, `flask-secret` (new random value for production) in Secret Manager, with `secretAccessor` for `fantasy-app`.
+4. Exported a **clean copy of the committed branch** (`git archive HEAD | tar -x -C <dir>`) so uncommitted local work is never deployed, then:
+   `gcloud run deploy fantasy-ai --source <dir> --region europe-west1 --service-account fantasy-app@... --allow-unauthenticated --max-instances 1 --memory 1Gi --timeout 600 --env-vars-file env.yaml --set-secrets ...`
+5. To add the login credentials later: put the client IDs in the env file / `gcloud run services update fantasy-ai --update-env-vars GOOGLE_CLIENT_ID=...,YAHOO_CLIENT_ID=...`, store the two client secrets in Secret Manager and attach with `--update-secrets GOOGLE_CLIENT_SECRET=google-client-secret:latest,YAHOO_CLIENT_SECRET=yahoo-client-secret:latest`.
+6. Register `https://fantasy-ai-276008835589.europe-west1.run.app/auth/google/callback` (Google) and `.../auth/yahoo/callback` (Yahoo).
 
+---
+
+## Original draft notes (kept for reference)
 ## 1. One-time setup
 ```
 gcloud config set project <PROJECT_ID>
