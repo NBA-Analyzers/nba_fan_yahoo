@@ -76,3 +76,6 @@ Desktop.ini
 # Other
 *.log
 host.json
+# Yahoo OAuth token files (contain consumer secret and tokens)
+oauth22.json
+**/oauth*.json
