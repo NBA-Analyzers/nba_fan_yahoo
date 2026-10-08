@@ -69,3 +69,38 @@ def test_oversized_json_record_is_split():
     assert len(chunks) > 1
     assert all(len(c.text) <= 200 for c in chunks)
     assert [c.index for c in chunks] == list(range(len(chunks)))
+
+
+def test_dict_of_records_gives_one_chunk_per_top_level_key():
+    data = {
+        "LeBron James": {"season": {"pts": 25.1}},
+        "Stephen Curry": {"season": {"pts": 27.3}},
+    }
+    chunks = chunk_json(data, source="stats.json")
+    assert len(chunks) == 2
+    assert chunks[0].text.startswith("LeBron James")
+    assert "LeBron James.season.pts: 25.1" in chunks[0].text
+    assert chunks[1].text.startswith("Stephen Curry")
+
+
+def test_dict_of_lists_gives_one_chunk_per_key():
+    data = {"2025-12-03": [{"home": "A", "away": "B"}], "2025-12-04": [{"home": "C", "away": "D"}]}
+    chunks = chunk_json(data, source="schedule.json")
+    assert len(chunks) == 2
+    assert "2025-12-03" in chunks[0].text and "2025-12-04" not in chunks[0].text
+
+
+def test_dict_with_scalar_values_stays_one_record():
+    chunks = chunk_json({"name": "Hoopers", "size": 12}, source="t.json")
+    assert len(chunks) == 1
+
+
+def test_oversized_record_is_split_only_at_line_boundaries():
+    player = {f"stat_{i}": i for i in range(60)}
+    chunks = chunk_json({"Big Player": player}, source="s.json", max_chars=300)
+    assert len(chunks) > 1
+    for c in chunks:
+        assert len(c.text) <= 300
+        assert all(line.startswith("Big Player.stat_") for line in c.text.splitlines())
+    joined = "\n".join(c.text for c in chunks)
+    assert all(f"Big Player.stat_{i}: {i}" in joined for i in range(60))
