@@ -103,6 +103,8 @@
   @media (max-width: 900px) { .pickform { grid-template-columns: 1fr 1fr; } .pickform .field:first-child { grid-column: 1 / -1; } }
   .logrow { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 12px; }
   .msg { color: var(--bad); font-size: .9rem; margin-top: 8px; min-height: 1em; }
+  .suggest-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; color: var(--text); }
+  #manualbox { margin-bottom: 18px; border-color: var(--accent); }
   .note { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .92rem; white-space: pre-wrap; }
   .note:last-child { border-bottom: 0; }
   .note small { display: flex; justify-content: space-between; color: var(--muted); white-space: normal; }
@@ -136,6 +138,23 @@
       <button class="btn secondary mini" id="nominee-clear">Clear</button>
     </div>
     <div id="nominee-card"></div>
+  </section>
+
+  <section class="card manual-only" id="manualbox" aria-label="Log a pick">
+    <h2>Log a pick</h2>
+    <form class="pickform" id="pickform">
+      <input class="field" id="pk_player" list="playernames" placeholder="Player name" autocomplete="off" required>
+      <select class="field" id="pk_team" aria-label="Team"></select>
+      <input class="field" id="pk_cost" type="number" min="0" placeholder="$ price" aria-label="Price">
+      <button class="btn" type="submit" id="pk_submit">Add pick</button>
+      <button class="btn secondary" type="button" id="pk_cancel" style="display:none">Cancel edit</button>
+      <button class="btn secondary" type="button" id="pk_undo">Undo last</button>
+    </form>
+    <div class="msg" id="pk_msg"></div>
+    <div class="logrow">
+      <label class="toggle"><input type="checkbox" id="finished"> The draft is finished</label>
+      <span class="hint" id="clock"></span>
+    </div>
   </section>
 
   <section class="card settings" aria-label="Settings">
@@ -177,21 +196,6 @@
     </div>
   </section>
 
-  <section class="card manual-only" id="manualbox" aria-label="Log a pick">
-    <h2>Log a pick</h2>
-    <form class="pickform" id="pickform">
-      <input class="field" id="pk_player" list="playernames" placeholder="Player name" autocomplete="off" required>
-      <select class="field" id="pk_team" aria-label="Team"></select>
-      <input class="field" id="pk_cost" type="number" min="0" placeholder="$ price" aria-label="Price">
-      <button class="btn" type="submit">Add pick</button>
-      <button class="btn secondary" type="button" id="pk_undo">Undo last</button>
-    </form>
-    <div class="msg" id="pk_msg"></div>
-    <div class="logrow">
-      <label class="toggle"><input type="checkbox" id="finished"> The draft is finished</label>
-      <span class="hint" id="clock"></span>
-    </div>
-  </section>
 
   <div class="layout">
     <div class="card table-card">
@@ -490,6 +494,15 @@ function renderNominee(d) {
   facts.append(fact("You can bid at most", `$${c.max_bid}`));
   card.append(facts);
   if (c.bid_up_to < c.my_value) card.append(el("div", "Your money limits this bid.", "line hint"));
+  if (c.walk_away_above != null) {
+    card.append(el("div", `Walk away above $${c.walk_away_above}.`, "line"));
+    if (c.spots_after_bid > 0) {
+      const text = `If you win at $${c.bid_up_to}: $${c.left_after_bid} left for ${c.spots_after_bid} spots ` +
+        `(about $${c.per_spot_after_bid} each; the room averages $${c.room_avg_per_spot}).`;
+      card.append(el("div", c.thin_after_bid ? `${text} That leaves you thin for the rest of the draft.` : text,
+        c.thin_after_bid ? "line notice bad" : "line hint"));
+    }
+  }
 
   if (c.strengths.length || c.weaknesses.length) {
     const line = el("div", undefined, "line");
@@ -670,9 +683,22 @@ function renderRoster(d) {
 function renderPicks(d) {
   const list = $("picks");
   list.textContent = "";
-  d.picks.slice(-12).reverse().forEach((p) => {
+  // A hand-entered league lists every pick, so any of them can be corrected
+  (manual ? d.picks : d.picks.slice(-12)).slice().reverse().forEach((p) => {
     const cost = p.cost ? ` ($${p.cost})` : "";
-    list.append(el("li", `#${p.pick} ${p.player_name}${cost} — ${p.team_name}`, p.is_mine ? "mine" : ""));
+    const li = el("li", `#${p.pick} ${p.player_name}${cost} — ${p.team_name}`, p.is_mine ? "mine" : "");
+    if (manual) {
+      const edit = el("a", "edit");
+      edit.onclick = () => startEdit(p, d);
+      const del = el("a", "delete");
+      del.onclick = () => {
+        if (!confirm(`Delete pick #${p.pick} (${p.player_name})? Later picks keep their teams and prices.`)) return;
+        if (editing === p.pick) stopEdit();
+        manualAction(() => manualApi(`/picks/${p.pick}`, "DELETE"));
+      };
+      li.append(" ", edit, " ", del);
+    }
+    list.append(li);
   });
   if (!d.picks.length) list.append(el("li", d.mock ? "Practice picks aren't listed here." : "No picks yet."));
 }
@@ -701,6 +727,27 @@ function pollInterval() {
 // --- hand-entered league ---------------------------------------------------
 
 let loggedTeam = "";
+let editing = null; // pick number being corrected, or null when logging a new one
+
+function startEdit(p, d) {
+  editing = p.pick;
+  $("pk_player").value = p.player_name;
+  $("pk_team").value = String(Number(p.team_key.slice(1)) + 1);
+  $("pk_cost").value = p.cost ?? "";
+  $("pk_msg").textContent = `Editing pick #${p.pick}.`;
+  $("pk_submit").textContent = `Save pick #${p.pick}`;
+  $("pk_cancel").style.display = "";
+  $("pk_player").focus();
+}
+
+function stopEdit() {
+  editing = null;
+  $("pk_player").value = "";
+  $("pk_cost").value = "";
+  $("pk_msg").textContent = "";
+  $("pk_submit").textContent = "Add pick";
+  $("pk_cancel").style.display = "none";
+}
 
 async function manualApi(path, method, body) {
   const res = await fetch(`${base}${path}`, {
@@ -709,7 +756,7 @@ async function manualApi(path, method, body) {
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || res.statusText);
+  if (!res.ok) throw Object.assign(new Error(data.error || res.statusText), { data });
   return data;
 }
 
@@ -764,11 +811,11 @@ function renderManual(d) {
   if (!document.querySelector("details[open]")) fillSettings(m.settings);
 }
 
+let slotsUi = null;
+
 function fillSettings(s) {
   $("s_name").value = s.name;
   $("s_teams").value = s.num_teams;
-let slotsUi = null;
-
   const slots = s.slots || slotsFromRosterSize(s.roster_size);
   if (slotsUi) slotsUi.set(slots); else slotsUi = slotsEditor($("s_slots"), slots);
   $("s_slot").value = s.my_slot;
@@ -783,18 +830,46 @@ async function manualAction(fn) {
   try { await fn(); await refresh(); } catch (e) { $("pk_msg").textContent = e.message; }
 }
 
+// After an unknown name: one-tap fixes, or log it as typed (rookies have no stats yet)
+function showSuggestions(names, logPick) {
+  const row = el("div", undefined, "suggest-row");
+  if (names.length) row.append(el("span", "Did you mean:"));
+  names.forEach((n) => {
+    const b = el("button", n, "btn mini");
+    b.type = "button";
+    b.onclick = () => { $("pk_player").value = n; logPick(false); };
+    row.append(b);
+  });
+  const anyway = el("button", `Log "${$("pk_player").value.trim()}" anyway`, "btn secondary mini");
+  anyway.type = "button";
+  anyway.title = "For players with no stats yet, like rookies";
+  anyway.onclick = () => logPick(true);
+  row.append(anyway);
+  $("pk_msg").append(row);
+}
+
 function wireManual() {
-  $("pickform").onsubmit = (e) => {
-    e.preventDefault();
+  const logPick = async (force) => {
     const team = $("pk_team").value;
-    manualAction(async () => {
-      await manualApi("/picks", "POST", { player_name: $("pk_player").value, team, cost: $("pk_cost").value });
-      loggedTeam = team;
-      $("pk_player").value = "";
-      $("pk_cost").value = "";
-      $("pk_player").focus();
-    });
+    const msg = $("pk_msg");
+    msg.textContent = "";
+    try {
+      const body = { player_name: $("pk_player").value, team, cost: $("pk_cost").value, force };
+      if (editing) await manualApi(`/picks/${editing}`, "PUT", body);
+      else await manualApi("/picks", "POST", body);
+    } catch (e) {
+      msg.textContent = e.message;
+      if (e.data && e.data.unknown_player) showSuggestions(e.data.suggestions || [], logPick);
+      return;
+    }
+    if (editing) stopEdit(); else loggedTeam = team;
+    $("pk_player").value = "";
+    $("pk_cost").value = "";
+    $("pk_player").focus();
+    await refresh();
   };
+  $("pk_cancel").onclick = stopEdit;
+  $("pickform").onsubmit = (e) => { e.preventDefault(); logPick(false); };
   $("pk_undo").onclick = () => manualAction(() => manualApi("/picks/last", "DELETE"));
   $("finished").onchange = (e) => manualAction(() => manualApi("/status", "PUT", { status: e.target.checked ? "finished" : "drafting" }));
   $("note_add").onclick = () => manualAction(async () => {

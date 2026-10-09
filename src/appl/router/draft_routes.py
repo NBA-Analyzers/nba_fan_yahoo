@@ -75,6 +75,30 @@ def _position_report(lookup, info: dict, mine: list) -> dict | None:
     return report
 
 
+THIN_PACE = 0.6  # warn when winning would leave under this share of the room's average $ per open spot
+
+
+def _bid_pace(state: dict, bid: int) -> dict:
+    """What winning at `bid` does to your money for the remaining spots."""
+    left, spots = state.get("my_budget_left"), state.get("my_open_spots")
+    room_left, room_spots = state.get("league_budget_left"), state.get("league_spots_left")
+    if None in (left, spots, room_left, room_spots) or spots <= 0 or not room_spots:
+        return {}
+    spots_after = spots - 1
+    left_after = left - bid
+    room_avg = room_left / room_spots
+    per_spot = left_after / spots_after if spots_after else None
+    pace = {
+        "walk_away_above": bid,
+        "left_after_bid": left_after,
+        "spots_after_bid": spots_after,
+        "per_spot_after_bid": round(per_spot, 1) if per_spot is not None else None,
+        "room_avg_per_spot": round(room_avg, 1),
+        "thin_after_bid": bool(spots_after and per_spot < THIN_PACE * room_avg),
+    }
+    return pace
+
+
 def _nominee_card(nominee, lookup, ranker, info, state, plan, punts, taken, mine) -> dict | None:
     """Everything the manager needs while a player is on the block."""
     if not nominee or not state["is_auction"]:
@@ -104,6 +128,8 @@ def _nominee_card(nominee, lookup, ranker, info, state, plan, punts, taken, mine
         verdict = "fair"
     else:
         verdict = "overpriced"  # the room will likely pay more than he's worth to you
+
+    card.update(_bid_pace(state, min(my_value, max_bid)))
 
     teams = [t for t in state.get("teams", []) if not t["is_mine"]]
     card.update(
@@ -397,26 +423,50 @@ class DraftRouter:
             raw = request.get_json(silent=True) or {}
             return guarded(lambda: store.set_status(user(), league_id, raw.get("status")))
 
+        def save_pick(league_id, save):
+            """Shared by add and edit: settle the player's name, then call `save(name, raw)`."""
+            raw = request.get_json(silent=True) or {}
+            name = str(raw.get("player_name") or "").strip()
+            try:
+                ranker = self._get_ranker(league_id, tracker_for(league_id))
+            except KeyError:
+                return jsonify({"error": "League not found"}), 404
+            # Store the pool's spelling so the same player is never logged twice
+            key = ranker.resolve_key(name) if name else None
+            if key:
+                name = ranker._by_key[key]["name"]
+            elif name and not raw.get("force"):
+                # A typo would silently use up a turn, so ask first; "force" logs
+                # players with no stats (e.g. rookies) as typed
+                return jsonify({
+                    "error": f'No player called "{name}" in the stats list.',
+                    "unknown_player": True,
+                    "suggestions": ranker.suggest_names(name),
+                }), 400
+
+            return guarded(lambda: save(name, raw))
+
         @bp.route("/<league_id>/picks", methods=["POST"])
         @require_google_auth
         def add_pick(league_id):
-            raw = request.get_json(silent=True) or {}
-
-            def action():
-                name = str(raw.get("player_name") or "").strip()
-                # Store the pool's spelling so the same player is never logged twice
-                ranker = self._get_ranker(league_id, tracker_for(league_id))
-                key = ranker.resolve_key(name) if name else None
-                if key:
-                    name = ranker._by_key[key]["name"]
-                store.add_pick(user(), league_id, name, raw.get("team"), raw.get("cost"))
-
-            return guarded(action)
+            return save_pick(league_id, lambda name, raw: store.add_pick(
+                user(), league_id, name, raw.get("team"), raw.get("cost")))
 
         @bp.route("/<league_id>/picks/last", methods=["DELETE"])
         @require_google_auth
         def undo_pick(league_id):
             return guarded(lambda: store.undo_pick(user(), league_id))
+
+        @bp.route("/<league_id>/picks/<int:number>", methods=["PUT"])
+        @require_google_auth
+        def edit_pick(league_id, number):
+            return save_pick(league_id, lambda name, raw: store.edit_pick(
+                user(), league_id, number, name, raw.get("team"), raw.get("cost")))
+
+        @bp.route("/<league_id>/picks/<int:number>", methods=["DELETE"])
+        @require_google_auth
+        def delete_pick(league_id, number):
+            return guarded(lambda: store.delete_pick(user(), league_id, number))
 
         @bp.route("/<league_id>/notes", methods=["POST"])
         @require_google_auth

@@ -278,24 +278,56 @@ class ManualLeagueStore:
 
     # --- picks --------------------------------------------------------------
 
-    def add_pick(self, user: str, league_id: str, player_name: str, team=None, cost=None) -> dict:
-        """Log the next pick. Snake picks go to whoever is on the clock unless `team`
-        (1-based) says otherwise; auction picks need a team and a price."""
+    @staticmethod
+    def _clean_pick(league: dict, player_name, team, cost, position: int, skip: int | None = None) -> dict:
+        """A validated pick for 0-based `position`. `skip` is the pick being edited,
+        which doesn't count as a duplicate of itself."""
         player_name = str(player_name or "").strip()[:80]
         if not player_name:
             raise ManualLeagueError("Enter a player's name")
+        n = league["num_teams"]
+        done = next(
+            (i for i, p in enumerate(league["picks"]) if i != skip and p["player_name"].lower() == player_name.lower()),
+            None,
+        )
+        if done is not None:
+            team_idx = league["picks"][done]["team"]
+            by = league["team_names"][team_idx] if team_idx < len(league["team_names"]) else f"Team {team_idx + 1}"
+            raise ManualLeagueError(f"{player_name} was already picked (pick #{done + 1}, {by})")
+        if league["is_auction"]:
+            idx = _int(team, "Team", 1, n) - 1
+            price = _int(cost, "Price", 0, league["budget"])
+        else:
+            idx = _int(team, "Team", 1, n, 0) - 1 if team not in (None, "") else snake_team(position, n)
+            price = None
+        return {"team": idx, "player_name": player_name, "cost": price}
 
+    def add_pick(self, user: str, league_id: str, player_name: str, team=None, cost=None) -> dict:
+        """Log the next pick. Snake picks go to whoever is on the clock unless `team`
+        (1-based) says otherwise; auction picks need a team and a price."""
         def change(league):
-            n = league["num_teams"]
-            if any(p["player_name"].lower() == player_name.lower() for p in league["picks"]):
-                raise ManualLeagueError(f"{player_name} was already picked")
-            if league["is_auction"]:
-                idx = _int(team, "Team", 1, n) - 1
-                price = _int(cost, "Price", 0, league["budget"])
-            else:
-                idx = _int(team, "Team", 1, n, 0) - 1 if team not in (None, "") else snake_team(len(league["picks"]), n)
-                price = None
-            league["picks"].append({"team": idx, "player_name": player_name, "cost": price})
+            league["picks"].append(self._clean_pick(league, player_name, team, cost, len(league["picks"])))
+
+        return self._modify(user, league_id, change)
+
+    @staticmethod
+    def _pick_index(league: dict, number: int) -> int:
+        if not 1 <= number <= len(league["picks"]):
+            raise ManualLeagueError(f"There is no pick #{number}")
+        return number - 1
+
+    def edit_pick(self, user: str, league_id: str, number: int, player_name, team=None, cost=None) -> dict:
+        """Correct any logged pick (1-based `number`): the player, the team or the price."""
+        def change(league):
+            i = self._pick_index(league, number)
+            league["picks"][i] = self._clean_pick(league, player_name, team, cost, i, skip=i)
+
+        return self._modify(user, league_id, change)
+
+    def delete_pick(self, user: str, league_id: str, number: int) -> dict:
+        """Remove any logged pick. Later picks keep their teams and prices but move up a number."""
+        def change(league):
+            league["picks"].pop(self._pick_index(league, number))
 
         return self._modify(user, league_id, change)
 

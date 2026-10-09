@@ -132,6 +132,17 @@ class DraftRanker:
         key = self.resolve_key(name)
         return self._by_key[key] if key else None
 
+    def suggest_names(self, name: str, limit: int = 4) -> list[str]:
+        """Pool names a typed name probably meant: every word typed appears in the
+        name (so 'jokic' finds Nikola Jokic), then looser spelling matches."""
+        query = normalize_name(name)
+        if not query:
+            return []
+        words = query.split()
+        keys = [k for k in self._by_key if all(any(t.startswith(w) for t in k.split()) for w in words)]
+        keys += [k for k in get_close_matches(query, self._by_key, n=limit, cutoff=0.6) if k not in keys]
+        return [self._by_key[k]["name"] for k in keys[:limit]]
+
     def unmatched(self, names: list[str]) -> list[str]:
         """Names with no stats in the pool (they can't be excluded or scored)."""
         return [n for n in names if self.resolve_key(n) is None]

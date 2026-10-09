@@ -78,6 +78,29 @@ def test_auction_pick_needs_team_and_price_within_budget(store):
     assert (pick["team"], pick["cost"]) == (1, 40)
 
 
+def test_any_pick_can_be_corrected_or_deleted(store):
+    league = _league(store, is_auction=True, budget=100)
+    for name, team, cost in (("A One", 1, 10), ("B Two", 2, 20), ("C Three", 3, 30)):
+        store.add_pick(USER, league["id"], name, team=team, cost=cost)
+
+    store.edit_pick(USER, league["id"], 2, "B Two", team=4, cost=25)
+    pick = store.get(USER, league["id"])["picks"][1]
+    assert (pick["team"], pick["cost"]) == (3, 25)
+
+    # keeping the same player is fine; taking another pick's player is not
+    store.edit_pick(USER, league["id"], 1, "A One", team=1, cost=11)
+    with pytest.raises(ManualLeagueError):
+        store.edit_pick(USER, league["id"], 1, "c three", team=1, cost=11)
+    with pytest.raises(ManualLeagueError):
+        store.edit_pick(USER, league["id"], 9, "A One", team=1, cost=11)
+
+    store.delete_pick(USER, league["id"], 1)
+    picks = store.get(USER, league["id"])["picks"]
+    assert [p["player_name"] for p in picks] == ["B Two", "C Three"]
+    with pytest.raises(ManualLeagueError):
+        store.delete_pick(USER, league["id"], 3)
+
+
 def test_notes_remember_the_phase(store):
     league = _league(store)
     store.add_note(USER, league["id"], "Team 3 hates bigs")
@@ -210,3 +233,24 @@ def test_unauthenticated_requests_are_redirected(client):
     with client.session_transaction() as session:
         session.clear()
     assert client.get("/manual/api/leagues").status_code == 302
+
+
+def test_unknown_name_is_not_logged_without_confirmation(client):
+    league_id = _create(client)
+    response = client.post(f"/manual/{league_id}/picks", json={"player_name": "aa"})
+    body = response.get_json()
+    assert response.status_code == 400 and body["unknown_player"]
+    assert "Big Aa" in body["suggestions"]
+    assert client.get(f"/manual/{league_id}/state").get_json()["picks"] == []
+
+    # A rookie with no stats can still be logged on purpose
+    assert client.post(f"/manual/{league_id}/picks", json={"player_name": "New Rookie", "force": True}).status_code == 200
+    assert client.get(f"/manual/{league_id}/state").get_json()["my_roster"] == ["New Rookie"]
+
+
+def test_duplicate_pick_says_who_has_him(client):
+    league_id = _create(client)
+    client.post(f"/manual/{league_id}/picks", json={"player_name": "Big Aa"})
+    response = client.post(f"/manual/{league_id}/picks", json={"player_name": "big aa"})
+    assert response.status_code == 400
+    assert "pick #1, Team 1" in response.get_json()["error"]

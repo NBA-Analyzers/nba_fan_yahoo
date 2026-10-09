@@ -196,6 +196,30 @@ def test_the_auction_bid_card_says_whether_the_nominee_fills_an_open_spot(client
     assert card["fills_open_slot"] is False
 
 
+def test_picks_can_be_edited_and_deleted_over_http(client):
+    league_id = _league(client, is_auction=True, budget=200)
+    _log(client, league_id, "Guard Aa", team=1, cost=20)
+    edit = client.put(f"/manual/{league_id}/picks/1", json={"player_name": "Guard Aa", "team": 2, "cost": 35})
+    assert edit.status_code == 200
+    pick = client.get(f"/manual/{league_id}/state").get_json()["picks"][0]
+    assert (pick["team_key"], pick["cost"]) == ("t1", 35)
+    assert client.put(f"/manual/{league_id}/picks/7", json={"player_name": "Guard Aa", "team": 2, "cost": 5}).status_code == 400
+    assert client.delete(f"/manual/{league_id}/picks/1").status_code == 200
+    assert client.get(f"/manual/{league_id}/state").get_json()["picks"] == []
+
+
+def test_bid_card_warns_when_the_ceiling_would_leave_you_thin(client):
+    league_id = _league(client, is_auction=True, budget=200)
+    card = client.get(f"/manual/{league_id}/state?nominee=Big Aa").get_json()["nominee_card"]
+    assert card["walk_away_above"] == card["bid_up_to"]
+    assert card["left_after_bid"] == 200 - card["bid_up_to"]
+    assert card["spots_after_bid"] == 2 and "thin_after_bid" in card
+    # a $1 price tag can never leave you thin; spending nearly everything on one player does
+    _log(client, league_id, "Guard Aa", team=1, cost=190)
+    card = client.get(f"/manual/{league_id}/state?nominee=Big Aa").get_json()["nominee_card"]
+    assert card["thin_after_bid"] is True
+
+
 def test_a_league_without_slots_has_no_position_check(client):
     body = {"name": "Old", "num_teams": 4, "roster_size": 3, "my_slot": 1}
     league_id = client.post("/manual/api/leagues", json=body).get_json()["id"]
