@@ -10,11 +10,15 @@ to those points:
   trades   - 1-for-1 and 2-for-1 deals that raise your points while the other
              team gets fair value by its own needs (so it might say yes)
   drops    - your players who add least to the categories you count
+  streaming - free agents ranked by value times the games their team plays in
+             the next week, so a four-game week beats a two-game one
 """
 
+from datetime import date
 from statistics import pstdev
 
 from ..draft.ranker import COUNTING_STATS, NEGATIVE_CATEGORIES, PERCENT_STATS
+from .schedule import WINDOW_DAYS, Schedule
 
 STATS = ("FGM", "FGA", "FTM", "FTA", "FG3M", "PTS", "REB", "AST", "STL", "BLK", "TOV")
 _IDX = {s: i for i, s in enumerate(STATS)}
@@ -30,6 +34,14 @@ MIN_OTHER_SHAPE = 2  # trade slots kept for the less common deal shape
 MAX_PICKUPS = 8
 FREE_AGENT_POOL = 25
 MAX_DROPS = 3
+MAX_STREAMS = 8
+STREAM_POOL = 60
+TOSSUP_COUNTING = 0.07  # projected within 7% either way: a coin flip
+TOSSUP_PERCENT = 0.025
+CONCEDE_FACTOR = 2.0  # behind by more than twice the toss-up band: not worth chasing
+DEFAULT_WEEK_GAMES = 3.5  # a player's games when the schedule can't say
+QUESTIONABLE_WEIGHT = 0.75  # a day-to-day player is expected to miss some games
+STRONG_Z = 0.75  # a category a streamer clearly helps
 
 
 def _line(player: dict) -> tuple:
@@ -79,13 +91,19 @@ def _points(team_totals: list[tuple], categories: list[str]) -> list[int]:
 
 
 class SeasonAnalyzer:
-    def __init__(self, ranker, snapshot, punts: list[str] | None = None):
+    def __init__(self, ranker, snapshot, punts: list[str] | None = None,
+                 schedule: Schedule | None = None, today: date | None = None,
+                 opponent: int | None = None):
         self.ranker = ranker
+        self.schedule = schedule
+        self.today = today or date.today()
         self.snapshot = snapshot
         self.categories = [c for c in snapshot.categories if c in ranker.categories] or ranker.categories
         self.punts = [p for p in (punts or []) if p in self.categories]
         self.counted = [c for c in self.categories if c not in self.punts]
         self.me = snapshot.my_team
+        opp = opponent if opponent is not None else getattr(snapshot, "opponent", None)
+        self.opponent = opp if opp is not None and 0 <= opp < len(snapshot.rosters) and opp != self.me else None
 
         self.players: list[list[dict]] = []
         self.unmatched: list[str] = []
@@ -161,7 +179,15 @@ class SeasonAnalyzer:
             my_roster_names=self._names(self.me),
             limit=limit,
         )
-        return [self.ranker.find(r["name"]) for r in recs]
+        return [self.ranker.find(r["name"]) for r in recs if self._injury(r["name"]) != "out"]
+
+    def _injury(self, name: str) -> str | None:
+        return getattr(self.snapshot, "injuries", {}).get(name)
+
+    def injuries(self) -> list[dict]:
+        """Your injured players, worst first."""
+        rows = [{"name": n, "status": self._injury(n)} for n in self._names(self.me) if self._injury(n)]
+        return sorted(rows, key=lambda r: r["status"] != "out")
 
     # --- standings ----------------------------------------------------------
 
@@ -230,6 +256,7 @@ class SeasonAnalyzer:
                 found.append({
                     "add": fa["name"],
                     "add_team": fa.get("team"),
+                    "injury": self._injury(fa["name"]),
                     "drop": drop["name"],
                     "points_gain": gain,
                     "value_gain": round(value, 2),
@@ -237,6 +264,85 @@ class SeasonAnalyzer:
                 })
         found.sort(key=lambda m: (m["points_gain"], m["value_gain"]), reverse=True)
         return found[:MAX_PICKUPS]
+
+    def streaming(self) -> dict:
+        """Free agents ranked by need-weighted value times games in the next week.
+        `available` is False when the schedule has no games for that window."""
+        window = {"start": self.today.isoformat(), "days": WINDOW_DAYS}
+        if self.schedule is None or not self.schedule.covers(self.today):
+            return {"available": False, "window": window, "players": []}
+        found = []
+        for fa in self._free_agents(limit=STREAM_POOL):
+            games = self.schedule.games(fa.get("team"), self.today)
+            if not games:
+                continue
+            injury = self._injury(fa["name"])
+            value = self._value(self.me, fa) * (QUESTIONABLE_WEIGHT if injury else 1.0)
+            found.append({
+                "injury": injury,
+                "name": fa["name"],
+                "team": fa.get("team"),
+                "games": games,
+                "back_to_backs": self.schedule.back_to_backs(fa.get("team"), self.today),
+                "value": round(value, 2),
+                "score": round(value * games, 2),
+                "helps": [c for c in self.counted if fa["z"][c] >= STRONG_Z],
+            })
+        found.sort(key=lambda m: (m["score"], m["games"]), reverse=True)
+        return {"available": True, "window": window, "players": found[:MAX_STREAMS]}
+
+    def _week_totals(self, team: int) -> tuple[tuple, float]:
+        """A roster's projected line for the next week: each player's per-game line
+        times the games his team plays, less for injured players. Returns the line
+        and the player-games it is built from."""
+        scheduled = self.schedule is not None and self.schedule.covers(self.today)
+        total, games_total = ZERO, 0.0
+        for p in self.players[team]:
+            games = self.schedule.games(p.get("team"), self.today) if scheduled else DEFAULT_WEEK_GAMES
+            injury = self._injury(p["name"])
+            games *= 0.0 if injury == "out" else QUESTIONABLE_WEIGHT if injury else 1.0
+            total = _add(total, tuple(x * games for x in _line(p)))
+            games_total += games
+        return total, games_total
+
+    def matchup(self) -> dict:
+        """Projected category-by-category result against this week's opponent."""
+        window = {"start": self.today.isoformat(), "days": WINDOW_DAYS}
+        if self.opponent is None:
+            return {"available": False, "window": window}
+        mine, my_games = self._week_totals(self.me)
+        theirs, their_games = self._week_totals(self.opponent)
+        rows, wins, losses, ties = [], 0, 0, 0
+        for c in self.categories:
+            a, b = category_value(mine, c), category_value(theirs, c)
+            band = TOSSUP_PERCENT if c in PERCENT_STATS else TOSSUP_COUNTING
+            edge = (b - a if c in NEGATIVE_CATEGORIES else a - b) / (abs(b) or 1.0)
+            result = "toss-up" if abs(edge) < band else "win" if edge > 0 else "lose"
+            punted = c in self.punts
+            if not punted:
+                wins, losses, ties = wins + (result == "win"), losses + (result == "lose"), ties + (result == "toss-up")
+            rows.append({"category": c, "mine": _round(a, c), "theirs": _round(b, c), "result": result,
+                         "edge_pct": round(edge * 100, 1), "punted": punted,
+                         "chase": not punted and (result == "toss-up" or (result == "lose" and -edge < band * CONCEDE_FACTOR)),
+                         "concede": not punted and result == "lose" and -edge >= band * CONCEDE_FACTOR})
+        return {
+            "available": True,
+            "window": window,
+            "scheduled": self.schedule is not None and self.schedule.covers(self.today),
+            "opponent": {"index": self.opponent, "name": self._team_name(self.opponent)},
+            "player_games": {"mine": round(my_games, 1), "theirs": round(their_games, 1)},
+            "record": {"wins": wins, "losses": losses, "ties": ties},
+            "categories": rows,
+            "chase": [r["category"] for r in rows if r["chase"]],
+            "concede": [r["category"] for r in rows if r["concede"]],
+        }
+
+    def _injury_advice(self) -> list[dict]:
+        out = [r["name"] for r in self.injuries() if r["status"] == "out"]
+        if not out:
+            return []
+        return [{"kind": "injury", "text": f"Out: {', '.join(out)}. Bench or replace them; an injured "
+                                           "player's stats still count in the standings above."}]
 
     def drops(self) -> list[dict]:
         mine = sorted(self.players[self.me], key=lambda p: self._value(self.me, p))
@@ -389,9 +495,12 @@ class SeasonAnalyzer:
             "punts": self.punts,
             "teams": teams,
             "my_categories": categories,
-            "advice": self.advice(categories),
+            "advice": self.advice(categories) + self._injury_advice(),
             "trades": self.trades(),
             "pickups": self.pickups(),
             "drops": self.drops(),
+            "streaming": self.streaming(),
+            "injuries": self.injuries(),
+            "matchup": self.matchup(),
             "unmatched": self.unmatched,
         }

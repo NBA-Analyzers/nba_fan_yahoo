@@ -13,6 +13,7 @@ from ..fantasy_integrations.yahoo.sync_league.yahoo_service import get_yahoo_sdk
 from ..middleware.auth_decorators import require_google_auth
 from ..season import jev_advisor, report_writer, service, snapshot as snapshots
 from ..season.analyzer import SeasonAnalyzer
+from ..season.schedule import Schedule
 
 logger = logging.getLogger(__name__)
 
@@ -22,16 +23,25 @@ def _punts() -> list[str]:
     return raw if isinstance(raw, list) else [p for p in str(raw).split(",") if p]
 
 
+def _opponent() -> int | None:
+    """The opponent team number (1-based) picked on the page, as a 0-based index."""
+    try:
+        return int(request.args.get("opponent", "")) - 1
+    except ValueError:
+        return None
+
+
 def _flag(name: str) -> bool:
     body = request.get_json(silent=True) or {}
     return str(body.get(name, request.args.get(name, ""))).lower() in ("1", "true")
 
 
 class SeasonRouter:
-    def __init__(self, store: ManualLeagueStore | None = None, briefs=None, llm_factory=None):
+    def __init__(self, store: ManualLeagueStore | None = None, briefs=None, llm_factory=None, schedule=None):
         self._store = store or default_store()
         self._briefs = briefs or report_writer.BriefStore()
         self._llm_factory = llm_factory or LiteLLMClient.from_env
+        self._schedule = schedule if schedule is not None else Schedule.load()
         self._blueprint = self._create_blueprint()
 
     # --- building blocks ----------------------------------------------------
@@ -46,11 +56,11 @@ class SeasonRouter:
         if not user_guid or user_guid not in token_store:
             return None
         game = get_yahoo_sdk(token_store, {"user": user_guid})
-        return snapshots.from_yahoo(game.to_league(league_id), league_id)
+        return snapshots.from_yahoo(game.to_league(league_id), league_id, user=user_guid)
 
     def _report(self, snap) -> tuple[dict, dict | None]:
         ranker = self._ranker(snap)
-        report = SeasonAnalyzer(ranker, snap, _punts()).report()
+        report = SeasonAnalyzer(ranker, snap, _punts(), schedule=self._schedule, opponent=_opponent()).report()
         recommendation = None
         if _flag("jev"):
             body = request.get_json(silent=True) or {}

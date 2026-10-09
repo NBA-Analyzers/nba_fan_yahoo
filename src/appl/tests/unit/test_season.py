@@ -247,7 +247,10 @@ def test_inseason_pool_falls_back_when_the_feed_fails(monkeypatch, tmp_path):
     current = {p["nba_id"]: {**p, "GP": 10.0} for p in POOL[:5]}
     monkeypatch.setattr(player_pool, "_retry_at", 0.0)
     pool = player_pool.load_inseason_pool("2026-11-02", fetch=lambda s: current)
-    assert pool is not POOL and (tmp_path / "player_pool_inseason_2026-11-02.json").exists()
+    assert pool is not POOL and (tmp_path / "player_pool_inseason.json").exists()
+    # Same day, new process: read back from the store, no fetch
+    monkeypatch.setattr(player_pool, "_inseason", {})
+    assert player_pool.load_inseason_pool("2026-11-02", fetch=down) == pool
 
 
 # --- routes ------------------------------------------------------------------
@@ -451,3 +454,110 @@ def test_opening_the_manual_chat_indexes_and_redirects(store, pool, monkeypatch)
 def test_manual_season_page_shows_the_league_tabs(client):
     page = client.http.get(f"/season/manual/{client.id}").get_data(as_text=True)
     assert f"/ai-chat/manual/{client.id}" in page and f'href="/manual/{client.id}"' in page
+
+
+# --- streaming ---------------------------------------------------------------
+
+def _games(day, *matchups):
+    return {day: [{"home_team": h, "away_team": a, "game_id": "x"} for h, a in matchups]}
+
+
+def test_schedule_counts_games_and_back_to_backs():
+    from datetime import date
+    from appl.season.schedule import Schedule, team_code
+
+    days = {}
+    for d, games in [("2026-01-05", [("Boston Celtics", "Miami Heat")]),
+                     ("2026-01-06", [("Boston Celtics", "Chicago Bulls")]),
+                     ("2026-01-08", [("Miami Heat", "Boston Celtics")])]:
+        days.update(_games(d, *games))
+    sched = Schedule(days)
+    start = date(2026, 1, 5)
+    assert sched.games("BOS", start) == 3
+    assert sched.back_to_backs("Boston Celtics", start) == 1
+    assert sched.games("CHI", start) == 1
+    assert sched.games("LAL", start) == 0
+    assert sched.covers(start) and not sched.covers(date(2026, 3, 1))
+    assert team_code("PHO") == "PHX" and team_code("nowhere") is None
+
+
+def test_streaming_prefers_more_games_and_flags_missing_schedule():
+    from datetime import date
+    from appl.season.schedule import Schedule
+
+    ranker, snap = _snapshot_league()
+    start = date(2026, 1, 5)
+    for p in ranker.players:
+        p["team"] = "BOS"
+    free = [p for p in ranker.players if p["name"] not in set(snap.rostered())]
+    free[0]["team"], free[1]["team"] = "MIA", "CHI"
+    days = {}
+    for d in range(4):
+        days.update(_games(f"2026-01-0{5 + d}", ("Miami Heat", "Chicago Bulls")))
+    sched = Schedule(days)
+
+    stream = SeasonAnalyzer(ranker, snap, schedule=sched, today=start).streaming()
+    assert stream["available"]
+    assert {"MIA", "CHI"} >= {p["team"] for p in stream["players"]}
+    assert all(p["games"] == 4 and p["back_to_backs"] == 3 for p in stream["players"])
+    assert stream["players"] == sorted(stream["players"], key=lambda p: -p["score"])
+
+    stale = SeasonAnalyzer(ranker, snap, schedule=sched, today=date(2026, 6, 1)).streaming()
+    assert stale["available"] is False and stale["players"] == []
+    assert SeasonAnalyzer(ranker, snap).streaming()["available"] is False
+
+
+# --- injuries ----------------------------------------------------------------
+
+def test_injury_levels_from_yahoo_status():
+    assert snapshots.injury_level("INJ") == "out"
+    assert snapshots.injury_level("GTD") == "questionable"
+    assert snapshots.injury_level("") is None and snapshots.injury_level("NA") is None
+
+
+def test_injured_free_agents_and_my_players():
+    ranker, snap = _snapshot_league()
+    base = SeasonAnalyzer(ranker, snap)
+    best = base._free_agents(limit=3)[0]["name"]
+    mine = snap.rosters[snap.my_team][0]
+
+    snap.injuries = {best: "out", mine: "out"}
+    hurt = SeasonAnalyzer(ranker, snap)
+    assert best not in [p["name"] for p in hurt._free_agents(limit=10)]
+    report = hurt.report()
+    assert report["injuries"] == [{"name": mine, "status": "out"}]
+    assert any(a["kind"] == "injury" and mine in a["text"] for a in report["advice"])
+
+    snap.injuries = {best: "questionable"}
+    assert SeasonAnalyzer(ranker, snap)._injury(best) == "questionable"
+
+
+# --- matchup -----------------------------------------------------------------
+
+def test_matchup_needs_an_opponent_then_projects_every_category():
+    ranker, snap = _snapshot_league()
+    assert SeasonAnalyzer(ranker, snap).matchup()["available"] is False
+    assert SeasonAnalyzer(ranker, snap, opponent=snap.my_team).matchup()["available"] is False
+
+    m = SeasonAnalyzer(ranker, snap, opponent=0).matchup()
+    assert m["available"] and m["scheduled"] is False
+    assert [r["category"] for r in m["categories"]] == ranker.categories
+    r = m["record"]
+    assert r["wins"] + r["losses"] + r["ties"] == len(ranker.categories)
+    assert set(m["chase"]).isdisjoint(m["concede"])
+
+    snap.opponent = 0
+    assert SeasonAnalyzer(ranker, snap).report()["matchup"]["opponent"]["index"] == 0
+
+
+def test_matchup_punts_leave_the_record_and_injuries_cost_games():
+    ranker, snap = _snapshot_league()
+    punted = SeasonAnalyzer(ranker, snap, punts=["BLK"], opponent=0).matchup()
+    row = next(r for r in punted["categories"] if r["category"] == "BLK")
+    assert row["punted"] and not row["chase"] and not row["concede"]
+    assert sum(punted["record"].values()) == len(ranker.categories) - 1
+
+    healthy = SeasonAnalyzer(ranker, snap, opponent=0).matchup()["player_games"]["mine"]
+    snap.injuries = {snap.rosters[snap.my_team][0]: "out"}
+    hurt = SeasonAnalyzer(ranker, snap, opponent=0).matchup()["player_games"]["mine"]
+    assert hurt == round(healthy - 3.5, 1)

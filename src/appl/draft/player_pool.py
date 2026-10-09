@@ -3,44 +3,48 @@ Draft player pool: blended per-game averages from the last two NBA seasons.
 
 Per-game stats come from ESPN's public stats feed (a few paged requests for
 all players), falling back to nba_api if ESPN fails. stats.nba.com blocks some
-networks, which is why ESPN is tried first. The blended pool is cached to
-data/draft/player_pool_<draft_season>.json so draft night never waits on a
-stats API.
+networks, which is why ESPN is tried first. Both fetchers live in appl/ingest/sources.
 
-Refresh before the draft:  python -m appl.draft.player_pool   (from src/)
+The blended pool is stored as a dataset (GCS on Cloud Run, data/draft locally) by the
+nightly ingest job, so draft night never waits on a stats API. The committed
+data/draft/player_pool_<season>.json is the fallback a fresh deploy starts from.
+
+Refresh by hand:  python -m appl.ingest run player_pool   (from src/)
 """
 
 import json
 import logging
+import os
 import re
 import time
 import unicodedata
+from datetime import date
 from pathlib import Path
+
+from ..ingest.season import current_season, previous_season
+from ..ingest.sinks.datasets import LocalDatasetStore, build_dataset_store
+from ..ingest.sources.espn import EspnSource, espn_season_year, parse_espn_athletes  # noqa: F401
+from ..ingest.sources.nba import STAT_FIELDS, NbaSource
 
 logger = logging.getLogger(__name__)
 
 POOL_DIR = Path(__file__).resolve().parent.parent / "data" / "draft"
 
-DRAFT_SEASON = "2026-27"
+# The season being drafted / played; rolls over every July
+DRAFT_SEASON = current_season()
 # (season, weight) - most recent season counts most
-SOURCE_SEASONS = [("2025-26", 0.7), ("2024-25", 0.3)]
+SOURCE_SEASONS = [(previous_season(DRAFT_SEASON, 1), 0.7), (previous_season(DRAFT_SEASON, 2), 0.3)]
 # A season's weight is scaled down when it has fewer games than this
 FULL_SAMPLE_GAMES = 50
 
-ESPN_URL = (
-    "https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/"
-    "statistics/byathlete"
-)
-ESPN_PAGE_SIZE = 100
-ESPN_TIMEOUT_SECONDS = 30
-
-FETCH_ATTEMPTS = 3
-FETCH_TIMEOUT_SECONDS = 90
-
-STAT_FIELDS = ["MIN", "PTS", "REB", "AST", "STL", "BLK", "TOV", "FG3M",
-               "FGM", "FGA", "FTM", "FTA"]
-
 _SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+
+def _store():
+    """GCS when a bucket is configured, otherwise files in POOL_DIR."""
+    if os.environ.get("DATASET_BUCKET") or os.environ.get("GCS_BUCKET"):
+        return build_dataset_store()
+    return LocalDatasetStore(POOL_DIR)
 
 
 def normalize_name(name: str) -> str:
@@ -53,99 +57,15 @@ def normalize_name(name: str) -> str:
     return " ".join(t for t in tokens if t not in _SUFFIXES)
 
 
-def _espn_season_year(season: str) -> int:
-    """ESPN labels a season by the year it ends: '2025-26' -> 2026."""
-    return int(season.split("-")[0]) + 1
-
-
-def parse_espn_athletes(payload: dict) -> dict[int, dict]:
-    """Turn one page of ESPN's byathlete response into per-game stat lines."""
-    players = {}
-    names = {c["name"]: c["names"] for c in payload.get("categories", [])}
-    for row in payload.get("athletes", []):
-        stats = {}
-        for category in row.get("categories", []):
-            stats.update(zip(names.get(category["name"], []), category["values"]))
-        athlete = row["athlete"]
-        try:
-            players[int(athlete["id"])] = {
-                "name": athlete["displayName"],
-                "team": athlete.get("teamShortName"),
-                "pos": (athlete.get("position") or {}).get("abbreviation"),
-                "GP": float(stats["gamesPlayed"]),
-                "MIN": float(stats["avgMinutes"]),
-                "PTS": float(stats["avgPoints"]),
-                "REB": float(stats["avgRebounds"]),
-                "AST": float(stats["avgAssists"]),
-                "STL": float(stats["avgSteals"]),
-                "BLK": float(stats["avgBlocks"]),
-                "TOV": float(stats["avgTurnovers"]),
-                "FG3M": float(stats["avgThreePointFieldGoalsMade"]),
-                "FGM": float(stats["avgFieldGoalsMade"]),
-                "FGA": float(stats["avgFieldGoalsAttempted"]),
-                "FTM": float(stats["avgFreeThrowsMade"]),
-                "FTA": float(stats["avgFreeThrowsAttempted"]),
-            }
-        except (KeyError, TypeError, ValueError):
-            logger.warning(f"Skipping ESPN row without full stats: {athlete.get('displayName')}")
-    return players
+_espn_season_year = espn_season_year
 
 
 def _fetch_season_espn(season: str) -> dict[int, dict]:
-    import requests
-
-    players: dict[int, dict] = {}
-    page, pages = 1, 1
-    while page <= pages:
-        response = requests.get(
-            ESPN_URL,
-            params={
-                "region": "us", "lang": "en", "contentorigin": "espn",
-                "isqualified": "false", "page": page, "limit": ESPN_PAGE_SIZE,
-                "sort": "offensive.avgPoints:desc",
-                "season": _espn_season_year(season), "seasontype": 2,
-            },
-            headers={"User-Agent": "Mozilla/5.0"},
-            timeout=ESPN_TIMEOUT_SECONDS,
-        )
-        response.raise_for_status()
-        payload = response.json()
-        pages = int(payload["pagination"]["pages"])
-        players.update(parse_espn_athletes(payload))
-        page += 1
-    if not players:
-        raise RuntimeError(f"ESPN returned no players for {season}")
-    return players
+    return EspnSource().season(season)
 
 
 def _fetch_season_nba_api(season: str) -> dict[int, dict]:
-    from nba_api.stats.endpoints import leaguedashplayerstats
-
-    # stats.nba.com is slow and flaky; retry before giving up
-    for attempt in range(1, FETCH_ATTEMPTS + 1):
-        try:
-            df = leaguedashplayerstats.LeagueDashPlayerStats(
-                season=season,
-                season_type_all_star="Regular Season",
-                per_mode_detailed="PerGame",
-                timeout=FETCH_TIMEOUT_SECONDS,
-            ).get_data_frames()[0]
-            break
-        except Exception as e:
-            logger.warning(f"{season}: attempt {attempt}/{FETCH_ATTEMPTS} failed: {e}")
-            if attempt == FETCH_ATTEMPTS:
-                raise
-            time.sleep(2 * attempt)
-
-    players = {}
-    for row in df.to_dict("records"):
-        players[int(row["PLAYER_ID"])] = {
-            "name": row["PLAYER_NAME"],
-            "team": row["TEAM_ABBREVIATION"],
-            "GP": float(row["GP"]),
-            **{field: float(row[field] or 0.0) for field in STAT_FIELDS},
-        }
-    return players
+    return NbaSource().season_lines(season)
 
 
 def blend_seasons(seasons: list[tuple[dict[int, dict], float]]) -> list[dict]:
@@ -190,18 +110,38 @@ def _fetch_season(season: str) -> dict[int, dict]:
         return _fetch_season_nba_api(season)
 
 
-def load_player_pool(refresh: bool = False) -> list[dict]:
-    """Return the cached blended pool, fetching it from nba_api if needed."""
-    cache_file = POOL_DIR / f"player_pool_{DRAFT_SEASON}.json"
-    if cache_file.exists() and not refresh:
-        return json.loads(cache_file.read_text(encoding="utf-8"))
+POOL_TTL_SECONDS = 60 * 60
+_preseason: dict[str, tuple[float, list[dict]]] = {}
 
+
+def build_player_pool() -> list[dict]:
+    """Fetch and blend the source seasons, and store the result (the ingest job's step)."""
     logger.info(f"Building draft player pool from {SOURCE_SEASONS}")
     pool = blend_seasons(
         [(_fetch_season(season), weight) for season, weight in SOURCE_SEASONS]
     )
-    POOL_DIR.mkdir(parents=True, exist_ok=True)
-    cache_file.write_text(json.dumps(pool, indent=2), encoding="utf-8")
+    _store().put(f"player_pool_{DRAFT_SEASON}", pool)
+    _preseason[DRAFT_SEASON] = (time.monotonic(), pool)
+    return pool
+
+
+def load_player_pool(refresh: bool = False) -> list[dict]:
+    """The blended pool: memory (1h) -> dataset store -> committed file -> fetch now."""
+    if refresh:
+        return build_player_pool()
+    cached = _preseason.get(DRAFT_SEASON)
+    if cached and time.monotonic() - cached[0] < POOL_TTL_SECONDS:
+        return cached[1]
+
+    name = f"player_pool_{DRAFT_SEASON}"
+    pool = _store().get(name)
+    if pool is None:
+        committed = POOL_DIR / f"{name}.json"
+        if committed.exists():
+            pool = json.loads(committed.read_text(encoding="utf-8"))
+    if pool is None:
+        return build_player_pool()
+    _preseason[DRAFT_SEASON] = (time.monotonic(), pool)
     return pool
 
 
@@ -252,39 +192,50 @@ def blend_current(prior: list[dict], current: dict[int, dict]) -> list[dict]:
     return pool
 
 
+INSEASON_DATASET = "player_pool_inseason"
+
+
+def build_inseason_pool(today: str, fetch=None) -> list[dict] | None:
+    """Blend this season's stats into the preseason pool and store it. None when the
+    season hasn't started or the feeds are down."""
+    prior = load_player_pool()
+    season = current_season(date.fromisoformat(today))
+    try:
+        current = (fetch or _fetch_season)(season)
+    except Exception as e:
+        logger.warning(f"{season}: current stats unavailable ({e}); using the preseason pool")
+        return None
+    if not any(p["GP"] > 0 for p in current.values()):
+        return None
+    pool = blend_current(prior, current)
+    try:
+        _store().put(INSEASON_DATASET, {"date": today, "pool": pool})
+    except Exception as e:
+        logger.warning(f"Couldn't store the in-season pool: {e}")
+    return pool
+
+
 def load_inseason_pool(today: str | None = None, fetch=None) -> list[dict]:
     """The preseason pool blended with this season's stats so far, rebuilt once a
-    day (cached in memory and in data/draft). Falls back to the preseason pool when
-    the season hasn't started or the stats feeds are down."""
+    day (cached in memory and in the dataset store; the nightly job usually builds it
+    first). Falls back to the preseason pool when the season hasn't started or the
+    stats feeds are down."""
     global _retry_at
     today = today or time.strftime("%Y-%m-%d")
     if today in _inseason:
         return _inseason[today]
 
-    cache_file = POOL_DIR / f"player_pool_inseason_{today}.json"
-    if cache_file.exists():
-        pool = json.loads(cache_file.read_text(encoding="utf-8"))
+    stored = _store().get(INSEASON_DATASET)
+    if stored and stored.get("date") == today:
+        pool = stored["pool"]
     else:
-        prior = load_player_pool()
         if time.monotonic() < _retry_at:
-            return prior
-        try:
-            current = (fetch or _fetch_season)(DRAFT_SEASON)
-        except Exception as e:
-            logger.warning(f"{DRAFT_SEASON}: current stats unavailable ({e}); using the preseason pool")
-            current = {}
-        if not any(p["GP"] > 0 for p in current.values()):
+            return load_player_pool()
+        pool = build_inseason_pool(today, fetch)
+        if pool is None:
             # Season not started or feeds down: don't ask again on every request
             _retry_at = time.monotonic() + INSEASON_RETRY_SECONDS
-            return prior
-        pool = blend_current(prior, current)
-        try:
-            POOL_DIR.mkdir(parents=True, exist_ok=True)
-            for old in POOL_DIR.glob("player_pool_inseason_*.json"):
-                old.unlink(missing_ok=True)
-            cache_file.write_text(json.dumps(pool), encoding="utf-8")
-        except OSError as e:
-            logger.warning(f"Couldn't cache the in-season pool: {e}")
+            return load_player_pool()
     _inseason.clear()
     _inseason[today] = pool
     return pool
@@ -292,4 +243,4 @@ def load_inseason_pool(today: str | None = None, fetch=None) -> list[dict]:
 
 if __name__ == "__main__":
     players = load_player_pool(refresh=True)
-    print(f"Saved {len(players)} players -> {POOL_DIR}")
+    print(f"Saved {len(players)} players")

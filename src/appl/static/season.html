@@ -124,6 +124,12 @@
       </section>
 
       <section class="card">
+        <h2>This week's matchup <small>projected from games played and injuries</small></h2>
+        <select id="opp" aria-label="Opponent"></select>
+        <div id="matchup"></div>
+      </section>
+
+      <section class="card">
         <h2>Trade ideas <small>deals the other team gets fair value from</small></h2>
         <div id="trades"></div>
       </section>
@@ -131,6 +137,11 @@
       <section class="card">
         <h2>Pickups <small>free agents, with who to drop</small></h2>
         <div id="pickups"></div>
+      </section>
+
+      <section class="card">
+        <h2>Streaming <small>free agents by games this week</small></h2>
+        <div id="streaming"></div>
       </section>
 
       <section class="card table-card">
@@ -211,6 +222,7 @@ const store = {
 let punts = store.get("punts", []);
 let useJev = store.get("jev", false);
 let preference = store.get("preference", "");
+let opponent = store.get("opponent", "");
 let last = null;
 let playersLoaded = false;
 
@@ -228,7 +240,7 @@ async function api(path, method = "GET", body) {
 }
 
 function query() {
-  return `?punts=${encodeURIComponent(punts.join(","))}&jev=${useJev ? 1 : 0}&preference=${encodeURIComponent(preference)}`;
+  return `?punts=${encodeURIComponent(punts.join(","))}&jev=${useJev ? 1 : 0}&preference=${encodeURIComponent(preference)}${opponent ? `&opponent=${opponent}` : ""}`;
 }
 
 function rankColor(rank, n) {
@@ -337,7 +349,7 @@ function renderPickups(d) {
     const what = el("div", undefined, "what");
     what.append(el("span", p.points_gain ? `+${p.points_gain} pts` : "better value", "gain"),
       `Add ${p.add}`, el("span", "→", "arrow"), `drop ${p.drop}`);
-    row.append(what, el("div", `${p.add_team || "FA"} · value ${p.value_gain >= 0 ? "+" : ""}${p.value_gain}`, "meta"), chips(p.category_changes));
+    row.append(what, el("div", `${p.add_team || "FA"} · value ${p.value_gain >= 0 ? "+" : ""}${p.value_gain}${p.injury ? " · " + p.injury : ""}`, "meta"), chips(p.category_changes));
     if (manual) {
       const b = el("button", "I made this move", "btn secondary mini");
       b.onclick = () => record({ kind: "add", team: d.my_team.index + 1, add: [p.add], drop: [p.drop] }, b);
@@ -346,6 +358,54 @@ function renderPickups(d) {
     box.append(row);
   });
   if (!d.pickups.length) box.append(el("div", "No free agent beats anyone on your team right now.", "hint"));
+}
+
+function renderMatchup(d) {
+  const sel = $("opp");
+  sel.textContent = "";
+  sel.append(new Option("Choose this week's opponent", ""));
+  d.teams.forEach((t) => { if (!t.is_mine) sel.append(new Option(t.name, t.index + 1)); });
+  const m = d.matchup || { available: false };
+  sel.value = m.available ? String(m.opponent.index + 1) : "";
+  sel.onchange = () => { opponent = sel.value; store.set("opponent", opponent); load(); };
+  const box = $("matchup");
+  box.textContent = "";
+  if (!m.available) {
+    box.append(el("div", "Pick your opponent to see which categories to chase and which to give up.", "hint"));
+    return;
+  }
+  const r = m.record;
+  box.append(el("div", `Projected ${r.wins}-${r.losses}${r.ties ? "-" + r.ties : ""} vs ${m.opponent.name}`, "what"));
+  if (!m.scheduled) box.append(el("div", "No schedule for this week, so every player is assumed to play the same number of games.", "hint"));
+  m.categories.forEach((c) => {
+    const row = el("div", undefined, "move");
+    const tag = c.punted ? "punted" : c.result;
+    const edge = `${c.edge_pct >= 0 ? "+" : ""}${c.edge_pct}%`;
+    row.append(el("div", `${c.category}: ${c.mine} vs ${c.theirs} · ${tag} (${edge})${c.chase ? " · chase" : c.concede ? " · give up" : ""}`, "meta"));
+    box.append(row);
+  });
+  if (m.chase.length) box.append(el("div", `Chase: ${m.chase.join(", ")}.`, "hint"));
+  if (m.concede.length) box.append(el("div", `Not worth chasing: ${m.concede.join(", ")}.`, "hint"));
+}
+
+function renderStreaming(d) {
+  const box = $("streaming");
+  box.textContent = "";
+  const s = d.streaming || { available: false, players: [] };
+  if (!s.available) {
+    box.append(el("div", "The saved NBA schedule has no games for the coming week, so streaming picks are off. Refresh it with scripts/schedule/get_nba_schedule.py.", "hint"));
+    return;
+  }
+  s.players.forEach((p) => {
+    const row = el("div", undefined, "move");
+    const what = el("div", undefined, "what");
+    what.append(el("span", `${p.games} games`, "gain"), p.name);
+    const b2b = p.back_to_backs ? ` · ${p.back_to_backs} back-to-back` : "";
+    const helps = p.helps.length ? ` · helps ${p.helps.join(", ")}` : "";
+    row.append(what, el("div", `${p.team || "FA"} · value ${p.value >= 0 ? "+" : ""}${p.value}${b2b}${helps}${p.injury ? " · " + p.injury : ""}`, "meta"));
+    box.append(row);
+  });
+  if (!s.players.length) box.append(el("div", "No free agent plays this week.", "hint"));
 }
 
 function renderStandings(d) {
@@ -435,6 +495,8 @@ function render(d) {
   renderAdvice(d);
   renderTrades(d);
   renderPickups(d);
+  renderStreaming(d);
+  renderMatchup(d);
   renderStandings(d);
 
   const drops = $("drops");

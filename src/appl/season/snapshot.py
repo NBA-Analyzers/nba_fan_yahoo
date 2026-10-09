@@ -16,7 +16,8 @@ from ..draft.ranker import categories_from_yahoo
 logger = logging.getLogger(__name__)
 
 YAHOO_CACHE_SECONDS = 15 * 60
-_yahoo_cache: dict[str, tuple[float, "LeagueSnapshot"]] = {}
+# (league_id, user) -> snapshot. Per user: `my_team` depends on who is looking.
+_yahoo_cache: dict[tuple[str, str | None], tuple[float, "LeagueSnapshot"]] = {}
 
 
 @dataclass
@@ -28,6 +29,8 @@ class LeagueSnapshot:
     my_team: int
     rosters: list[list[str]]
     slots: dict = field(default_factory=dict)
+    opponent: int | None = None  # this week's head-to-head opponent, when known
+    injuries: dict[str, str] = field(default_factory=dict)  # player name -> "out" | "questionable"
 
     @property
     def num_teams(self) -> int:
@@ -42,6 +45,20 @@ class LeagueSnapshot:
         return [name for roster in self.rosters for name in roster]
 
 
+OUT_STATUSES = {"INJ", "O", "OUT", "SUSP", "IL", "IL+"}
+QUESTIONABLE_STATUSES = {"GTD", "DTD", "Q", "P", "D"}
+
+
+def injury_level(status) -> str | None:
+    """Yahoo's player status as "out", "questionable" or None (healthy / not on a team)."""
+    code = str(status or "").strip().upper()
+    if code in OUT_STATUSES:
+        return "out"
+    if code in QUESTIONABLE_STATUSES:
+        return "questionable"
+    return None
+
+
 def from_manual(league: dict) -> LeagueSnapshot:
     return LeagueSnapshot(
         key=f"manual:{league['id']}",
@@ -54,9 +71,29 @@ def from_manual(league: dict) -> LeagueSnapshot:
     )
 
 
-def from_yahoo(league, league_id: str, now=time.monotonic) -> LeagueSnapshot:
-    """`league` is a yahoo_fantasy_api League. Reads settings and every roster."""
-    cached = _yahoo_cache.get(league_id)
+def _current_opponent(league, league_id: str, keys: list, my_key) -> int | None:
+    """Index of this week's opponent in a head-to-head league, or None."""
+    try:
+        from ..fantasy_integrations.yahoo.sync_league.sync_yahoo_league import parse_matchups
+
+        raw = league.matchups(league.current_week())
+        scoreboard = raw["fantasy_content"]["league"][1]["scoreboard"]["0"]["matchups"]
+        for m in parse_matchups(scoreboard):
+            pair = [m["team_1"]["team_key"], m["team_2"]["team_key"]]
+            if my_key in pair:
+                other = pair[1 - pair.index(my_key)]
+                return keys.index(other) if other in keys else None
+    except Exception as e:
+        logger.info(f"League {league_id}: no head-to-head opponent found: {e}")
+    return None
+
+
+def from_yahoo(league, league_id: str, user: str | None = None,
+               now=time.monotonic) -> LeagueSnapshot:
+    """`league` is a yahoo_fantasy_api League. Reads settings and every roster.
+    `user` (the viewer's Yahoo guid) keys the cache, since `my_team` is theirs."""
+    cache_key = (league_id, user)
+    cached = _yahoo_cache.get(cache_key)
     if cached and now() - cached[0] < YAHOO_CACHE_SECONDS:
         return cached[1]
 
@@ -69,21 +106,38 @@ def from_yahoo(league, league_id: str, now=time.monotonic) -> LeagueSnapshot:
     keys = sorted(teams, key=lambda k: int(str(k).rsplit(".", 1)[-1]))
 
     rosters = []
+    injuries: dict[str, str] = {}
+
+    def note(players):
+        for p in players:
+            level = injury_level(p.get("status"))
+            if level and p.get("name"):
+                injuries[p["name"]] = level
+
     for key in keys:
         try:
             players = league.to_team(key).roster()
         except Exception as e:
             logger.warning(f"League {league_id}: roster for {key} failed: {e}")
             players = []
+        note(players)
         rosters.append([p["name"] for p in players if p.get("name")])
 
+    try:
+        note(league.free_agents("Util"))
+    except Exception as e:
+        logger.warning(f"League {league_id}: free agent injuries failed: {e}")
+
+    my_index = keys.index(my_key) if my_key in keys else 0
     snapshot = LeagueSnapshot(
         key=f"yahoo:{league_id}",
         name=settings.get("name", league_id),
         categories=categories_from_yahoo(league.stat_categories()),
         team_names=[teams[k].get("name", k) for k in keys],
-        my_team=keys.index(my_key) if my_key in keys else 0,
+        my_team=my_index,
         rosters=rosters,
+        injuries=injuries,
+        opponent=_current_opponent(league, league_id, keys, my_key),
     )
-    _yahoo_cache[league_id] = (now(), snapshot)
+    _yahoo_cache[cache_key] = (now(), snapshot)
     return snapshot
