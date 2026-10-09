@@ -27,6 +27,7 @@ from ..draft.yahoo_draft import (
 )
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import get_yahoo_sdk
 from ..middleware.auth_decorators import require_google_auth
+from ..season.service import manual_chat_id
 
 logger = logging.getLogger(__name__)
 
@@ -390,7 +391,7 @@ class DraftRouter:
                 store.get(user(), league_id)
             except KeyError:
                 return redirect("/manual")
-            return render_template("draft.html")
+            return render_template("draft.html", league_id=manual_chat_id(league_id))
 
         @bp.route("/<league_id>/state")
         @require_google_auth

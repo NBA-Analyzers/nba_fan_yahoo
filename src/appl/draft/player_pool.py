@@ -205,6 +205,91 @@ def load_player_pool(refresh: bool = False) -> list[dict]:
     return pool
 
 
+# --- in season ----------------------------------------------------------------
+
+# This season's games count as much as the prior pool after this many games
+CURRENT_SEASON_PRIOR_GAMES = 15
+FULL_SEASON_GP = 70
+INSEASON_RETRY_SECONDS = 30 * 60
+_inseason: dict[str, list[dict]] = {}
+_retry_at = 0.0
+
+
+def blend_current(prior: list[dict], current: dict[int, dict]) -> list[dict]:
+    """The preseason pool updated with this season's per-game stats. A player's
+    current numbers weigh gp / (gp + CURRENT_SEASON_PRIOR_GAMES), so a hot first
+    week moves him a little and half a season moves him a lot. Players are matched
+    by name, since the two sources may use different ids. Games played are scaled
+    to a full season so rookies and early-season players aren't filtered out."""
+    most_games = max((p["GP"] for p in current.values()), default=0)
+    scale = FULL_SEASON_GP / most_games if most_games else 0.0
+    now = {normalize_name(p["name"]): p for p in current.values() if p["GP"] > 0}
+
+    pool, seen = [], set()
+    for player in prior:
+        key = normalize_name(player["name"])
+        cur = now.get(key)
+        if not cur:
+            pool.append(player)
+            continue
+        seen.add(key)
+        w = cur["GP"] / (cur["GP"] + CURRENT_SEASON_PRIOR_GAMES)
+        blended = {**player, "team": cur.get("team") or player["team"],
+                   "pos": player.get("pos") or cur.get("pos")}
+        for field in STAT_FIELDS:
+            blended[field] = round(w * cur[field] + (1 - w) * player[field], 3)
+        blended["GP"] = round(w * cur["GP"] * scale + (1 - w) * player["GP"], 1)
+        blended["GP_current"] = cur["GP"]
+        pool.append(blended)
+
+    for pid, cur in current.items():
+        key = normalize_name(cur["name"])
+        if key in now and key not in seen:
+            # New this season (rookies, returns from injury)
+            pool.append({"nba_id": pid, **{k: cur.get(k) for k in ("name", "team", "pos")},
+                         "GP": round(cur["GP"] * scale, 1), "GP_current": cur["GP"],
+                         **{field: cur[field] for field in STAT_FIELDS}})
+    return pool
+
+
+def load_inseason_pool(today: str | None = None, fetch=None) -> list[dict]:
+    """The preseason pool blended with this season's stats so far, rebuilt once a
+    day (cached in memory and in data/draft). Falls back to the preseason pool when
+    the season hasn't started or the stats feeds are down."""
+    global _retry_at
+    today = today or time.strftime("%Y-%m-%d")
+    if today in _inseason:
+        return _inseason[today]
+
+    cache_file = POOL_DIR / f"player_pool_inseason_{today}.json"
+    if cache_file.exists():
+        pool = json.loads(cache_file.read_text(encoding="utf-8"))
+    else:
+        prior = load_player_pool()
+        if time.monotonic() < _retry_at:
+            return prior
+        try:
+            current = (fetch or _fetch_season)(DRAFT_SEASON)
+        except Exception as e:
+            logger.warning(f"{DRAFT_SEASON}: current stats unavailable ({e}); using the preseason pool")
+            current = {}
+        if not any(p["GP"] > 0 for p in current.values()):
+            # Season not started or feeds down: don't ask again on every request
+            _retry_at = time.monotonic() + INSEASON_RETRY_SECONDS
+            return prior
+        pool = blend_current(prior, current)
+        try:
+            POOL_DIR.mkdir(parents=True, exist_ok=True)
+            for old in POOL_DIR.glob("player_pool_inseason_*.json"):
+                old.unlink(missing_ok=True)
+            cache_file.write_text(json.dumps(pool), encoding="utf-8")
+        except OSError as e:
+            logger.warning(f"Couldn't cache the in-season pool: {e}")
+    _inseason.clear()
+    _inseason[today] = pool
+    return pool
+
+
 if __name__ == "__main__":
     players = load_player_pool(refresh=True)
     print(f"Saved {len(players)} players -> {POOL_DIR}")

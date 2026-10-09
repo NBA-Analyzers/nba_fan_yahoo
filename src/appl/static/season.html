@@ -1,0 +1,523 @@
+{% extends "pages/base.html" %}
+{% set active_tab = "season" %}
+{% block title %}Season · Fantasy Basketball Helper{% endblock %}
+{% block head %}
+<style>
+  body { font-size: 15px; }
+  .topbar, .page.season-page { max-width: 1240px; }
+  .error { display: none; margin-bottom: 16px; }
+  .warn { display: none; margin-bottom: 16px; }
+  .season-head { margin: 4px 0 18px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 10px; }
+  .status { color: var(--muted); margin-top: 6px; }
+  .status strong { display: inline-block; color: var(--accent-strong); background: var(--accent-soft); padding: 2px 12px; border-radius: 999px; font-weight: 800; }
+
+  .settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px 24px; margin-bottom: 18px; }
+  .setting .label, .setting label { display: block; font-weight: 700; margin-bottom: 4px; }
+  .setting .help { color: var(--muted); font-size: .85rem; margin-bottom: 8px; }
+  .setting.wide { grid-column: 1 / -1; }
+  .field { width: 100%; font: inherit; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); }
+  .field:focus { border-color: var(--accent); outline: none; }
+  .toggle { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; }
+  .toggle input { accent-color: var(--accent); width: 18px; height: 18px; }
+  #punts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .punt { display: inline-flex; align-items: center; padding: 5px 12px; border: 1.5px solid var(--line); border-radius: 999px; cursor: pointer; user-select: none; font-weight: 700; font-size: .85rem; background: var(--surface); }
+  .punt:hover { border-color: var(--accent); }
+  .punt.on { background: var(--surface-soft); color: var(--muted); text-decoration: line-through; }
+
+  .layout { display: grid; grid-template-columns: 1fr 320px; gap: 18px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+  .main, .side { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+  .card { padding: 18px; }
+  .card.table-card { overflow-x: auto; }
+  .card h2 { margin: 0 0 10px; font-size: 1.05rem; }
+  .card h2 small { color: var(--muted); font-weight: 600; font-size: .8rem; margin-left: 6px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: .78rem; color: var(--muted); font-weight: 700; }
+  th.c, td.c { text-align: center; }
+  tr.mine td { background: var(--accent-soft); font-weight: 700; }
+  tr.punted td { color: var(--muted); text-decoration: line-through; }
+  .rank { display: inline-block; min-width: 30px; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: .82rem; text-align: center; }
+  .label-strong { color: var(--good); font-weight: 700; }
+  .label-weak { color: var(--bad); font-weight: 700; }
+  .label-middle { color: var(--muted); font-weight: 700; }
+
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: .92rem; }
+  li:last-child { border-bottom: 0; }
+  .tip b { color: var(--accent-strong); text-transform: capitalize; margin-right: 6px; }
+
+  .move { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .move:last-child { border-bottom: 0; }
+  .move .what { font-weight: 700; }
+  .move .what .arrow { color: var(--muted); margin: 0 6px; }
+  .move .meta { color: var(--muted); font-size: .86rem; margin-top: 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+  .chip { font-size: .75rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+  .chip.up { background: var(--good-soft); color: var(--good); }
+  .chip.down { background: var(--bad-soft); color: var(--bad); }
+  .gain { float: right; font-weight: 800; color: var(--good); }
+  .btn.mini { font-size: .78rem; padding: 6px 11px; margin-top: 8px; }
+
+  .decision { background: var(--accent-soft); border-radius: var(--radius-sm); padding: 14px 16px; }
+  .decision .pick { font-size: 1.1rem; font-weight: 800; }
+  .decision .meta { color: var(--muted); margin-top: 4px; font-size: .9rem; }
+  .brief { white-space: pre-wrap; font-size: .93rem; line-height: 1.5; }
+  .brief:empty { display: none; }
+  .hint { color: var(--muted); font-size: .88rem; margin-top: 8px; }
+  .msg { color: var(--bad); font-size: .9rem; margin-top: 8px; min-height: 1em; }
+  .manual-only { display: none; }
+  .moveform { display: grid; gap: 8px; }
+  .moveform .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .logged { font-size: .88rem; display: flex; justify-content: space-between; gap: 8px; }
+  .logged a { cursor: pointer; color: var(--muted); }
+  .roster li { font-size: .9rem; padding: 5px 0; }
+</style>
+{% endblock %}
+{% block page_class %}season-page{% endblock %}
+{% block content %}
+  <div class="notice bad error" id="error"></div>
+
+  <div class="season-head">
+    <div>
+      <h1 id="title">Season analysis</h1>
+      <div class="status" id="status">Loading&hellip;</div>
+    </div>
+    <a class="btn secondary" id="back" href="#">Back to the draft</a>
+  </div>
+  <div class="notice info warn" id="warn"></div>
+
+  <section class="card settings" aria-label="Settings">
+    <div class="setting wide">
+      <span class="label">Categories you're punting</span>
+      <div class="help">Tap a category you've given up on. Standings points, trades and pickups will ignore it.</div>
+      <div id="punts"></div>
+    </div>
+    <div class="setting">
+      <span class="label">Ask Jev</span>
+      <div class="help">Jev picks the one move it would make from the ideas below.</div>
+      <label class="toggle"><input type="checkbox" id="jev"> Recommend a move</label>
+    </div>
+    <div class="setting">
+      <label for="pref">Anything in mind?</label>
+      <div class="help">Optional, for Jev. e.g. "I won't trade my center".</div>
+      <input id="pref" class="field" maxlength="500">
+    </div>
+  </section>
+
+  <div class="layout">
+    <div class="main">
+      <div class="decision" id="decision" style="display:none"></div>
+
+      <section class="card table-card">
+        <h2>Your categories <small>rank 1 is best</small></h2>
+        <table>
+          <thead><tr><th>Category</th><th class="c">Rank</th><th class="c">Your team</th><th class="c">Behind next team</th><th class="c">Ahead of next team</th><th></th></tr></thead>
+          <tbody id="cats"></tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <h2>What to do</h2>
+        <ul id="advice"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Trade ideas <small>deals the other team gets fair value from</small></h2>
+        <div id="trades"></div>
+      </section>
+
+      <section class="card">
+        <h2>Pickups <small>free agents, with who to drop</small></h2>
+        <div id="pickups"></div>
+      </section>
+
+      <section class="card table-card">
+        <h2>League standings <small>roto points from per-game totals</small></h2>
+        <table>
+          <thead id="st_head"></thead>
+          <tbody id="st_body"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <div class="side">
+      <section class="card">
+        <h2>Your brief</h2>
+        <div class="hint" id="brief_hint">A short write-up of the analysis by the AI.</div>
+        <div class="brief" id="brief"></div>
+        <button class="btn mini" id="brief_btn">Write my brief</button>
+      </section>
+
+      <section class="card">
+        <h2>Weakest players</h2>
+        <ul id="drops"></ul>
+      </section>
+
+      <section class="card manual-only">
+        <h2>Record a move</h2>
+        <form class="moveform" id="moveform">
+          <select class="field" id="mv_kind" aria-label="Kind of move">
+            <option value="add">Pick up (and maybe drop)</option>
+            <option value="drop">Drop</option>
+            <option value="trade">Trade</option>
+          </select>
+          <select class="field" id="mv_team" aria-label="Team"></select>
+          <select class="field" id="mv_partner" aria-label="Trade partner" style="display:none"></select>
+          <input class="field" id="mv_add" list="playernames" autocomplete="off" placeholder="Picked up">
+          <input class="field" id="mv_drop" list="playernames" autocomplete="off" placeholder="Dropped">
+          <datalist id="playernames"></datalist>
+          <div class="hint" id="mv_help"></div>
+          <button class="btn" type="submit">Save move</button>
+        </form>
+        <div class="msg" id="mv_msg"></div>
+        <h2 style="margin-top:14px">Moves so far</h2>
+        <ul id="moves"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Your team</h2>
+        <ul class="roster" id="roster"></ul>
+      </section>
+    </div>
+  </div>
+{% endblock %}
+{% block scripts %}
+<script>
+const pathParts = location.pathname.split("/").filter(Boolean);
+const kind = pathParts[1];            // "manual" or "yahoo"
+const leagueId = pathParts[2];
+const manual = kind === "manual";
+const base = `/season/${kind}/${leagueId}`;
+
+const $ = (id) => document.getElementById(id);
+const el = (tag, text, cls) => {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = text;
+  if (cls) node.className = cls;
+  return node;
+};
+const store = {
+  get(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(`season:${kind}:${leagueId}:${key}`)) ?? fallback; }
+    catch (e) { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(`season:${kind}:${leagueId}:${key}`, JSON.stringify(value)); } catch (e) {}
+  },
+};
+
+let punts = store.get("punts", []);
+let useJev = store.get("jev", false);
+let preference = store.get("preference", "");
+let last = null;
+let playersLoaded = false;
+
+function showError(msg) { $("error").textContent = msg || ""; $("error").style.display = msg ? "block" : "none"; }
+
+async function api(path, method = "GET", body) {
+  const res = await fetch(`${base}${path}`, {
+    method,
+    headers: body === undefined ? {} : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw Object.assign(new Error(data.error || res.statusText), { data });
+  return data;
+}
+
+function query() {
+  return `?punts=${encodeURIComponent(punts.join(","))}&jev=${useJev ? 1 : 0}&preference=${encodeURIComponent(preference)}`;
+}
+
+function rankColor(rank, n) {
+  // Green for the top of the league, red for the bottom
+  const t = n > 1 ? (rank - 1) / (n - 1) : 0;
+  const rgb = t <= 0.5 ? "31,157,85" : "214,69,69";
+  const strength = Math.abs(t - 0.5) * 2;
+  return `rgba(${rgb},${(0.1 + strength * 0.45).toFixed(2)})`;
+}
+
+function chips(changes) {
+  const box = el("div", undefined, "chips");
+  Object.entries(changes || {}).forEach(([cat, d]) => {
+    box.append(el("span", `${cat} ${d > 0 ? "+" : ""}${d}`, `chip ${d > 0 ? "up" : "down"}`));
+  });
+  return box;
+}
+
+function placeText(n) { return n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`; }
+
+// --- render ------------------------------------------------------------------
+
+function renderPunts(categories) {
+  const box = $("punts");
+  box.textContent = "";
+  categories.forEach((c) => {
+    const chip = el("span", c, "punt" + (punts.includes(c) ? " on" : ""));
+    chip.onclick = () => {
+      punts = punts.includes(c) ? punts.filter((p) => p !== c) : [...punts, c];
+      store.set("punts", punts);
+      load();
+    };
+    box.append(chip);
+  });
+}
+
+function renderCategories(d) {
+  const body = $("cats");
+  body.textContent = "";
+  d.my_categories.forEach((r) => {
+    const tr = el("tr", undefined, r.punted ? "punted" : "");
+    tr.append(el("td", r.category));
+    const rankCell = el("td", undefined, "c");
+    const badge = el("span", `${r.rank}`, "rank");
+    if (!r.punted) badge.style.background = rankColor(r.rank, d.num_teams);
+    rankCell.append(badge);
+    tr.append(rankCell, el("td", String(r.value), "c"),
+      el("td", r.gap_up === null ? "first" : String(r.gap_up), "c"),
+      el("td", r.cushion === null ? "last" : String(r.cushion), "c"));
+    tr.append(el("td", r.punted ? "punted" : r.label, `label-${r.label}`));
+    body.append(tr);
+  });
+}
+
+function renderAdvice(d) {
+  const list = $("advice");
+  list.textContent = "";
+  d.advice.forEach((a) => {
+    const li = el("li", undefined, "tip");
+    li.append(el("b", a.kind), a.text);
+    if (a.kind === "punt" && a.category && !punts.includes(a.category)) {
+      const b = el("button", `Punt ${a.category}`, "btn secondary mini");
+      b.style.marginLeft = "8px";
+      b.onclick = () => { punts = [...punts, a.category]; store.set("punts", punts); load(); };
+      li.append(b);
+    }
+    list.append(li);
+  });
+  if (!d.advice.length) list.append(el("li", "Not enough players on the rosters yet to judge."));
+}
+
+async function record(body, button) {
+  button.disabled = true;
+  try { await api("/moves", "POST", body); await load(); }
+  catch (e) { showError(e.message); button.disabled = false; }
+}
+
+function renderTrades(d) {
+  const box = $("trades");
+  box.textContent = "";
+  d.trades.forEach((t) => {
+    const row = el("div", undefined, "move");
+    const what = el("div", undefined, "what");
+    what.append(el("span", `+${t.points_gain} pts`, "gain"),
+      `Give ${t.give.join(" + ")}`, el("span", "→", "arrow"), `get ${t.get.join(" + ")}`);
+    row.append(what);
+    const meta = [`from ${t.partner_name}`];
+    if (t.pickup) meta.push(`then pick up ${t.pickup}`);
+    meta.push(t.their_value_change >= 0 ? "they gain value by their needs" : "about even for them");
+    row.append(el("div", meta.join(" · "), "meta"), chips(t.category_changes));
+    if (manual) {
+      const b = el("button", "I made this trade", "btn secondary mini");
+      b.onclick = () => record({ kind: "trade", team: d.my_team.index + 1, partner: t.partner + 1, drop: t.give, add: t.get }, b);
+      row.append(b);
+    }
+    box.append(row);
+  });
+  if (!d.trades.length) box.append(el("div", "No trade found that raises your points and is fair to the other team.", "hint"));
+}
+
+function renderPickups(d) {
+  const box = $("pickups");
+  box.textContent = "";
+  d.pickups.forEach((p) => {
+    const row = el("div", undefined, "move");
+    const what = el("div", undefined, "what");
+    what.append(el("span", p.points_gain ? `+${p.points_gain} pts` : "better value", "gain"),
+      `Add ${p.add}`, el("span", "→", "arrow"), `drop ${p.drop}`);
+    row.append(what, el("div", `${p.add_team || "FA"} · value ${p.value_gain >= 0 ? "+" : ""}${p.value_gain}`, "meta"), chips(p.category_changes));
+    if (manual) {
+      const b = el("button", "I made this move", "btn secondary mini");
+      b.onclick = () => record({ kind: "add", team: d.my_team.index + 1, add: [p.add], drop: [p.drop] }, b);
+      row.append(b);
+    }
+    box.append(row);
+  });
+  if (!d.pickups.length) box.append(el("div", "No free agent beats anyone on your team right now.", "hint"));
+}
+
+function renderStandings(d) {
+  const head = $("st_head");
+  head.textContent = "";
+  const hr = el("tr");
+  hr.append(el("th", "#"), el("th", "Team"), el("th", "Pts", "c"));
+  d.categories.forEach((c) => hr.append(el("th", c, "c")));
+  head.append(hr);
+
+  const body = $("st_body");
+  body.textContent = "";
+  [...d.teams].sort((a, b) => a.place - b.place).forEach((t) => {
+    const tr = el("tr", undefined, t.is_mine ? "mine" : "");
+    tr.append(el("td", String(t.place)), el("td", t.name), el("td", String(t.points), "c"));
+    d.categories.forEach((c) => {
+      const td = el("td", undefined, "c");
+      const badge = el("span", String(t.ranks[c]), "rank");
+      if (!d.punts.includes(c)) badge.style.background = rankColor(t.ranks[c], d.num_teams);
+      badge.title = String(t.values[c]);
+      td.append(badge);
+      tr.append(td);
+    });
+    body.append(tr);
+  });
+}
+
+function renderDecision(d) {
+  const box = $("decision");
+  const r = d.recommendation;
+  if (!useJev || !r) { box.style.display = "none"; return; }
+  box.textContent = "";
+  box.style.display = "block";
+  box.append(el("div", r.source === "jev" ? "Jev recommends" : "Best move", "meta"), el("div", r.text, "pick"));
+  const meta = [`+${r.move.points_gain} standings points`];
+  if (r.confidence !== null) meta.push(`${Math.round(r.confidence * 100)}% sure`);
+  if (r.note) meta.push(r.note);
+  box.append(el("div", meta.join(" · "), "meta"));
+}
+
+function renderManual(d) {
+  document.querySelectorAll(".manual-only").forEach((n) => { n.style.display = "block"; });
+  const rosters = d.manual.rosters;
+  [["mv_team", false], ["mv_partner", true]].forEach(([id, partner]) => {
+    const sel = $(id);
+    const keep = sel.value;
+    sel.textContent = "";
+    if (partner) sel.append(new Option("Trade partner", ""));
+    rosters.forEach((t) => sel.append(new Option(t.name + (t.is_mine ? " (you)" : ""), t.index + 1)));
+    sel.value = keep || (partner ? "" : String(d.my_team.index + 1));
+  });
+
+  const list = $("moves");
+  list.textContent = "";
+  const names = rosters.map((t) => t.name);
+  [...d.manual.moves].reverse().forEach((m) => {
+    let text;
+    if (m.kind === "trade") text = `${names[m.team]} traded ${m.drop.join(", ")} to ${names[m.partner]} for ${m.add.join(", ")}`;
+    else if (m.kind === "add") text = `${names[m.team]} added ${m.add.join(", ")}` + (m.drop.length ? `, dropped ${m.drop.join(", ")}` : "");
+    else text = `${names[m.team]} dropped ${m.drop.join(", ")}`;
+    const li = el("li", undefined, "logged");
+    const del = el("a", "delete");
+    del.onclick = async () => { try { await api(`/moves/${m.id}`, "DELETE"); load(); } catch (e) { $("mv_msg").textContent = e.message; } };
+    li.append(el("span", text), del);
+    list.append(li);
+  });
+  if (!d.manual.moves.length) list.append(el("li", "None yet. Record adds, drops and trades so the analysis stays current.", "hint"));
+}
+
+function updateMoveForm() {
+  const k = $("mv_kind").value;
+  $("mv_partner").style.display = k === "trade" ? "" : "none";
+  $("mv_add").style.display = k === "drop" ? "none" : "";
+  $("mv_add").placeholder = k === "trade" ? "Players received (comma separated)" : "Picked up";
+  $("mv_drop").placeholder = k === "trade" ? "Players sent away (comma separated)" : k === "add" ? "Dropped (optional)" : "Dropped";
+  $("mv_help").textContent = k === "trade" ? "From the point of view of the first team." : "";
+}
+
+function render(d) {
+  last = d;
+  $("title").textContent = d.league_name;
+  $("status").textContent = "";
+  $("status").append(el("strong", `${placeText(d.my_team.place)} of ${d.num_teams}`), ` · ${d.my_team.name} · ${d.my_team.points} standings points`);
+  renderPunts(d.categories);
+  renderDecision(d);
+  renderCategories(d);
+  renderAdvice(d);
+  renderTrades(d);
+  renderPickups(d);
+  renderStandings(d);
+
+  const drops = $("drops");
+  drops.textContent = "";
+  d.drops.forEach((p) => drops.append(el("li", `${p.name}` + (p.weak_in.length ? ` (hurts ${p.weak_in.join(", ")})` : ""))));
+  const roster = $("roster");
+  roster.textContent = "";
+  d.my_team.players.forEach((n) => roster.append(el("li", n)));
+
+  const warn = [];
+  if (d.unmatched.length) warn.push(`No stats for ${d.unmatched.slice(0, 6).join(", ")}${d.unmatched.length > 6 ? "…" : ""}, so they are left out.`);
+  if (manual && d.manual.status !== "finished") warn.push("The draft isn't marked finished yet; this uses the picks logged so far.");
+  $("warn").textContent = warn.join(" ");
+  $("warn").style.display = warn.length ? "block" : "none";
+  if (manual) renderManual(d);
+}
+
+async function load() {
+  showError("");
+  try { render(await api(`/report${query()}`)); }
+  catch (e) { showError("Could not load the analysis: " + e.message); }
+}
+
+async function loadPlayers() {
+  if (playersLoaded || !manual) return;
+  try {
+    const { players } = await api("/players");
+    const list = $("playernames");
+    players.forEach((n) => list.append(new Option(n)));
+    playersLoaded = true;
+  } catch (e) { /* autocomplete is optional */ }
+}
+
+// --- wiring ------------------------------------------------------------------
+
+$("back").href = manual ? `/manual/${leagueId}` : `/draft/${leagueId}`;
+$("jev").checked = useJev;
+$("jev").onchange = (e) => { useJev = e.target.checked; store.set("jev", useJev); load(); };
+$("pref").value = preference;
+$("pref").onchange = (e) => { preference = e.target.value; store.set("preference", preference); if (useJev) load(); };
+$("mv_kind").onchange = updateMoveForm;
+updateMoveForm();
+
+$("moveform").onsubmit = async (e) => {
+  e.preventDefault();
+  $("mv_msg").textContent = "";
+  const k = $("mv_kind").value;
+  const split = (v) => v.split(",").map((s) => s.trim()).filter(Boolean);
+  const body = {
+    kind: k, team: $("mv_team").value, partner: $("mv_partner").value,
+    add: k === "drop" ? [] : split($("mv_add").value), drop: split($("mv_drop").value),
+  };
+  try {
+    await api("/moves", "POST", body);
+    $("mv_add").value = ""; $("mv_drop").value = "";
+    load();
+  } catch (err) {
+    const tips = err.data && err.data.suggestions && err.data.suggestions.length ? ` Did you mean ${err.data.suggestions.join(", ")}?` : "";
+    $("mv_msg").textContent = err.message + tips;
+    if (err.data && err.data.unknown_player && confirm(`${err.message} Save it anyway?`)) {
+      try { await api("/moves", "POST", { ...body, force: true }); $("mv_msg").textContent = ""; load(); }
+      catch (e2) { $("mv_msg").textContent = e2.message; }
+    }
+  }
+};
+
+$("brief_btn").onclick = async () => {
+  const btn = $("brief_btn");
+  btn.disabled = true;
+  $("brief_hint").textContent = "Writing…";
+  try {
+    const b = await api("/brief", "POST", { punts, jev: useJev, preference, refresh: btn.dataset.done === "1" });
+    // The model writes light markdown; show it as plain text
+    $("brief").textContent = b.text.replace(/\*\*/g, "").replace(/^#+\s*/gm, "");
+    $("brief_hint").textContent = `Written ${new Date(b.ts).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}`;
+    btn.textContent = "Rewrite";
+    btn.dataset.done = "1";
+  } catch (e) {
+    $("brief_hint").textContent = "Couldn't write the brief: " + e.message;
+  }
+  btn.disabled = false;
+};
+
+load().then(loadPlayers);
+</script>
+{% endblock %}

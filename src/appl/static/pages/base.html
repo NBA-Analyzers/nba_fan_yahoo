@@ -22,9 +22,17 @@
   </header>
   <main class="page {% block page_class %}{% endblock %}">
     {% if league_id and active_tab %}
+    {% set manual_id = league_id[7:] if league_id.startswith('manual-') else none %}
     <nav class="league-tabs" aria-label="League sections">
+      {% if manual_id %}
+      <a href="/ai-chat/manual/{{ manual_id | urlencode }}" {% if active_tab == 'ask' %}class="active" aria-current="page"{% endif %}>💬 Ask</a>
+      <a href="/manual/{{ manual_id | urlencode }}" {% if active_tab == 'draft' %}class="active" aria-current="page"{% endif %}>📋 Draft</a>
+      <a href="/season/manual/{{ manual_id | urlencode }}" {% if active_tab == 'season' %}class="active" aria-current="page"{% endif %}>📈 Season</a>
+      {% else %}
       <a href="/ai-chat/{{ league_id | urlencode }}" {% if active_tab == 'ask' %}class="active" aria-current="page"{% endif %}>💬 Ask</a>
       <a href="/draft/{{ league_id | urlencode }}" {% if active_tab == 'draft' %}class="active" aria-current="page"{% endif %}>📋 Draft</a>
+      <a href="/season/yahoo/{{ league_id | urlencode }}" {% if active_tab == 'season' %}class="active" aria-current="page"{% endif %}>📈 Season</a>
+      {% endif %}
     </nav>
     {% endif %}
     {% block content %}{% endblock %}

@@ -82,3 +82,6 @@ oauth22.json
 
 # Manual draft leagues are per-user data
 src/appl/data/draft/manual/
+
+# Daily in-season stats cache
+src/appl/data/draft/player_pool_inseason_*.json

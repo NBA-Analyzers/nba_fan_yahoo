@@ -153,6 +153,7 @@
     <div class="msg" id="pk_msg"></div>
     <div class="logrow">
       <label class="toggle"><input type="checkbox" id="finished"> The draft is finished</label>
+      <a class="btn mini" id="season_link" style="display:none">Season analysis &rarr;</a>
       <span class="hint" id="clock"></span>
     </div>
   </section>
@@ -779,6 +780,8 @@ function renderManual(d) {
   $("pk_cost").required = d.is_auction;
   $("clock").textContent = m.complete ? "Every roster spot is filled." : `${d.picks.length} of ${m.total_picks} picks logged`;
   $("finished").checked = m.status === "finished";
+  $("season_link").href = `/season/manual/${leagueId}`;
+  $("season_link").style.display = m.status === "finished" ? "" : "none";
 
   const notes = $("notes");
   notes.textContent = "";

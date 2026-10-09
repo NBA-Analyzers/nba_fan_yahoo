@@ -51,6 +51,14 @@ standing.json
 player_stats_2025_26.json
 - Displays all the stats of each player this year.
 
+Manual leagues (league_settings.league_type says "Manual league")
+- The manager entered this league by hand; it is not on Yahoo, so there are no matchups or real standings.
+- team_rosters.json: every team's current players with per-game stats (draft picks plus recorded moves).
+- standing.json: estimated category standings, ranking each roster's per-game totals in every category.
+- my_team_analysis.json: the manager's category ranks, advice, trade ideas, pickup ideas and weakest players, computed by the app. Prefer these numbers over your own estimates.
+- free_agents.json: the best players on no roster, with their value for the manager's team.
+- draft_results.json, transactions.json, league_notes.json: the draft, the adds/drops/trades since, and the manager's own notes.
+
 Live data from nba.com and statmuse.com
 - Real-time stats, injury updates, player usage trends, and upcoming schedules.
 - Crucial to monitor player health, recent performance trends, and matchup difficulties.

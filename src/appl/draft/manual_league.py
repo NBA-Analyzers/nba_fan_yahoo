@@ -2,7 +2,8 @@
 A league entered by hand, for drafting without a Yahoo connection.
 
 The manager types in the league settings, logs each pick as it happens and adds
-notes before, during and after the draft. Each league is one JSON file per user.
+notes before, during and after the draft. After the draft, adds, drops and trades
+are recorded as moves, so the rosters stay current for the season analysis.
 `ManualDraftTracker` answers the same questions as `YahooDraftTracker`, so the
 ranker and the draft page work unchanged.
 """
@@ -246,6 +247,7 @@ class ManualLeagueStore:
             "status": "drafting",
             "picks": [],
             "notes": [],
+            "moves": [],
             **clean_settings(raw),
         }
         self.backend.write(user, league)
@@ -364,6 +366,148 @@ class ManualLeagueStore:
             user, league_id,
             lambda league: league.update(notes=[n for n in league["notes"] if n["id"] != note_id]),
         )
+
+    # --- moves after the draft (adds, drops, trades) -------------------------
+
+    def add_move(self, user: str, league_id: str, raw: dict) -> dict:
+        """Record a roster change. Raises ManualLeagueError if it doesn't fit the
+        current rosters (dropping a player the team doesn't have, and so on)."""
+        def change(league):
+            move = _clean_move(league, raw)
+            rosters = current_rosters(league)
+            _apply_move(rosters, move, league["team_names"], strict=True)
+            league.setdefault("moves", []).append(move)
+
+        return self._modify(user, league_id, change)
+
+    def delete_move(self, user: str, league_id: str, move_id: str) -> dict:
+        """Remove a recorded move, unless a later move depends on it."""
+        def change(league):
+            remaining = [m for m in league.get("moves", []) if m["id"] != move_id]
+            if len(remaining) == len(league.get("moves", [])):
+                raise ManualLeagueError("That move doesn't exist")
+            rosters = draft_rosters(league)
+            for move in remaining:
+                try:
+                    _apply_move(rosters, move, league["team_names"], strict=True)
+                except ManualLeagueError:
+                    raise ManualLeagueError(
+                        "A later move depends on this one; delete that one first"
+                    ) from None
+            league["moves"] = remaining
+
+        return self._modify(user, league_id, change)
+
+
+MOVE_KINDS = ("add", "drop", "trade")
+MAX_MOVE_PLAYERS = 5
+
+
+def _names(raw) -> list[str]:
+    if isinstance(raw, str):
+        raw = raw.split(",")
+    names = [str(n).strip()[:80] for n in (raw or [])]
+    return [n for n in names if n][:MAX_MOVE_PLAYERS]
+
+
+def _clean_move(league: dict, raw: dict) -> dict:
+    kind = raw.get("kind")
+    if kind not in MOVE_KINDS:
+        raise ManualLeagueError("Choose add, drop or trade")
+    n = league["num_teams"]
+    team = _int(raw.get("team"), "Team", 1, n, league["my_slot"]) - 1
+    add, drop = _names(raw.get("add")), _names(raw.get("drop"))
+    move = {"id": uuid.uuid4().hex[:8], "ts": _now(), "kind": kind, "team": team,
+            "add": add, "drop": drop}
+    if kind == "add" and not add:
+        raise ManualLeagueError("Name the player who was picked up")
+    if kind == "drop" and (add or not drop):
+        raise ManualLeagueError("Name the player who was dropped")
+    if kind == "trade":
+        partner = _int(raw.get("partner"), "Trade partner", 1, n) - 1
+        if partner == team:
+            raise ManualLeagueError("A team can't trade with itself")
+        if not add or not drop:
+            raise ManualLeagueError("A trade needs players going both ways")
+        move["partner"] = partner
+    return move
+
+
+def _team_name(names: list[str], index: int) -> str:
+    return names[index] if index < len(names) else f"Team {index + 1}"
+
+
+def _apply_move(rosters: list[list[str]], move: dict, team_names: list[str], strict: bool) -> None:
+    """Change `rosters` in place. strict: refuse moves that don't fit (for new
+    moves); otherwise apply what still fits (replaying after picks were edited)."""
+    def owner(name):
+        low = name.lower()
+        return next((i for i, r in enumerate(rosters) if any(p.lower() == low for p in r)), None)
+
+    def remove(team, name):
+        low = name.lower()
+        rosters[team][:] = [p for p in rosters[team] if p.lower() != low]
+
+    team = move["team"]
+    if team >= len(rosters):
+        if strict:
+            raise ManualLeagueError("That team no longer exists")
+        return
+
+    if move["kind"] == "trade":
+        partner = move.get("partner", -1)
+        if not 0 <= partner < len(rosters):
+            if strict:
+                raise ManualLeagueError("That team no longer exists")
+            return
+        give, get = move["drop"], move["add"]
+        if strict:
+            for name in give:
+                if owner(name) != team:
+                    raise ManualLeagueError(f"{_team_name(team_names, team)} doesn't have {name}")
+            for name in get:
+                if owner(name) != partner:
+                    raise ManualLeagueError(f"{_team_name(team_names, partner)} doesn't have {name}")
+        for name in give:
+            if owner(name) == team:
+                remove(team, name)
+                rosters[partner].append(name)
+        for name in get:
+            if owner(name) == partner:
+                remove(partner, name)
+                rosters[team].append(name)
+        return
+
+    for name in move["drop"]:
+        if owner(name) != team:
+            if strict:
+                raise ManualLeagueError(f"{_team_name(team_names, team)} doesn't have {name}")
+            continue
+        remove(team, name)
+    for name in move["add"]:
+        held = owner(name)
+        if held is not None:
+            if strict:
+                raise ManualLeagueError(f"{name} is already on {_team_name(team_names, held)}")
+            continue
+        rosters[team].append(name)
+
+
+def draft_rosters(league: dict) -> list[list[str]]:
+    """Each team's players as drafted (index = 0-based team)."""
+    rosters = [[] for _ in range(league["num_teams"])]
+    for p in league["picks"]:
+        if p["team"] < len(rosters):
+            rosters[p["team"]].append(p["player_name"])
+    return rosters
+
+
+def current_rosters(league: dict) -> list[list[str]]:
+    """Each team's players today: the draft plus every recorded move."""
+    rosters = draft_rosters(league)
+    for move in league.get("moves", []):
+        _apply_move(rosters, move, league["team_names"], strict=False)
+    return rosters
 
 
 def _now() -> str:

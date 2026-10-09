@@ -146,9 +146,20 @@ def choose(
     client=None,
 ) -> dict | None:
     """Ask Jev to pick from the shortlist. Returns None if Jev can't answer."""
+    if len(shortlist) < 2:
+        return None
+    state, criteria = build_request(
+        shortlist, roster, punts, categories, roster_profile, preference
+    )
+    return ask(state, criteria, INSTRUCTIONS, client)
+
+
+def ask(state: dict, criteria: dict, instructions: str, client=None) -> dict | None:
+    """One Jev choice among `criteria` (option name -> description), given `state`.
+    Returns {"pick", "confidence", "options"} or None if Jev can't answer."""
     global _failed_until
 
-    if len(shortlist) < 2:
+    if len(criteria) < 2:
         return None
     # An injected client (tests) bypasses the key check, cooldown and cache
     use_shared_state = client is None
@@ -157,11 +168,8 @@ def choose(
     if use_shared_state and time.monotonic() < _failed_until:
         return None
 
-    state, criteria = build_request(
-        shortlist, roster, punts, categories, roster_profile, preference
-    )
     cache_key = hashlib.sha1(
-        json.dumps([state, criteria], sort_keys=True).encode()
+        json.dumps([state, criteria, instructions], sort_keys=True).encode()
     ).hexdigest()
     if use_shared_state and cache_key in _cache:
         return _cache[cache_key]
@@ -171,7 +179,7 @@ def choose(
 
         response = (client or _get_client()).system_one(
             state,
-            {"pick": Choice(criteria=criteria, instructions=INSTRUCTIONS)},
+            {"pick": Choice(criteria=criteria, instructions=instructions)},
         )
         answer = response.choices["pick"]
     except Exception as e:

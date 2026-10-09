@@ -12,6 +12,8 @@ import uuid
 import logging
 
 from ..ai.document_indexer import DocumentIndexer
+from ..draft.manual_league import user_key
+from ..season.service import index_manual_league_async, manual_chat_id
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
 from ..middleware.auth_decorators import require_google_auth
 
@@ -19,8 +21,9 @@ logger = logging.getLogger(__name__)
 
 
 class MainRouter:
-    def __init__(self, document_indexer: DocumentIndexer):
+    def __init__(self, document_indexer: DocumentIndexer, manual_store=None):
         self.document_indexer = document_indexer
+        self.manual_store = manual_store
         self._blueprint = self._create_blueprint()
 
     def _create_blueprint(self):
@@ -138,6 +141,21 @@ class MainRouter:
                 return redirect(agent_url)
 
             return chat_content()
+
+        @main_bp.route("/ai-chat/manual/<league_id>")
+        @require_google_auth
+        def ai_chat_manual(league_id):
+            """The same chat for a manual league. Its data is indexed in the background
+            (like the Yahoo sync) while the chat opens."""
+            try:
+                league = self.manual_store.get(user_key(session.get("google_user")), league_id)
+            except KeyError:
+                return redirect("/manual")
+            try:
+                index_manual_league_async(self.document_indexer, league)
+            except Exception as e:
+                logger.warning(f"Could not start indexing manual league {league_id}: {e}")
+            return redirect(f"/agent?league_id={manual_chat_id(league_id)}&session_id={uuid.uuid4()}")
 
         # Serve the main page
         @main_bp.route("/agent")

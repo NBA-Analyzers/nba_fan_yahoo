@@ -108,12 +108,19 @@ async function loadLeagues() {
       const link = el("a", l.name, "name");
       link.href = `/manual/${l.id}`;
       info.append(link, el("small", `${l.is_auction ? "Auction" : "Snake"} · ${l.num_teams} teams · ${l.picks}/${l.total_picks} picks · ${l.status === "finished" ? "draft finished" : "drafting"}`));
+      const ask = el("a", "💬 Ask", "btn mini");
+      ask.href = `/ai-chat/manual/${l.id}`;
+      const season = el("a", "Season analysis", "btn secondary mini");
+      season.href = `/season/manual/${l.id}`;
       const del = el("button", "Delete", "btn secondary mini");
       del.onclick = async () => {
         if (!confirm(`Delete "${l.name}" and all its picks and notes?`)) return;
         try { await api(`/manual/${l.id}`, { method: "DELETE" }); loadLeagues(); } catch (e) { showError(e.message); }
       };
-      row.append(info, del);
+      const actions = el("div");
+      actions.style.cssText = "display:flex; gap:8px; flex-shrink:0";
+      actions.append(ask, season, del);
+      row.append(info, actions);
       box.append(row);
     });
   } catch (e) { box.textContent = ""; showError("Could not load leagues: " + e.message); }
