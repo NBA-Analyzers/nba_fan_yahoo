@@ -60,7 +60,7 @@ def manual_id_from_chat(chat_league_id: str | None) -> str | None:
 
 # --- the files the chat retrieves from ---------------------------------------
 
-def _stat_line(player: dict | None) -> dict:
+def stat_line(player: dict | None) -> dict:
     if not player:
         return {"stats": "no stats found"}
     line = {k: round(player[k], 1) for k in STAT_LINE if k in player}
@@ -99,7 +99,7 @@ def manual_league_files(league: dict) -> dict:
             {
                 "team": names[i],
                 "is_my_team": i == mine,
-                "players": [{"name": n, **_stat_line(ranker.find(n))} for n in roster],
+                "players": [{"name": n, **stat_line(ranker.find(n))} for n in roster],
             }
             for i, roster in enumerate(snap.rosters)
         ],
@@ -117,7 +117,7 @@ def manual_league_files(league: dict) -> dict:
             "pickup_ideas": report["pickups"],
             "weakest_players": report["drops"],
         },
-        "free_agents": [{"name": r["name"], "value_for_my_team": r["score"], **_stat_line(ranker.find(r["name"]))}
+        "free_agents": [{"name": r["name"], "value_for_my_team": r["score"], **stat_line(ranker.find(r["name"]))}
                         for r in free_agents],
         "draft_results": [
             {"pick": i + 1, "team": names[p["team"]] if p["team"] < len(names) else p["team"],

@@ -17,8 +17,24 @@ class SearchResult:
     collection_id: str
 
 
+@dataclass(frozen=True)
+class ToolCall:
+    id: str
+    name: str
+    arguments: dict
+
+
+@dataclass(frozen=True)
+class LLMReply:
+    """One model turn: either a final answer (`content`) or tools it wants run."""
+    content: str = ""
+    tool_calls: tuple[ToolCall, ...] = ()
+
+
 class LLMClient(Protocol):
     def complete(self, messages: list[dict]) -> str: ...
+
+    def complete_with_tools(self, messages: list[dict], tools: list[dict]) -> LLMReply: ...
 
 
 class Embedder(Protocol):

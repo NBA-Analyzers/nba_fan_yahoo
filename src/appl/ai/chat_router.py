@@ -48,6 +48,7 @@ class ChatRouter:
 
             request_for_service = dict(chat_request)
             request_for_service["league_id"] = league_id
+            request_for_service["user_id"] = user.user_id  # set here, never trusted from the client
             # Keep every user's chat history separate, whatever session_id the client sends
             client_session_id = chat_request.get("session_id")
             if client_session_id:

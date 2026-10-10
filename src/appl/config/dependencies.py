@@ -6,6 +6,9 @@ from ..ai.document_indexer import DocumentIndexer
 from ..ai.firestore_store import FirestoreVectorStore
 from ..ai.litellm_adapters import LiteLLMClient, LiteLLMEmbedder
 from ..ai.retrieval import RetrievalService
+from ..ai.tools import manual_toolkit_factory
+from ..draft.manual_league import default_store
+from ..season.schedule import Schedule
 from ..service.chat_session_manager import ChatSessionManager
 
 _chat_session_manager = None
@@ -43,6 +46,7 @@ def set_services():
         retrieval=_retrieval_service,
         sessions=_chat_session_manager,
         system_prompt=load_system_prompt(),
+        tools_factory=manual_toolkit_factory(default_store(), Schedule.load()),
     )
 
 

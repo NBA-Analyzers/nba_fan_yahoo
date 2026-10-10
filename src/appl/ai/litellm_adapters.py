@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import time
@@ -6,6 +7,7 @@ from typing import Callable, Optional
 import litellm
 
 from ..ingest.http import with_retry
+from .ports import LLMReply, ToolCall
 from .redact import scrub_secrets
 
 logger = logging.getLogger(__name__)
@@ -62,33 +64,59 @@ class LiteLLMClient:
         )
 
     def complete(self, messages: list[dict]) -> str:
+        return self._first_working(lambda model: self._complete_with(model, messages))
+
+    def complete_with_tools(self, messages: list[dict], tools: list[dict]) -> LLMReply:
+        """One model turn with `tools` on offer: a final answer or tool calls to run."""
+        return self._first_working(lambda model: self._turn_with(model, messages, tools))
+
+    def _first_working(self, call: Callable[[str], object]):
         models = [self.model] + ([self.fallback_model] if self.fallback_model else [])
         last_error: Optional[Exception] = None
         for model in models:
             try:
-                return self._complete_with(model, messages)
+                return call(model)
             except Exception as e:
                 last_error = e
                 logger.warning("LLM call to %s failed: %s", model, scrub_secrets(str(e)))
         # `from None`: the original exception text can contain the request URL (with the key)
         raise LLMError(f"LLM call failed: {scrub_secrets(str(last_error))}") from None
 
-    def _complete_with(self, model: str, messages: list[dict]) -> str:
+    def _message(self, model: str, messages: list[dict], tools: Optional[list[dict]] = None):
+        extra = {"tools": tools} if tools else {}
         response = _call_with_retries(
             lambda: litellm.completion(
                 model=model,
                 messages=messages,
                 timeout=self.timeout,
                 num_retries=0,
+                **extra,
             ),
             self.max_retries,
             self.retry_delay,
             self._sleep,
         )
-        content = response.choices[0].message.content
+        return response.choices[0].message
+
+    def _complete_with(self, model: str, messages: list[dict]) -> str:
+        content = self._message(model, messages).content
         if not content:
             raise ValueError("LLM returned an empty answer")
         return content
+
+    def _turn_with(self, model: str, messages: list[dict], tools: list[dict]) -> LLMReply:
+        message = self._message(model, messages, tools)
+        calls = []
+        for call in getattr(message, "tool_calls", None) or []:
+            try:
+                arguments = json.loads(call.function.arguments or "{}")
+            except ValueError:
+                arguments = {}
+            calls.append(ToolCall(call.id, call.function.name,
+                                  arguments if isinstance(arguments, dict) else {}))
+        if not calls and not message.content:
+            raise ValueError("LLM returned an empty answer")
+        return LLMReply(content=message.content or "", tool_calls=tuple(calls))
 
 
 class LiteLLMEmbedder:
