@@ -65,12 +65,7 @@ def test_email_is_normalised():
 # ---------- sign_in: storage failures ----------
 import logging
 
-from flask import Blueprint, Flask
-
 from appl.identity import sign_in
-from appl.repository.firestore import AuthService
-from appl.router.auth_routes import AuthRouter
-from appl.tests.unit.fake_firestore import FakeFirestore
 
 
 class BrokenStore:
@@ -103,44 +98,3 @@ def test_email_user_still_signs_in_when_store_is_down_with_the_same_id(caplog):
     with caplog.at_level(logging.ERROR):
         assert sign_in(BrokenStore(), password())["user_id"] == healthy
     assert any(r.exc_info for r in caplog.records)
-
-
-class FakeGoogle:
-    def authorize_access_token(self):
-        return {"access_token": "t"}
-
-    def get(self, url):
-        class R:
-            def json(self_inner):
-                return {"sub": "g123", "email": "a@x.com", "email_verified": True,
-                        "name": "Ann Lee", "given_name": "Ann"}
-        return R()
-
-
-def _callback_app(store):
-    app = Flask(__name__)
-    app.secret_key = "test"
-    app.oauth = type("O", (), {"create_client": lambda self, name: FakeGoogle()})()
-    main = Blueprint("main", __name__)
-    main.add_url_rule("/dashboard", "dashboard", lambda: "dash")
-    app.register_blueprint(main)
-    app.register_blueprint(AuthRouter(None, store, AuthService(FakeFirestore())).get_bp())
-    return app
-
-
-def test_google_callback_redirects_and_logs_when_database_write_fails(caplog):
-    client = _callback_app(BrokenStore()).test_client()
-    with caplog.at_level(logging.ERROR):
-        resp = client.get("/auth/google/callback")
-    assert resp.status_code == 302 and resp.headers["Location"].endswith("/dashboard")
-    with client.session_transaction() as s:
-        assert s["user_id"] == "g123" and s["profile"]["given_name"] == "Ann"
-    assert any(r.exc_info for r in caplog.records)
-
-
-def test_google_callback_double_login_is_one_user():
-    store = MemoryIdentityStore()
-    client = _callback_app(store).test_client()
-    client.get("/auth/google/callback")
-    client.get("/auth/google/callback")
-    assert list(store.users) == ["g123"] and len(store.identities) == 1

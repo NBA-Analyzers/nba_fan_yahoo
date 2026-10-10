@@ -2,7 +2,7 @@ import logging
 import time
 import xml.etree.ElementTree as ET
 
-from ..config.app_config import DEBUG, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+from ..config.app_config import DEBUG
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
 from flask import Blueprint, current_app, jsonify, redirect, render_template, request, session, url_for
 from ..middleware.auth_decorators import require_login
@@ -105,68 +105,6 @@ class AuthRouter:
                 return jsonify(error="verify_email"), 403
             start_session(signed_in["user_id"], signed_in["profile"])
             return jsonify(ok=True, redirect=url_for("main.dashboard"))
-
-        @auth_bp.route("/google/login")
-        def google_login():
-            """Google OAuth login - First step in authentication flow"""
-
-            google = current_app.oauth.create_client("google")
-            if google is None:
-                logger.error("Google OAuth client is not available")
-                return "Google OAuth client not configured", 500
-            if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
-                logger.error("GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are not set")
-                return "Google OAuth credentials not configured", 500
-
-            # ProxyFix already reports https behind ngrok; forcing it breaks plain http://localhost
-            redirect_uri = url_for("auth.google_callback", _external=True)
-            return google.authorize_redirect(redirect_uri)
-
-        @auth_bp.route("/google/callback")
-        def google_callback():
-            """Google OAuth callback - After successful Google auth, redirect to dashboard"""
-
-            google = current_app.oauth.create_client("google")
-            if google is None:
-                logger.error("Google OAuth client is not available")
-                return "Google OAuth client not configured", 500
-
-            try:
-                token = google.authorize_access_token()
-                resp = google.get("https://openidconnect.googleapis.com/v1/userinfo")
-                user_info = resp.json()
-
-                # Google's userinfo has the same shape as the claims of a Firebase ID token
-                sub = user_info["sub"]
-                claims = {
-                    "uid": sub,
-                    "email": user_info.get("email"),
-                    "email_verified": user_info.get("email_verified"),
-                    "name": user_info.get("name"),
-                    "given_name": user_info.get("given_name"),
-                    "picture": user_info.get("picture"),
-                    "firebase": {"sign_in_provider": "google.com",
-                                 "identities": {"google.com": [sub]}},
-                }
-                # A storage failure falls back to the Google sub and doesn't block login
-                signed_in = sign_in(self.identity_store, claims)
-                start_session(signed_in["user_id"], signed_in["profile"])
-                try:  # kept server-side with the user; a failure never blocks login
-                    retry_once(lambda: self.auth_service.save_google_token(
-                        signed_in["user_id"], token["access_token"]), "saving Google token")
-                except Exception as e:
-                    log_failure("Could not save the Google token", e)
-                return redirect(url_for("main.dashboard"))
-
-            except Exception as e:
-                log_failure("Error during Google callback", e)
-                return render_template(
-                    "pages/message.html",
-                    title="Sign-in didn't work",
-                    text="Something went wrong signing in with Google. Please try again.",
-                    link="/auth/google/login",
-                    link_text="Try again",
-                ), 500
 
         @auth_bp.route("/yahoo/login")
         @require_login

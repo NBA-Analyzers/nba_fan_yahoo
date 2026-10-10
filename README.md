@@ -120,9 +120,9 @@ GOOGLE_CLOUD_PROJECT=your_gcp_project_id
 #   gcloud firestore indexes composite create --collection-group=chunks #     --query-scope=COLLECTION #     --field-config=field-path=embedding,vector-config='{"dimension":"768","flat":"{}"}'
 
 
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
+# Firebase Auth (sign-in)
+FIREBASE_API_KEY=your_firebase_web_api_key
+FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 
 # Flask Configuration
 FLASK_SECRET_KEY=your_secret_key_here

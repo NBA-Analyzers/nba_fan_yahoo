@@ -11,8 +11,8 @@ client IDs below) and the service account actually reading Firestore (the `roles
 3. Secrets `gemini-api-key`, `flask-secret` (new random value for production) in Secret Manager, with `secretAccessor` for `fantasy-app`.
 4. Exported a **clean copy of the committed branch** (`git archive HEAD | tar -x -C <dir>`) so uncommitted local work is never deployed, then:
    `gcloud run deploy fantasy-ai --source <dir> --region europe-west1 --service-account fantasy-app@... --allow-unauthenticated --max-instances 1 --memory 1Gi --timeout 600 --env-vars-file env.yaml --set-secrets ...`
-5. To add the login credentials later: put the client IDs in the env file / `gcloud run services update fantasy-ai --update-env-vars GOOGLE_CLIENT_ID=...,YAHOO_CLIENT_ID=...`, store the two client secrets in Secret Manager and attach with `--update-secrets GOOGLE_CLIENT_SECRET=google-client-secret:latest,YAHOO_CLIENT_SECRET=yahoo-client-secret:latest`.
-6. Register `https://fantasy-ai-276008835589.europe-west1.run.app/auth/google/callback` (Google) and `.../auth/yahoo/callback` (Yahoo).
+5. Sign-in is Firebase Auth (see the Firebase section below). For Yahoo: `gcloud run services update fantasy-ai --update-env-vars YAHOO_CLIENT_ID=...` and attach the secret with `--update-secrets YAHOO_CLIENT_SECRET=yahoo-client-secret:latest`.
+6. Register `https://fantasy-ai-276008835589.europe-west1.run.app/auth/yahoo/callback` in your Yahoo app.
 
 ## Nightly data refresh (Cloud Run Job + Cloud Scheduler) — not yet run
 
@@ -77,7 +77,7 @@ Create one secret per sensitive value (paste the value when prompted via stdin):
 ```
 printf '%s' '<value>' | gcloud secrets create gemini-api-key --data-file=-
 ```
-Do the same for `FLASK_SECRET_KEY`, `GOOGLE_CLIENT_SECRET`, `YAHOO_CLIENT_SECRET`, then grant access:
+Do the same for `FLASK_SECRET_KEY`, `YAHOO_CLIENT_SECRET`, then grant access:
 ```
 gcloud secrets add-iam-policy-binding gemini-api-key --member=serviceAccount:fantasy-app@<PROJECT_ID>.iam.gserviceaccount.com --role=roles/secretmanager.secretAccessor
 ```
@@ -94,14 +94,14 @@ Grant `secretAccessor` as above and add `ESPN_COOKIE_KEY=espn-cookie-key:latest`
 ```
 gcloud run deploy fantasy-ai --source . --region europe-west1 --service-account fantasy-app@<PROJECT_ID>.iam.gserviceaccount.com \
   --allow-unauthenticated --max-instances 1 \
-  --set-env-vars GOOGLE_CLOUD_PROJECT=<PROJECT_ID>,LLM_MODEL=gemini/gemini-3.8-flash,LLM_FALLBACK_MODEL=gemini/gemini-3.7-flash,EMBEDDING_MODEL=gemini/gemini-embedding-001,EMBEDDING_DIMENSIONS=768,GOOGLE_CLIENT_ID=<id>,YAHOO_CLIENT_ID=<id>,YAHOO_REDIRECT_URL=https://<service-url>/auth/yahoo/callback \
-  --set-secrets GEMINI_API_KEY=gemini-api-key:latest,FLASK_SECRET_KEY=flask-secret:latest,GOOGLE_CLIENT_SECRET=google-client-secret:latest,YAHOO_CLIENT_SECRET=yahoo-client-secret:latest
+  --set-env-vars GOOGLE_CLOUD_PROJECT=<PROJECT_ID>,LLM_MODEL=gemini/gemini-3.8-flash,LLM_FALLBACK_MODEL=gemini/gemini-3.7-flash,EMBEDDING_MODEL=gemini/gemini-embedding-001,EMBEDDING_DIMENSIONS=768,YAHOO_CLIENT_ID=<id>,YAHOO_REDIRECT_URL=https://<service-url>/auth/yahoo/callback \
+  --set-secrets GEMINI_API_KEY=gemini-api-key:latest,FLASK_SECRET_KEY=flask-secret:latest,YAHOO_CLIENT_SECRET=yahoo-client-secret:latest
 ```
 Notes:
 - `--max-instances 1` and the Dockerfile's single gunicorn worker are deliberate: chat history lives in process memory
   (see AI_DESIGN.md §10.1). Move sessions to Firestore before scaling out.
 - Cloud Run URLs are already HTTPS, so login redirects work without a tunnel. Register
-  `https://<service-url>/auth/google/callback` and `/auth/yahoo/callback` in the Google and Yahoo consoles.
+  `https://<service-url>/auth/yahoo/callback` in the Yahoo console.
 - Manual draft leagues are stored in Firestore (collection `manual_leagues`), switched on automatically when `K_SERVICE` is set. The container disk is wiped on every restart, so nothing the draft pages save may live there.
 - The first deploy prints the service URL; set `YAHOO_REDIRECT_URL` to match and redeploy.
 
@@ -148,8 +148,8 @@ paused or deleted, and the `supabase-key` secret removed.
 ## Sign-in: Firebase Auth (email + Google) and server-side sessions
 The home page shows the Firebase sign-in widget (email + password with a verification mail, email link, Google). The browser
 signs in with the Firebase SDK; `POST /auth/session` verifies the ID token with `firebase-admin` (Application Default Credentials,
-no key file) and starts our own session. Until `FIREBASE_API_KEY` and `FIREBASE_AUTH_DOMAIN` are set the page falls back to the
-old "Sign in with Google" link (`/auth/google/login`), so nothing breaks before this is configured.
+no key file) and starts our own session. `FIREBASE_API_KEY` and `FIREBASE_AUTH_DOMAIN` must be set, otherwise the page says
+sign-in is not configured.
 
 One-time setup (Google Cloud / Firebase console):
 1. Add Firebase to the project (console.firebase.google.com > Add project > pick `<PROJECT_ID>`), or enable Identity Platform.
@@ -162,7 +162,7 @@ One-time setup (Google Cloud / Firebase console):
 7. Existing Google users keep their account: their `user_id` stays their Google `sub`. Run the Supabase migration first (it also
    writes the `identities` documents that let an email login with the same address join the old account).
 
-Once Google sign-in through Firebase is verified, the old `/auth/google/*` routes and `GOOGLE_CLIENT_SECRET` can be removed.
+The old server-side Google login (`/auth/google/*`, `GOOGLE_CLIENT_ID/SECRET`, the `google-client-secret` secret) was removed.
 Yahoo still connects through its own OAuth flow.
 
 ### Sessions (not the same as chat history)

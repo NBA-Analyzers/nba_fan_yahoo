@@ -30,9 +30,6 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 YAHOO_CLIENT_ID = os.getenv("YAHOO_CLIENT_ID") or os.getenv("YAHOO_FANTASY_CLIENT_ID")
 YAHOO_CLIENT_SECRET = os.getenv("YAHOO_CLIENT_SECRET") or os.getenv("YAHOO_FANTASY_CLIENT_SECRET")
 YAHOO_REDIRECT_URI = os.getenv("YAHOO_REDIRECT_URL")
-GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID") or os.getenv("Google_OAuth_Client_ID")
-GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET") or os.getenv("Google_OAuth_Client_Secret")
 FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY")  # public by design (identifies the project)
 FIREBASE_AUTH_DOMAIN = os.getenv("FIREBASE_AUTH_DOMAIN")
 FIREBASE_PROJECT_ID = os.getenv("FIREBASE_PROJECT_ID") or os.getenv("GOOGLE_CLOUD_PROJECT")
-GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"

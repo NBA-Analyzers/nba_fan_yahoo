@@ -11,7 +11,7 @@ What the app needs, in one line each:
 | Gemini API key | the AI answers + embeddings | **Yes** |
 | Google Cloud project + Firestore | stores the document vectors for retrieval | **Yes** |
 | Firestore (same project) | user accounts / Yahoo links | **Yes** (no extra setup) |
-| Google OAuth client | "Login with Google" | **Yes** (to log in) |
+| Firebase Auth (same project) | email + Google sign-in | **Yes** (to log in) |
 | Yahoo developer app | reading your fantasy league | **Yes** (to sync a league) |
 | HTTPS tunnel (ngrok/cloudflared) | Google/Yahoo redirect to `https://` | **Yes** (for local login) |
 | OpenAI | — | **No longer needed** |
@@ -126,9 +126,10 @@ GOOGLE_CLOUD_PROJECT=<project id from Step 3>
 # --- App ---
 FLASK_SECRET_KEY=<run: python -c "import secrets; print(secrets.token_hex(32))">
 
-# --- Google login ---
-GOOGLE_CLIENT_ID=<Step 6>
-GOOGLE_CLIENT_SECRET=<Step 6>
+# --- Sign-in (Firebase Auth) ---
+FIREBASE_API_KEY=<Step 6>
+FIREBASE_AUTH_DOMAIN=<project id>.firebaseapp.com
+FIREBASE_PROJECT_ID=<project id>
 
 # --- Yahoo ---
 YAHOO_CLIENT_ID=<Step 7>
@@ -141,14 +142,15 @@ You can delete `OPENAI_API_KEY`; nothing reads it any more (unless you set `LLM_
 
 ---
 
-## Step 6 — Google login credentials (10 min)
+## Step 6 — Firebase sign-in (10 min)
 
-1. https://console.cloud.google.com/apis/credentials (use the same project).
-2. If asked, configure the **OAuth consent screen** first (External, add yourself as a test user).
-3. **Create credentials → OAuth client ID → Web application.**
-4. **Authorized redirect URIs:** `https://<your-tunnel-host>/auth/google/callback`
-   (the tunnel host comes from Step 8; you can come back and add it).
-5. Copy the Client ID and secret into `.env`.
+1. https://console.firebase.google.com → add Firebase to the same Google Cloud project.
+2. **Authentication → Sign-in method:** enable Email/Password (with Email link) and Google.
+3. **Authentication → Settings → Authorized domains:** `localhost` is there; add your Cloud Run domain later.
+4. **Project settings → Your apps → Web (`</>`):** register an app and copy `apiKey` into `FIREBASE_API_KEY`
+   (it is public, not a secret). `authDomain` is `<project id>.firebaseapp.com`.
+5. Locally, run `gcloud auth application-default login` so the server can verify tokens and reach Firestore.
+   Make sure no stray `GOOGLE_APPLICATION_CREDENTIALS` points at another project's key.
 
 ## Step 7 — Yahoo developer app (10 min)
 

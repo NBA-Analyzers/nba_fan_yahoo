@@ -136,11 +136,6 @@ class AuthService:
         return GoogleAuth(user_id, payload["full_name"], payload["email"],
                           last_updated=payload["last_updated"])
 
-    def save_google_token(self, user_id: str, access_token: str) -> None:
-        """Keep the Google access token with the user record (a secret, never logged)."""
-        self.fs.col("users").document(user_hash(_check_id(user_id, "User ID"))).set(
-            {"user_id": user_id, "access_token": access_token, "last_updated": _now()}, merge=True)
-
     def get_google_user(self, google_user_id: str) -> GoogleAuth:
         snap = self.fs.col("users").document(user_hash(google_user_id)).get()
         if not snap.exists:

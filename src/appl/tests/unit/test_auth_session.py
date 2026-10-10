@@ -112,4 +112,4 @@ def test_home_page_shows_widget_only_when_firebase_is_configured():
         with_fb = render_template("pages/home.html", firebase=cfg)
         without = render_template("pages/home.html", firebase=None)
     assert 'id="signin"' in with_fb and "/static/login.js" in with_fb and "d.firebaseapp.com" in with_fb
-    assert 'id="signin"' not in without and "/auth/google/login" in without
+    assert 'id="signin"' not in without and "not configured" in without
