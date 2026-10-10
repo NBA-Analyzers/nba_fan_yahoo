@@ -4,10 +4,12 @@ from pathlib import Path
 import pytest
 from flask import Blueprint, Flask
 
+from appl.draft.api_tokens import ApiTokenStore, FileTokenBackend
 from appl.draft.manual_league import (
     ManualDraftTracker,
     ManualLeagueError,
     ManualLeagueStore,
+    current_rosters,
     snake_team,
 )
 from appl.tests.unit.test_draft import _name, _player
@@ -152,8 +154,6 @@ def test_tracker_auction_state_tracks_budgets(store):
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
-    for var in ("SUPABASE_URL", "SUPABASE_KEY"):
-        monkeypatch.setenv(var, "test")
     routes = importlib.import_module("appl.router.draft_routes")
     from appl.draft import jev_chooser
 
@@ -168,13 +168,14 @@ def client(tmp_path, monkeypatch):
     app = Flask(__name__, static_folder=static, template_folder=static)  # as in the real app
     app.secret_key = "test"
     app.config["TESTING"] = True
-    auth = Blueprint("auth", __name__)
-    auth.add_url_rule("/login", "google_login", lambda: "login")  # the target of the login redirect
-    app.register_blueprint(auth)
-    app.register_blueprint(routes.DraftRouter(ManualLeagueStore(tmp_path)).get_manual_bp())
+    home = Blueprint("main", __name__)
+    home.add_url_rule("/", "homepage", lambda: "home")  # the target of the login redirect
+    app.register_blueprint(home)
+    tokens = ApiTokenStore(FileTokenBackend(tmp_path / "tokens.json"))
+    app.register_blueprint(routes.DraftRouter(ManualLeagueStore(tmp_path), tokens).get_manual_bp())
     test_client = app.test_client()
     with test_client.session_transaction() as session:
-        session["google_user"] = {"sub": USER}
+        session["user_id"] = USER
     return test_client
 
 
@@ -254,3 +255,85 @@ def test_duplicate_pick_says_who_has_him(client):
     response = client.post(f"/manual/{league_id}/picks", json={"player_name": "big aa"})
     assert response.status_code == 400
     assert "pick #1, Team 1" in response.get_json()["error"]
+
+
+# --- importing a finished league (e.g. from screenshots, via Claude Code) -------
+
+def _teams(*rosters):
+    return [{"name": f"T{i}", "players": list(r)} for i, r in enumerate(rosters)]
+
+
+def test_import_stores_rosters_as_a_finished_draft(store):
+    league = store.import_league(USER, {
+        "name": "Shots", "my_team": "t1",
+        "teams": _teams(["A", "B", "C"], ["D", "E"], ["F"]),
+    })
+    assert league["status"] == "finished" and league["num_teams"] == 3
+    assert league["my_slot"] == 2  # matched by name, ignoring case
+    assert league["roster_size"] == 3  # the biggest roster, when no slots are given
+    assert current_rosters(store.get(USER, league["id"])) == [["A", "B", "C"], ["D", "E"], ["F"]]
+
+
+def test_import_refuses_a_player_on_two_teams_and_unknown_teams(store):
+    with pytest.raises(ManualLeagueError, match="two teams"):
+        store.import_league(USER, {"my_team": 1, "teams": _teams(["A"], ["a"])})
+    with pytest.raises(ManualLeagueError, match="No team called"):
+        store.import_league(USER, {"my_team": "Nobody", "teams": _teams(["A"], ["B"])})
+    with pytest.raises(ManualLeagueError):
+        store.import_league(USER, {"my_team": 1, "teams": _teams(["A"])})
+    assert store.list(USER) == []
+
+
+def _token(client):
+    return client.post("/manual/api/tokens", json={"label": "cc"}).get_json()["token"]
+
+
+def test_a_token_imports_a_league_for_its_owner_without_a_session(client):
+    token = _token(client)
+    with client.session_transaction() as session:
+        session.clear()
+    auth = {"Authorization": f"Bearer {token}"}
+    body = {"name": "Shots", "my_team": 1, "teams": _teams(["big aa", "Guard Ab"], ["Big Ac"])}
+
+    dry = client.post("/manual/api/import", json={**body, "dry_run": True}, headers=auth).get_json()
+    assert dry["unknown"] == [] and dry["teams"][0]["players"][0]["name"] == "Big Aa"
+    assert client.get("/manual/api/leagues", headers=auth).get_json()["leagues"] == []  # dry run saves nothing
+
+    response = client.post("/manual/api/import", json=body, headers=auth)
+    assert response.status_code == 201
+    league_id = response.get_json()["id"]
+    assert response.get_json()["links"]["season"] == f"/season/manual/{league_id}"
+
+    with client.session_transaction() as session:  # the same Google user sees it in the browser
+        session["user_id"] = USER
+    state = client.get(f"/manual/{league_id}/state").get_json()
+    assert state["my_roster"] == ["Big Aa", "Guard Ab"] and state["draft_status"] == "finished"
+
+
+def test_import_reports_unknown_names_and_saves_only_when_forced(client):
+    auth = {"Authorization": f"Bearer {_token(client)}"}
+    body = {"my_team": 1, "teams": _teams(["Big Aa", "Zzqx Unknownson"], ["Big Ab"])}
+    response = client.post("/manual/api/import", json=body, headers=auth)
+    assert response.status_code == 400 and response.get_json()["unknown"] == ["Zzqx Unknownson"]
+    assert client.get("/manual/api/leagues").get_json()["leagues"] == []
+    assert client.post("/manual/api/import", json={**body, "force": True}, headers=auth).status_code == 201
+
+
+def test_bad_or_revoked_tokens_are_refused_and_tokens_cant_make_tokens(client):
+    token = _token(client)
+    assert client.get("/manual/api/leagues", headers={"Authorization": "Bearer fbh_nope"}).status_code == 401
+    (listed,) = client.get("/manual/api/tokens").get_json()["tokens"]
+    assert token not in str(listed) and listed["hint"] == token[-4:]
+
+    with client.session_transaction() as session:
+        session.clear()
+    auth = {"Authorization": f"Bearer {token}"}
+    assert client.post("/manual/api/tokens", json={}, headers=auth).status_code == 302  # browser login only
+
+    with client.session_transaction() as session:
+        session["user_id"] = "someone-else"
+    assert client.delete(f"/manual/api/tokens/{listed['id']}").status_code == 404  # not theirs
+    with client.session_transaction() as session:
+        session["user_id"] = USER
+    assert client.delete(f"/manual/api/tokens/{listed['id']}").status_code == 200
+    assert client.get("/manual/api/leagues", headers=auth).status_code == 401

@@ -134,8 +134,6 @@ class _MemoryBackend:
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
-    for var in ("SUPABASE_URL", "SUPABASE_KEY"):
-        monkeypatch.setenv(var, "test")
     routes = importlib.import_module("appl.router.draft_routes")
     from appl.draft import jev_chooser
 
@@ -155,7 +153,7 @@ def client(tmp_path, monkeypatch):
     app.register_blueprint(routes.DraftRouter(ManualLeagueStore(tmp_path)).get_manual_bp())
     test_client = app.test_client()
     with test_client.session_transaction() as session:
-        session["google_user"] = {"sub": USER}
+        session["user_id"] = USER
     return test_client
 
 

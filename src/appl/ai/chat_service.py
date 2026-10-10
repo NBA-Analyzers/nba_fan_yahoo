@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from ..model.file import FilePurpose
+from ..model.file import GENERAL_COLLECTIONS
 from ..model.vector_store import generate_league_vector_store_id
 from ..service.chat_session_manager import ChatSessionManager
 from .ports import LLMClient
@@ -47,7 +47,7 @@ class ChatService:
         return answer
 
     def _context(self, query: str, league_id: Optional[str]) -> str:
-        collections = [FilePurpose.GENERAL.value]
+        collections = list(GENERAL_COLLECTIONS)
         if league_id:
             collections.insert(0, generate_league_vector_store_id(league_id))
         results = self.retrieval.retrieve(query, collections)

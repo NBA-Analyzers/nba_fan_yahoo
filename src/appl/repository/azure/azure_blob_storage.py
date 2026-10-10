@@ -8,12 +8,8 @@ import hashlib
 from azure.storage.blob import BlobServiceClient
 from azure.core.exceptions import ResourceNotFoundError, AzureError
 import logging
-from dotenv import load_dotenv
 
-load_dotenv(".env")  # Loads from .env or .env.vault if DOTENV_KEY is set
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# .env and logging are configured by the app (appl/__init__.py, app.py)
 logger = logging.getLogger(__name__)
 
 

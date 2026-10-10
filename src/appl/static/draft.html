@@ -245,10 +245,11 @@
 <script src="/static/slots.js"></script>
 <script>
 const pathParts = location.pathname.split("/").filter(Boolean);
-const leagueId = pathParts[1];
+const espn = pathParts[0] === "draft" && pathParts[1] === "espn";   // /draft/espn/<id> follows an ESPN league
+const leagueId = espn ? pathParts[2] : pathParts[1];
 // /manual/<id> is a hand-entered league; /draft/<id> follows Yahoo
 const manual = pathParts[0] === "manual";
-const base = `/${manual ? "manual" : "draft"}/${leagueId}`;
+const base = `/${manual ? "manual" : "draft"}/${espn ? "espn/" : ""}${leagueId}`;
 const POLL_MS = 10000;
 const AUCTION_POLL_MS = 4000; // bid clocks are short, so check Yahoo more often
 const store = {

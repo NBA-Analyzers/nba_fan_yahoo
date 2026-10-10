@@ -257,8 +257,6 @@ def test_inseason_pool_falls_back_when_the_feed_fails(monkeypatch, tmp_path):
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
-    for var in ("SUPABASE_URL", "SUPABASE_KEY"):
-        monkeypatch.setenv(var, "test")
     routes = importlib.import_module("appl.router.season_routes")
     monkeypatch.setattr(service, "load_inseason_pool", lambda: POOL)
     monkeypatch.setattr(service, "_rankers", {})
@@ -272,7 +270,7 @@ def client(tmp_path, monkeypatch):
     app.register_blueprint(router.get_bp())
     test_client = app.test_client()
     with test_client.session_transaction() as session:
-        session["google_user"] = {"sub": USER}
+        session["user_id"] = USER
     league = store.create(USER, {"name": "Friends", "num_teams": 4, "roster_size": 6, "my_slot": 1})
     for p in POOL[:24]:
         store.add_pick(USER, league["id"], p["name"])
@@ -413,10 +411,10 @@ def test_chat_access_for_manual_leagues(store):
 
     class NoYahoo:
         def league_exist_for_user(self, league_id, yahoo_id):
-            raise AssertionError("manual leagues never ask Supabase")
+            raise AssertionError("manual leagues never ask Yahoo")
 
     access = SessionAccess(NoYahoo, store)
-    owner, other = CurrentUser(google_id=USER), CurrentUser(google_id="someone-else")
+    owner, other = CurrentUser(user_id=USER), CurrentUser(user_id="someone-else")
     assert access.can_access_league(owner, f"manual-{league['id']}")
     assert not access.can_access_league(other, f"manual-{league['id']}")
     assert not access.can_access_league(owner, "manual-aaaaaaaaaaaa")
@@ -425,8 +423,6 @@ def test_chat_access_for_manual_leagues(store):
 
 
 def test_opening_the_manual_chat_indexes_and_redirects(store, pool, monkeypatch):
-    for var in ("SUPABASE_URL", "SUPABASE_KEY"):
-        monkeypatch.setenv(var, "test")
     main_routes = importlib.import_module("appl.router.main_routes")
     started = []
     monkeypatch.setattr(main_routes, "index_manual_league_async", lambda indexer, league: started.append(league["id"]))
@@ -438,7 +434,7 @@ def test_opening_the_manual_chat_indexes_and_redirects(store, pool, monkeypatch)
     app.register_blueprint(main_routes.MainRouter(FakeIndexer(), store).get_bp())
     http = app.test_client()
     with http.session_transaction() as session:
-        session["google_user"] = {"sub": USER}
+        session["user_id"] = USER
 
     response = http.get(f"/ai-chat/manual/{league['id']}")
     assert response.status_code == 302

@@ -18,14 +18,8 @@ import json
 import logging
 import os
 import time
-from pathlib import Path
-
-from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
-
-# JEV_API_KEY lives in src/.env, which the app's own load_dotenv does not read
-load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 MODES = ("manual", "assist", "auto")
 MODEL = "jev-latest"

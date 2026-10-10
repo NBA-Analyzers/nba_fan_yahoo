@@ -27,11 +27,19 @@ class Embedder(Protocol):
 
 class VectorStore(Protocol):
     def replace_collection(
-        self, collection_id: str, records: list[VectorRecord]
-    ) -> None: ...
+        self, collection_id: str, records: list[VectorRecord],
+        content_hash: Optional[str] = None,
+    ) -> None:
+        """Swap in `records` as one unit: searches see the old records or the new ones,
+        never a mix or an empty collection."""
 
     def search(
         self, collection_ids: list[str], query_vector: list[float], k: int
     ) -> list[SearchResult]: ...
 
     def last_synced(self, collection_id: str) -> Optional[str]: ...
+
+    def content_hash(self, collection_id: str) -> Optional[str]:
+        """The hash passed with the last replace, so unchanged content can skip embedding."""
+
+    def delete_collection(self, collection_id: str) -> None: ...

@@ -51,7 +51,7 @@ class ChatRouter:
             # Keep every user's chat history separate, whatever session_id the client sends
             client_session_id = chat_request.get("session_id")
             if client_session_id:
-                request_for_service["session_id"] = f"{user.google_id}:{client_session_id}"
+                request_for_service["session_id"] = f"{user.user_id}:{client_session_id}"
 
             try:
                 return self.chat_service.chat(request_for_service)

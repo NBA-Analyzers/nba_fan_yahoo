@@ -10,7 +10,7 @@ What the app needs, in one line each:
 |---|---|---|
 | Gemini API key | the AI answers + embeddings | **Yes** |
 | Google Cloud project + Firestore | stores the document vectors for retrieval | **Yes** |
-| Supabase | user accounts / Yahoo-Google links (unchanged) | **Yes** |
+| Firestore (same project) | user accounts / Yahoo links | **Yes** (no extra setup) |
 | Google OAuth client | "Login with Google" | **Yes** (to log in) |
 | Yahoo developer app | reading your fantasy league | **Yes** (to sync a league) |
 | HTTPS tunnel (ngrok/cloudflared) | Google/Yahoo redirect to `https://` | **Yes** (for local login) |
@@ -122,10 +122,6 @@ GOOGLE_CLOUD_PROJECT=<project id from Step 3>
 # BLOB_STORAGE=gcs            # gcs | azure | none  (auto: gcs if GCS_BUCKET set, azure if AZURE_STORAGE_CONNECTION_STRING set)
 # GCS_BUCKET=<bucket name>    # see 'Optional: Cloud Storage bucket' below
 # LLM_FALLBACK_MODEL=gemini/gemini-3.7-flash
-
-# --- Supabase (existing) ---
-SUPABASE_URL=<Supabase → Project Settings → API → Project URL>
-SUPABASE_KEY=<same page → anon public key>
 
 # --- App ---
 FLASK_SECRET_KEY=<run: python -c "import secrets; print(secrets.token_hex(32))">
@@ -251,7 +247,6 @@ then set `GCS_BUCKET=<unique-bucket-name>` in `.env` (uses the same `gcloud auth
 
 | Symptom | Cause / fix |
 |---|---|
-| Server exits: "Missing required environment variables" | `SUPABASE_URL`/`SUPABASE_KEY` missing in `src/.env`. |
 | `DefaultCredentialsError` / "Could not automatically determine credentials" | Run `gcloud auth application-default login` (Step 3.5). |
 | "The query requires a vector index" | Index not READY yet, or wrong dimension/collection-group (Step 4). |
 | "Vector dimension mismatch" / invalid argument | `EMBEDDING_MODEL` dimension ≠ index dimension. Recreate the index with the right `DIM`, re-index. |

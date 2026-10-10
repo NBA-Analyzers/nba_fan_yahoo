@@ -7,10 +7,11 @@ from ..draft.manual_league import (
     ManualLeagueError,
     ManualLeagueStore,
     default_store,
-    user_key,
 )
+from ..fantasy_integrations.espn.espn_service import EspnError, EspnService
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import get_yahoo_sdk
-from ..middleware.auth_decorators import require_google_auth
+from ..middleware.auth_decorators import require_login
+from ..identity.session import current_user_id
 from ..season import jev_advisor, report_writer, service, snapshot as snapshots
 from ..season.analyzer import SeasonAnalyzer
 from ..season.schedule import Schedule
@@ -37,8 +38,10 @@ def _flag(name: str) -> bool:
 
 
 class SeasonRouter:
-    def __init__(self, store: ManualLeagueStore | None = None, briefs=None, llm_factory=None, schedule=None):
+    def __init__(self, store: ManualLeagueStore | None = None, briefs=None, llm_factory=None, schedule=None,
+                 espn: EspnService | None = None):
         self._store = store or default_store()
+        self._espn = espn or EspnService(None)
         self._briefs = briefs or report_writer.BriefStore()
         self._llm_factory = llm_factory or LiteLLMClient.from_env
         self._schedule = schedule if schedule is not None else Schedule.load()
@@ -94,7 +97,7 @@ class SeasonRouter:
         store = self._store
 
         def user() -> str:
-            return user_key(session.get("google_user"))
+            return current_user_id()
 
         def manual_league(league_id: str) -> dict:
             return store.get(user(), league_id)
@@ -114,7 +117,7 @@ class SeasonRouter:
         # --- manual leagues ---
 
         @bp.route("/manual/<league_id>")
-        @require_google_auth
+        @require_login
         def manual_page(league_id):
             try:
                 manual_league(league_id)
@@ -136,7 +139,7 @@ class SeasonRouter:
             }
 
         @bp.route("/manual/<league_id>/report", methods=["GET", "POST"])
-        @require_google_auth
+        @require_login
         def manual_report(league_id):
             def run():
                 league = manual_league(league_id)
@@ -145,12 +148,12 @@ class SeasonRouter:
             return errors(run)
 
         @bp.route("/manual/<league_id>/brief", methods=["POST"])
-        @require_google_auth
+        @require_login
         def manual_brief(league_id):
             return errors(lambda: self._brief_response(user(), snapshots.from_manual(manual_league(league_id))))
 
         @bp.route("/manual/<league_id>/players")
-        @require_google_auth
+        @require_login
         def manual_players(league_id):
             def run():
                 ranker = self._ranker(snapshots.from_manual(manual_league(league_id)))
@@ -159,7 +162,7 @@ class SeasonRouter:
             return errors(run)
 
         @bp.route("/manual/<league_id>/moves", methods=["POST"])
-        @require_google_auth
+        @require_login
         def add_move(league_id):
             def run():
                 raw = request.get_json(silent=True) or {}
@@ -191,7 +194,7 @@ class SeasonRouter:
             return errors(run)
 
         @bp.route("/manual/<league_id>/moves/<move_id>", methods=["DELETE"])
-        @require_google_auth
+        @require_login
         def delete_move(league_id, move_id):
             def run():
                 store.delete_move(user(), league_id, move_id)
@@ -202,7 +205,7 @@ class SeasonRouter:
         # --- Yahoo leagues (read live, nothing stored but the cached brief) ---
 
         @bp.route("/yahoo/<league_id>")
-        @require_google_auth
+        @require_login
         def yahoo_page(league_id):
             return render_template("season.html", league_id=league_id, active_tab="season")
 
@@ -216,14 +219,44 @@ class SeasonRouter:
             return errors(run)
 
         @bp.route("/yahoo/<league_id>/report", methods=["GET", "POST"])
-        @require_google_auth
+        @require_login
         def yahoo_report(league_id):
             return yahoo(league_id, self._report_response)
 
         @bp.route("/yahoo/<league_id>/brief", methods=["POST"])
-        @require_google_auth
+        @require_login
         def yahoo_brief(league_id):
             return yahoo(league_id, lambda snap: self._brief_response(user(), snap))
+
+        # --- ESPN leagues (read live like Yahoo; only the user's own leagues) ---
+
+        def espn(league_id, action):
+            def run():
+                try:
+                    league, swid = self._espn.load_league(user(), league_id)
+                except EspnError as e:
+                    return jsonify({"error": str(e)}), 502
+                snap = snapshots.from_espn(league, league_id, swid=swid, user=user())
+                return action(snap)
+
+            return errors(run)  # an unknown or foreign league is a KeyError: 404
+
+        @bp.route("/espn/<league_id>")
+        @require_login
+        def espn_page(league_id):
+            if not self._espn.league_repo.league_exist_for_user(league_id, user()):
+                return redirect("/dashboard")
+            return render_template("season.html", league_id=league_id, active_tab="season")
+
+        @bp.route("/espn/<league_id>/report", methods=["GET", "POST"])
+        @require_login
+        def espn_report(league_id):
+            return espn(league_id, self._report_response)
+
+        @bp.route("/espn/<league_id>/brief", methods=["POST"])
+        @require_login
+        def espn_brief(league_id):
+            return espn(league_id, lambda snap: self._brief_response(user(), snap))
 
         return bp
 

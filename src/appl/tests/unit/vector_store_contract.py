@@ -55,6 +55,21 @@ class VectorStoreContract:
         store.replace_collection("a", [rec("x", [1.0, 0.0])])
         assert store.last_synced("a") is not None
 
+    def test_content_hash_round_trips(self, store):
+        assert store.content_hash("a") is None
+        store.replace_collection("a", [rec("x", [1.0, 0.0])], content_hash="h1")
+        assert store.content_hash("a") == "h1"
+        store.replace_collection("a", [rec("y", [1.0, 0.0])], content_hash="h2")
+        assert store.content_hash("a") == "h2"
+
+    def test_delete_collection_removes_records_and_metadata(self, store):
+        store.replace_collection("a", [rec("x", [1.0, 0.0])], content_hash="h1")
+        store.replace_collection("b", [rec("in-b", [1.0, 0.0])])
+        store.delete_collection("a")
+        assert store.search(["a"], [1.0, 0.0], k=5) == []
+        assert store.last_synced("a") is None and store.content_hash("a") is None
+        assert [r.chunk.text for r in store.search(["b"], [1.0, 0.0], k=5)] == ["in-b"]
+
     def test_chunk_metadata_round_trips(self, store):
         store.replace_collection("a", [rec("x", [1.0, 0.0], source="rules.pdf", index=7)])
         chunk = store.search(["a"], [1.0, 0.0], k=1)[0].chunk

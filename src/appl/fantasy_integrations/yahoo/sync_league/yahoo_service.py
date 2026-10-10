@@ -1,20 +1,25 @@
 import logging
 import os
 import threading
+import time
 from datetime import datetime, timezone
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import requests
 from yahoo_fantasy_api.league import yfa
 from .league_sync_manager import get_sync_manager
+from .yahoo_tokens import TokenRefreshError, ensure_fresh, save_entry
+from ....ingest.season import current_season, yahoo_game_year
 from ....fantasy_integrations.yahoo.sync_league.sync_yahoo_league import YahooLeague
 from ....storage.blob_storage import build_blob_storage
-from ....repository.supaBase.repositories.yahoo_league_repository import (
-    YahooLeagueRepository,
-)
+from ....repository.firestore import YahooLeagueRepository
 from ....ai.document_indexer import DocumentIndexer
 
 logger = logging.getLogger(__name__)
+
+# (user guid, season year) -> (fetched at, league keys); the dashboard asks on every visit
+_season_league_ids: dict[tuple[str, int], tuple[float, set[str]]] = {}
+SEASON_LEAGUES_CACHE_SECONDS = 10 * 60
 
 
 class YahooService:
@@ -32,7 +37,7 @@ class YahooService:
             if not yahoo_game:
                 return []
 
-            league_ids = yahoo_game.league_ids(year=2025)
+            league_ids = yahoo_game.league_ids(year=yahoo_game_year(current_season()))
             league_options = []
             for league_id in league_ids:
                 league = yahoo_game.to_league(league_id)
@@ -114,103 +119,76 @@ class YahooService:
         yahoo_league_repo = YahooLeagueRepository()
 
         try:
-            # Step 1: Check if sync is needed based on TTL
-            existing_league = yahoo_league_repo.get_by_league_id(league_id)
-            last_blob_sync = None
+            yahoo_game = get_yahoo_sdk(self.token_store, {"user": user_guid})
+            if not yahoo_game:
+                return {"success": False, "error": "Yahoo SDK not available", "db_message": "No database update - Yahoo SDK not available"}
+            yahoo_user_id = self.token_store[user_guid].get(
+                "xoauth_yahoo_guid"
+            ) or self.token_store[user_guid].get("guid")
 
-            if existing_league and existing_league.get("last_blob_sync"):
-                # Parse timestamp from DB (handle both formats)
-                last_sync_str = existing_league["last_blob_sync"]
-                try:
-                    # Try parsing with timezone
-                    last_blob_sync = datetime.fromisoformat(
-                        last_sync_str.replace("Z", "+00:00")
-                    )
-                except ValueError:
-                    # Try parsing without timezone
-                    last_blob_sync = datetime.fromisoformat(last_sync_str)
-                    last_blob_sync = last_blob_sync.replace(tzinfo=timezone.utc)
+            # Step 1: link this user to the league, always. The league's AI index is shared,
+            # but access to it (and "which team is mine") is per user, so a fresh index
+            # synced by a league-mate must not stop this user's row from being written.
+            league = yahoo_game.to_league(league_id)
+            league_name = league.settings().get("name", "Unknown League")
+            user_data = league.teams()[league.team_key()]
+            league_data = {
+                "yahoo_user_id": yahoo_user_id,
+                "league_id": league_id,
+                "team_name": user_data.get("name", "Unknown Team"),
+                "league_name": league_name,
+                "team_id": user_data.get("team_id", ""),
+            }
+            if yahoo_league_repo.league_exist_for_user(league_id, yahoo_user_id):
+                yahoo_league_repo.update_by_league_id_and_yahoo_user_id(league_id, yahoo_user_id, league_data)
+                db_message = "League updated in database"
+            else:
+                league_data["created_at"] = datetime.now(timezone.utc).isoformat()
+                yahoo_league_repo.create(league_data)
+                db_message = "League added to database"
 
-            # Check if sync needed based on TTL
+            # Step 2: skip the heavy sync while the league's index is fresh (TTL)
+            last_blob_sync = _parse_ts((yahoo_league_repo.get_by_league_id(league_id) or {}).get("last_blob_sync"))
             if not self.sync_manager.should_sync(league_id, last_blob_sync):
                 return {
                     "success": True,
                     "message": "Data is fresh, sync skipped",
-                    "db_message": "No database update needed - data is fresh",
+                    "db_message": db_message,
                     "last_sync": last_blob_sync.isoformat() if last_blob_sync else None,
                     "skipped": True,
                 }
 
-            # Step 2: Try to acquire lock (prevent concurrent syncs)
+            # Step 3: one sync per league at a time
             if not self.sync_manager.try_acquire_sync_lock(league_id):
                 return {
-                    "success": False,
+                    "success": True,
                     "message": "Sync already in progress for this league",
-                    "db_message": "No database update - sync already in progress",
+                    "db_message": db_message,
                     "in_progress": True,
                 }
 
             try:
-                # Step 3: Get Yahoo SDK and league data
-                yahoo_game = get_yahoo_sdk(self.token_store, {"user": user_guid})
-                if not yahoo_game:
-                    return {"success": False, "error": "Yahoo SDK not available", "db_message": "No database update - Yahoo SDK not available"}
-
-                league = yahoo_game.to_league(league_id)
-                league_settings = league.settings()
-                league_name = league_settings.get("name", "Unknown League")
-
-                # Get user's team information
-                user_data = league.teams()[league.team_key()]
-                user_team_name = user_data.get("name", "Unknown Team")
-                user_team_id = user_data.get("team_id", "")
-                
-                # Get yahoo_user_id
-                yahoo_user_id = self.token_store[user_guid].get(
-                    "xoauth_yahoo_guid"
-                ) or self.token_store[user_guid].get("guid")
-
-                # Step 4: Update/create DB record (without last_blob_sync yet)
-                league_data = {
-                    "yahoo_user_id": yahoo_user_id,
-                    "league_id": league_id,
-                    "team_name": user_team_name,
-                    "league_name": league_name,
-                    "team_id": user_team_id,
-                }
-
-                if existing_league and yahoo_league_repo.league_exist_for_user(league_id, yahoo_user_id):
-                    yahoo_league_repo.update_by_league_id_and_yahoo_user_id(league_id, yahoo_user_id, league_data)
-                    db_message = "League updated in database"
-                else:
-                    league_data["created_at"] = datetime.now(timezone.utc).isoformat()
-                    yahoo_league_repo.create(league_data)
-                    db_message = "League added to database"
-
-                # Step 5: Archive the synced JSON (GCS / Azure / none, see BLOB_STORAGE)
-                blob_storage = build_blob_storage(azure_container)
+                # Step 4: fetch and archive (GCS / Azure / none, see BLOB_STORAGE)
                 yahoo_league = YahooLeague(league)
+                sync_results = yahoo_league.sync_full_league(build_blob_storage(azure_container))
 
-                # Call sync - returns Dict[str, bool]
-                sync_results = yahoo_league.sync_full_league(blob_storage)
+                if sync_results:
+                    self.document_indexer.update_league_files(league_id, sync_results)
 
-                # Step 7: Update last_blob_sync ONLY if all critical blobs succeeded
-                yahoo_league_repo.update_by_league_id_and_yahoo_user_id(
-                    league_id, yahoo_user_id, {"last_blob_sync": datetime.now(timezone.utc).isoformat()}
-                )
+                # Step 5: the league only counts as fresh if its critical parts synced,
+                # so a partial sync is retried on the next visit instead of in 15 minutes
+                if yahoo_league.critical_ok:
+                    yahoo_league_repo.update_by_league_id_and_yahoo_user_id(
+                        league_id, yahoo_user_id, {"last_blob_sync": datetime.now(timezone.utc).isoformat()}
+                    )
 
-                self.document_indexer.update_league_files(league_id, sync_results)
-
-                logger.info(f"League {league_id}: Sync completed successfully")
-
-                # Count successes
-                total_blobs = len(sync_results)
-                successful_blobs = sum(1 for v in sync_results.values() if v)
-
+                logger.info(f"League {league_id}: Sync done, failed parts: {yahoo_league.failed or 'none'}")
                 return {
-                    "success": True,
-                    "message": f"Sync completed: {successful_blobs}/{total_blobs} blobs uploaded",
+                    "success": yahoo_league.critical_ok,
+                    "message": f"Synced {len(sync_results)} parts"
+                               + (f"; failed: {', '.join(yahoo_league.failed)}" if yahoo_league.failed else ""),
                     "db_message": db_message,
+                    "failed": yahoo_league.failed,
                     "last_sync": datetime.now(timezone.utc).isoformat(),
                 }
 
@@ -222,20 +200,44 @@ class YahooService:
             logger.error(f"League {league_id}: Sync error: {e}", exc_info=True)
             return {"success": False, "error": str(e), "db_message": "No database update - sync failed with error"}
 
-    def get_user_synced_leagues(self, user_guid):
-        """Get user's synced leagues from database"""
-        try:
-            yahoo_user_id = self.token_store[user_guid].get(
-                "xoauth_yahoo_guid"
-            ) or self.token_store[user_guid].get("guid")
-            if not yahoo_user_id:
-                return []
+    def current_season_league_ids(self, user_guid) -> set[str]:
+        """Keys of the user's Yahoo leagues this NBA season. Yahoo gives a league a new
+        key every season, so last season's copy of a league is not in this set.
+        Raises if Yahoo can't be reached."""
+        year = yahoo_game_year(current_season())
+        cache_key = (user_guid, year)
+        cached = _season_league_ids.get(cache_key)
+        if cached and time.monotonic() - cached[0] < SEASON_LEAGUES_CACHE_SECONDS:
+            return cached[1]
+        yahoo_game = get_yahoo_sdk(self.token_store, {"user": user_guid})
+        if not yahoo_game:
+            return set()
+        ids = set(yahoo_game.league_ids(year=year))
+        _season_league_ids[cache_key] = (time.monotonic(), ids)
+        return ids
 
-            yahoo_league_repo = YahooLeagueRepository()
-            return yahoo_league_repo.get_by_yahoo_user_id(yahoo_user_id)
-        except Exception as e:
-            logger.error(f"Error retrieving user leagues: {e}")
+    def get_user_synced_leagues(self, user_guid):
+        """The user's synced leagues for the current season. Leagues synced in earlier
+        seasons stay stored but are not listed. Raises if the leagues can't be loaded,
+        so the dashboard can say so instead of showing an empty list."""
+        yahoo_user_id = self.token_store[user_guid].get(
+            "xoauth_yahoo_guid"
+        ) or self.token_store[user_guid].get("guid")
+        if not yahoo_user_id:
             return []
+
+        synced = YahooLeagueRepository().get_by_yahoo_user_id(yahoo_user_id)
+        if not synced:
+            return []
+        this_season = self.current_season_league_ids(user_guid)
+        return [row for row in synced if row.get("league_id") in this_season]
+
+
+def _parse_ts(value: Optional[str]) -> Optional[datetime]:
+    if not value:
+        return None
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
 class CustomYahooSession:
@@ -256,5 +258,25 @@ def get_yahoo_sdk(token_store, session):
     user_guid = session.get("user")
     if not user_guid or user_guid not in token_store:
         return None
-    sc = CustomYahooSession(token_store[user_guid])
+    entry = token_store[user_guid]
+    try:
+        refreshed = ensure_fresh(entry)
+    except TokenRefreshError:
+        # Access was revoked: forget it so the dashboard offers "Connect Yahoo" again
+        token_store.pop(user_guid, None)
+        _mark_flask_session_modified()
+        raise
+    if refreshed:
+        if entry.get("guid"):
+            save_entry(entry)
+        _mark_flask_session_modified()
+    sc = CustomYahooSession(entry)
     return yfa.Game(sc, "nba")
+
+
+def _mark_flask_session_modified():
+    """token_store lives in the Flask session cookie; nested edits aren't detected."""
+    from flask import has_request_context, session as flask_session
+
+    if has_request_context():
+        flask_session.modified = True

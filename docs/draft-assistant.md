@@ -105,7 +105,7 @@ The ranking and tracking logic passed on a synthetic pool of 200 players; the li
 | Yahoo draft-analysis parsing on a hand-built payload | Pass |
 | Python compile check and JavaScript syntax check | Pass |
 | Building the player pool from stats.nba.com | **Failed**: timeouts, then dropped connections, even with retries |
-| Routes against a real Yahoo league and the page in a browser | **Not run**: the Supabase config needs env vars that are not set locally |
+| Routes against a real Yahoo league and the page in a browser | **Not run**: needs Yahoo credentials and Firestore access |
 
 **Update 2026-10-08:** the full suite passes (139 tests, 38 of them new). The page was checked in a browser against a fake backend: decision card, punt chips, mock mode, saved state and a 390 px phone layout all work, with no console errors. The Flask routes are tested with a fake Yahoo tracker. The player pool is built from ESPN's stats feed (687 players, 529 with enough games to rank), because stats.nba.com is blocked on this network and on the manager's PC; nba_api stays as the fallback.
 

@@ -26,6 +26,8 @@
   .row a.name { font-weight: 800; color: var(--accent-strong); text-decoration: none; }
   .error { display: none; margin-bottom: 16px; }
   .btn.mini { font-size: .78rem; padding: 6px 11px; }
+  .token { font-family: ui-monospace, Consolas, monospace; font-size: .85rem; word-break: break-all; padding: 10px 12px; border: 1.5px dashed var(--accent); border-radius: var(--radius-sm); margin: 10px 0; }
+  pre.snippet { font-family: ui-monospace, Consolas, monospace; font-size: .8rem; white-space: pre-wrap; word-break: break-all; background: var(--surface-2, var(--surface)); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px; margin: 8px 0 0; }
 </style>
 </head>
 <body>
@@ -69,6 +71,20 @@
     <div class="btn-row" style="margin-top: 18px;"><button class="btn" type="submit">Create league</button></div>
     <p class="help" style="margin-top:10px">Team names, notes and everything else can be changed on the draft page.</p>
   </form>
+
+  <section class="card" id="claude">
+    <h2>Connect Claude Code</h2>
+    <p class="help">Claude Code can create a league for you from screenshots of every team's roster, saved to this Google account. Make an access token, put it in Claude Code's settings, then ask it to <b>import a league</b> and attach the pictures.</p>
+    <div id="new_token" style="display:none">
+      <div class="notice">Copy this token now. It won't be shown again.</div>
+      <div class="token" id="token_value"></div>
+      <span class="label" style="margin-top:10px">Add to <code>.claude/settings.local.json</code> in the project</span>
+      <pre class="snippet" id="token_snippet"></pre>
+      <div class="btn-row" style="margin-top:10px"><button class="btn secondary mini" type="button" id="copy_snippet">Copy settings</button></div>
+    </div>
+    <div class="btn-row" style="margin-top: 12px;"><button class="btn mini" type="button" id="make_token">Create access token</button></div>
+    <div id="tokens" style="margin-top: 10px;"></div>
+  </section>
 </main>
 
 <script src="/static/slots.js"></script>
@@ -141,7 +157,44 @@ $("form").onsubmit = async (e) => {
   } catch (err) { showError(err.message); }
 };
 
+async function loadTokens() {
+  const box = $("tokens");
+  try {
+    const { tokens } = await api("/manual/api/tokens");
+    box.textContent = "";
+    tokens.forEach((t) => {
+      const row = el("div", undefined, "row");
+      const info = el("div");
+      info.append(el("b", t.label), el("small", `ends in …${t.hint} · made ${t.created.slice(0, 10)}`));
+      const revoke = el("button", "Revoke", "btn secondary mini");
+      revoke.type = "button";
+      revoke.onclick = async () => {
+        if (!confirm(`Revoke "${t.label}" (…${t.hint})? Anything using it stops working.`)) return;
+        try { await api(`/manual/api/tokens/${t.id}`, { method: "DELETE" }); loadTokens(); } catch (e) { showError(e.message); }
+      };
+      row.append(info, revoke);
+      box.append(row);
+    });
+  } catch (e) { showError("Could not load access tokens: " + e.message); }
+}
+
+$("make_token").onclick = async () => {
+  showError("");
+  try {
+    const { token } = await api("/manual/api/tokens", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ label: "Claude Code" }) });
+    $("token_value").textContent = token;
+    $("token_snippet").textContent = JSON.stringify({ env: { FBH_URL: location.origin, FBH_TOKEN: token } }, null, 2);
+    $("new_token").style.display = "";
+    loadTokens();
+  } catch (e) { showError(e.message); }
+};
+$("copy_snippet").onclick = async () => {
+  try { await navigator.clipboard.writeText($("token_snippet").textContent); $("copy_snippet").textContent = "Copied"; }
+  catch { showError("Couldn't copy; select the text and copy it by hand."); }
+};
+
 loadLeagues();
+loadTokens();
 </script>
 </body>
 </html>

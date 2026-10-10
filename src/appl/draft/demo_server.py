@@ -11,10 +11,6 @@ then open http://localhost:5055/demo        (or /demo?auction=1 for an auction l
 
 import os
 
-# The routes import the Supabase config, which only checks these are set
-os.environ.setdefault("SUPABASE_URL", "demo")
-os.environ.setdefault("SUPABASE_KEY", "demo")
-
 from pathlib import Path  # noqa: E402
 
 from flask import Flask, redirect, request, session  # noqa: E402
@@ -105,7 +101,7 @@ def create_app() -> Flask:
 
     @app.route("/demo")
     def demo():
-        session["google_user"] = {"name": "Demo"}
+        session["user_id"] = "demo"
         session["auction"] = request.args.get("auction") == "1"
         return redirect("/draft/demo")
 

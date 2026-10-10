@@ -1,15 +1,15 @@
-import json
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict
 
-from ..model.file import FilePurpose
+from ..model.file import FilePurpose, GeneralCollection
 from ..model.vector_store import generate_league_vector_store_id
 from .pdf import extract_pdf_text
 from .retrieval import Document, RetrievalService
 
 
 class DocumentIndexer:
-    """Replaces OpenaiFileManager: same public methods, but indexes into our own store."""
+    """What goes into the AI index. Each shared source has its own collection, so
+    re-indexing one (e.g. tonight's stats) never touches the others."""
 
     def __init__(
         self,
@@ -27,30 +27,25 @@ class DocumentIndexer:
         self.retrieval.index(collection_id, documents)
         return collection_id
 
-    def update_rules(self, pdf_path: str) -> str:
-        collection_id = FilePurpose.GENERAL.value
-        self.retrieval.index(collection_id, [self._pdf_document(pdf_path)])
-        return collection_id
+    def update_rules(self, pdf_path: str) -> bool:
+        """Index the rules PDF. False when its text hasn't changed (nothing re-embedded)."""
+        doc = Document(source=Path(pdf_path).name, text=self.pdf_extractor(str(pdf_path)))
+        return self.retrieval.index(GeneralCollection.RULES.value, [doc])
 
-    def update_player_stats(
-        self,
-        json_path: str,
-        pdf_path: Optional[str] = None,
-        schedule_path: Optional[str] = None,
-    ) -> str:
-        documents = [self._json_document(json_path)]
-        if pdf_path:
-            documents.append(self._pdf_document(pdf_path))
-        if schedule_path:
-            documents.append(self._json_document(schedule_path))
-        collection_id = FilePurpose.GENERAL.value
-        self.retrieval.index(collection_id, documents)
-        return collection_id
+    def update_player_stats(self, report: Dict[str, Any], season: str) -> bool:
+        doc = Document(source=f"player_stats_{season}.json", data=report)
+        return self.retrieval.index(GeneralCollection.STATS.value, [doc])
 
-    def _pdf_document(self, path: str) -> Document:
-        return Document(source=Path(path).name, text=self.pdf_extractor(path))
+    def update_schedule(self, games: list[dict], season: str) -> bool:
+        """Games grouped by date, the shape the assistant was indexed with before."""
+        by_date: Dict[str, list] = {}
+        for g in games:
+            by_date.setdefault(g["date"], []).append(
+                {"home_team": g["home_team"], "away_team": g["away_team"], "game_id": g["game_id"]}
+            )
+        doc = Document(source=f"NBA_schedule_{season}.json", data=by_date)
+        return self.retrieval.index(GeneralCollection.SCHEDULE.value, [doc])
 
-    @staticmethod
-    def _json_document(path: str) -> Document:
-        with open(path, encoding="utf-8") as f:
-            return Document(source=Path(path).name, data=json.load(f))
+    def drop_legacy_general(self) -> None:
+        """The single shared collection used before the per-source split."""
+        self.retrieval.store.delete_collection(FilePurpose.GENERAL.value)

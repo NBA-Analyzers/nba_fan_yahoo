@@ -5,6 +5,7 @@ from typing import Callable, Optional
 
 import litellm
 
+from ..ingest.http import with_retry
 from .redact import scrub_secrets
 
 logger = logging.getLogger(__name__)
@@ -31,13 +32,8 @@ class LLMError(Exception):
 
 def _call_with_retries(call: Callable[[], object], max_retries: int, delay: float, sleep):
     """Run `call`, retrying transient provider errors with exponential backoff."""
-    for attempt in range(max_retries + 1):
-        try:
-            return call()
-        except _TRANSIENT:
-            if attempt == max_retries:
-                raise
-            sleep(delay * (2**attempt))
+    return with_retry(call, attempts=max_retries + 1, delay=delay, retry_on=_TRANSIENT,
+                      sleep=sleep, label="LLM")
 
 
 class LiteLLMClient:

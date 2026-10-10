@@ -253,6 +253,55 @@ class ManualLeagueStore:
         self.backend.write(user, league)
         return league
 
+    def import_league(self, user: str, raw: dict) -> dict:
+        """A league whose draft already happened elsewhere, from each team's roster
+        (e.g. read off screenshots). The rosters are stored as picks, so moves and
+        the season analysis work as for a league drafted here.
+
+        raw: settings as for `create`, plus `teams` ([{"name", "players"}]) and
+        `my_team` (1-based, or the team's name). Team count comes from `teams`."""
+        teams = raw.get("teams")
+        if not isinstance(teams, list) or not 2 <= len(teams) <= 30:
+            raise ManualLeagueError("List between 2 and 30 teams")
+        names = [str((t or {}).get("name") or "").strip() for t in teams]
+        rosters = [_names_list((t or {}).get("players")) for t in teams]
+
+        seen: dict[str, int] = {}
+        for i, roster in enumerate(rosters):
+            for player in roster:
+                held = seen.setdefault(player.lower(), i)
+                if held != i:
+                    raise ManualLeagueError(
+                        f"{player} is on two teams ({names[held] or f'Team {held + 1}'} and {names[i] or f'Team {i + 1}'})")
+
+        mine = raw.get("my_team")
+        if isinstance(mine, str) and not mine.strip().isdigit():
+            low = mine.strip().lower()
+            match = next((i for i, n in enumerate(names) if n.lower() == low), None)
+            if match is None:
+                raise ManualLeagueError(f'No team called "{mine}"')
+            mine = match + 1
+
+        settings = {k: v for k, v in raw.items() if k not in ("teams", "my_team")}
+        settings.update(num_teams=len(teams), team_names=names, my_slot=mine)
+        if settings.get("slots") is None and settings.get("roster_size") in (None, ""):
+            settings["roster_size"] = max(1, max(len(r) for r in rosters))
+        league = {
+            "id": uuid.uuid4().hex[:12],
+            "created": _now(),
+            "status": "finished",
+            "imported": True,
+            "picks": [
+                {"team": i, "player_name": player, "cost": None}
+                for i, roster in enumerate(rosters) for player in roster
+            ],
+            "notes": [],
+            "moves": [],
+            **clean_settings(settings),
+        }
+        self.backend.write(user, league)
+        return league
+
     def delete(self, user: str, league_id: str) -> None:
         self._check(league_id)
         self.backend.delete(user, league_id)
@@ -408,6 +457,17 @@ def _names(raw) -> list[str]:
         raw = raw.split(",")
     names = [str(n).strip()[:80] for n in (raw or [])]
     return [n for n in names if n][:MAX_MOVE_PLAYERS]
+
+
+MAX_IMPORT_ROSTER = 40
+
+
+def _names_list(raw) -> list[str]:
+    """A roster from an import: names, blanks dropped, capped at a sane size."""
+    if isinstance(raw, str):
+        raw = raw.split(",")
+    names = [str(n).strip()[:80] for n in (raw if isinstance(raw, list) else [])]
+    return [n for n in names if n][:MAX_IMPORT_ROSTER]
 
 
 def _clean_move(league: dict, raw: dict) -> dict:
@@ -625,12 +685,6 @@ class ManualDraftTracker:
                 clock = snake_team(len(picks), n)
                 state["manual"]["on_the_clock"] = {"index": clock, "name": names[clock]}
         return state
-
-
-def user_key(google_user: dict | None) -> str:
-    """Stable id for the logged-in Google user (same field the chat access check uses)."""
-    google_user = google_user or {}
-    return str(google_user.get("sub") or google_user.get("email") or google_user.get("name") or "anonymous")
 
 
 def default_store() -> ManualLeagueStore:

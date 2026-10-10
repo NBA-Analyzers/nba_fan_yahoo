@@ -2,7 +2,7 @@
 A league as it stands today: settings plus every team's current roster.
 
 Manual leagues are rebuilt from the stored draft picks and recorded moves.
-Yahoo leagues are read live (Yahoo is the source of truth), cached briefly.
+Yahoo and ESPN leagues are read live (the platform is the source of truth), cached briefly.
 """
 
 import logging
@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 YAHOO_CACHE_SECONDS = 15 * 60
 # (league_id, user) -> snapshot. Per user: `my_team` depends on who is looking.
 _yahoo_cache: dict[tuple[str, str | None], tuple[float, "LeagueSnapshot"]] = {}
+_espn_cache: dict[tuple[str, str | None], tuple[float, "LeagueSnapshot"]] = {}
 
 
 @dataclass
@@ -140,4 +141,62 @@ def from_yahoo(league, league_id: str, user: str | None = None,
         opponent=_current_opponent(league, league_id, keys, my_key),
     )
     _yahoo_cache[cache_key] = (now(), snapshot)
+    return snapshot
+
+
+def _espn_opponent(league, league_id: str, me, teams: list) -> int | None:
+    """Index of this week's opponent, or None (bye week, or no matchup found)."""
+    try:
+        for m in league.scoreboard(league.currentMatchupPeriod):
+            pair = [m.home_team, m.away_team]
+            if me in pair:
+                other = pair[1 - pair.index(me)]
+                return teams.index(other) if other in teams else None
+    except Exception as e:
+        logger.info(f"League {league_id}: no head-to-head opponent found: {e}")
+    return None
+
+
+def from_espn(league, league_id: str, swid: str | None = None, user: str | None = None,
+              now=time.monotonic) -> LeagueSnapshot:
+    """`league` is an espn_api basketball League. `swid` (the viewer's cookie) finds
+    their team; without it the first team stands in. Cached per (league, user)."""
+    from ..fantasy_integrations.espn import espn_league_info as info
+
+    cache_key = (league_id, user)
+    cached = _espn_cache.get(cache_key)
+    if cached and now() - cached[0] < YAHOO_CACHE_SECONDS:
+        return cached[1]
+
+    teams = info.sorted_teams(league)
+    injuries: dict[str, str] = {}
+
+    def note(players):
+        for p in players:
+            level = info.injury_level(getattr(p, "injuryStatus", None))
+            if level and getattr(p, "name", None):
+                injuries[p.name] = level
+
+    rosters = []
+    for team in teams:
+        players = list(getattr(team, "roster", []) or [])
+        note(players)
+        rosters.append([p.name for p in players if getattr(p, "name", None)])
+    try:
+        note(league.free_agents(size=50))
+    except Exception as e:
+        logger.warning(f"League {league_id}: free agent injuries failed: {e}")
+
+    me = info.my_team(league, swid)
+    snapshot = LeagueSnapshot(
+        key=f"espn:{league_id}",
+        name=getattr(league.settings, "name", None) or league_id,
+        categories=info.categories(league),
+        team_names=[getattr(t, "team_name", None) or f"Team {t.team_id}" for t in teams],
+        my_team=teams.index(me) if me in teams else 0,
+        rosters=rosters,
+        injuries=injuries,
+        opponent=_espn_opponent(league, league_id, me, teams) if me else None,
+    )
+    _espn_cache[cache_key] = (now(), snapshot)
     return snapshot

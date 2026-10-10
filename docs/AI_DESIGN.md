@@ -11,7 +11,7 @@ Originally the chat was tied to OpenAI in three ways:
 That locked the app to one vendor and made the plan to move to Google services impossible without a rewrite.
 The goal of this change: **the model is a config setting, and the document search belongs to us.**
 
-Out of scope (later phases): Azure Blob → Cloud Storage, hosting on Cloud Run, moving auth/user tables from Supabase to Firestore.
+Out of scope (later phases): Azure Blob → Cloud Storage, hosting on Cloud Run, moving auth/user tables from Supabase to Firestore (done: see DEPLOY_CLOUD_RUN.md).
 
 ## 2. Big picture
 

@@ -1,16 +1,31 @@
+import logging
 import time
 import xml.etree.ElementTree as ET
 
 from ..config.app_config import DEBUG, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
-from flask import Blueprint, current_app, redirect, render_template, session, url_for
-from ..middleware.auth_decorators import require_google_auth
-from ..repository.supaBase.models.google_auth import GoogleAuth
-from ..repository.supaBase.models.google_fantasy import GoogleFantasy
-from ..repository.supaBase.models.yahoo_auth import YahooAuth
-from ..repository.supaBase.services.auth_services import AuthService
-from ..repository.supaBase.services.fantasy_services import FantasyService
+from flask import Blueprint, current_app, jsonify, redirect, render_template, request, session, url_for
+from ..middleware.auth_decorators import require_login
+from ..identity import FirestoreIdentityStore, UnverifiedEmail, sign_in
+from ..identity.firebase_verify import InvalidToken, verify_id_token
+from ..identity.session import current_user_id, rotate_session, start_session
+from ..repository.firestore import (
+    AuthService,
+    FantasyService,
+    GoogleFantasy,
+    YahooAuth,
+    retry_once,
+)
 from ..ai.document_indexer import DocumentIndexer
+from ..ai.redact import scrub_secrets
+
+logger = logging.getLogger(__name__)
+
+
+def log_failure(what: str, exc: Exception) -> None:
+    """Log the exception type and a scrubbed message. Never the traceback or raw
+    response bodies: OAuth errors can echo tokens."""
+    logger.error("%s: %s: %s", what, type(exc).__name__, scrub_secrets(str(exc))[:300])
 
 def get_user_guid_from_token(token, yahoo):
     user_guid = token.get("xoauth_yahoo_guid")
@@ -48,31 +63,59 @@ def get_username_from_token(token, yahoo):
             if nickname_elem is not None:
                 username = nickname_elem.text
     except Exception as e:
-        print(f"⚠️ Could not fetch username: {e}")
+        log_failure("Could not fetch the Yahoo username", e)
     
     return username
 
 
 class AuthRouter:
     
-    def __init__(self, document_indexer: DocumentIndexer):
+    def __init__(self, document_indexer: DocumentIndexer, identity_store=None, auth_service=None,
+                 token_verifier=None):
         self.document_indexer = document_indexer
+        self.identity_store = identity_store or FirestoreIdentityStore()
+        self.auth_service = auth_service or AuthService()
+        self.token_verifier = token_verifier or verify_id_token
         self._blueprint = self._create_blueprint()
 
     def _create_blueprint(self):
         
         auth_bp = Blueprint('auth', __name__, url_prefix="/auth")
         
+        @auth_bp.route("/session", methods=["POST"])
+        def create_session():
+            """Sign in with a Firebase ID token (email+password, email link or Google).
+            The browser signs in with the Firebase SDK; here the token is verified and
+            turned into our own user_id and a server-side session."""
+            origin = request.headers.get("Origin")
+            if origin and origin.rstrip("/") != request.host_url.rstrip("/"):
+                return jsonify(error="bad_origin"), 403
+            body = request.get_json(silent=True) or {}
+            token = body.get("idToken")
+            if not isinstance(token, str) or not token:
+                return jsonify(error="missing_token"), 400
+            try:
+                claims = self.token_verifier(token)
+            except InvalidToken as e:
+                log_failure("Rejected sign-in token", e)
+                return jsonify(error="invalid_token"), 401
+            try:
+                signed_in = sign_in(self.identity_store, claims)
+            except UnverifiedEmail:
+                return jsonify(error="verify_email"), 403
+            start_session(signed_in["user_id"], signed_in["profile"])
+            return jsonify(ok=True, redirect=url_for("main.dashboard"))
+
         @auth_bp.route("/google/login")
         def google_login():
             """Google OAuth login - First step in authentication flow"""
 
             google = current_app.oauth.create_client("google")
             if google is None:
-                print("ERROR: Google OAuth client is not available!")
+                logger.error("Google OAuth client is not available")
                 return "Google OAuth client not configured", 500
             if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
-                print("ERROR: GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are not set in .env")
+                logger.error("GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET are not set")
                 return "Google OAuth credentials not configured", 500
 
             # ProxyFix already reports https behind ngrok; forcing it breaks plain http://localhost
@@ -85,7 +128,7 @@ class AuthRouter:
 
             google = current_app.oauth.create_client("google")
             if google is None:
-                print("ERROR: Google OAuth client is not available!")
+                logger.error("Google OAuth client is not available")
                 return "Google OAuth client not configured", 500
 
             try:
@@ -93,39 +136,30 @@ class AuthRouter:
                 resp = google.get("https://openidconnect.googleapis.com/v1/userinfo")
                 user_info = resp.json()
 
-                # Store user info in session
-                session["google_user"] = user_info
-
-                # Extract user data
-                google_user_id = user_info["sub"]
-                full_name = user_info["name"]
-                email = user_info["email"]
-                access_token = token["access_token"]
-
-                # Create GoogleAuth object
-                google_auth = GoogleAuth(
-                    google_user_id=google_user_id,
-                    full_name=full_name,
-                    email=email,
-                    access_token=access_token,
-                )
-
-                # Insert or update user in database using AuthService
-                auth_service = AuthService()
-                try:
-                    created_user = auth_service.create_or_update_google_user(google_auth)
-                    print(
-                        f"✅ User successfully saved to database: {created_user.full_name}"
-                    )
+                # Google's userinfo has the same shape as the claims of a Firebase ID token
+                sub = user_info["sub"]
+                claims = {
+                    "uid": sub,
+                    "email": user_info.get("email"),
+                    "email_verified": user_info.get("email_verified"),
+                    "name": user_info.get("name"),
+                    "given_name": user_info.get("given_name"),
+                    "picture": user_info.get("picture"),
+                    "firebase": {"sign_in_provider": "google.com",
+                                 "identities": {"google.com": [sub]}},
+                }
+                # A storage failure falls back to the Google sub and doesn't block login
+                signed_in = sign_in(self.identity_store, claims)
+                start_session(signed_in["user_id"], signed_in["profile"])
+                try:  # kept server-side with the user; a failure never blocks login
+                    retry_once(lambda: self.auth_service.save_google_token(
+                        signed_in["user_id"], token["access_token"]), "saving Google token")
                 except Exception as e:
-                    print(f"❌ Database operation failed: {e}")
-                    # Continue with login even if database fails
-
-                # Redirect to dashboard instead of showing user info directly
+                    log_failure("Could not save the Google token", e)
                 return redirect(url_for("main.dashboard"))
 
             except Exception as e:
-                print(f"❌ Error during Google callback: {e}")
+                log_failure("Error during Google callback", e)
                 return render_template(
                     "pages/message.html",
                     title="Sign-in didn't work",
@@ -135,7 +169,7 @@ class AuthRouter:
                 ), 500
 
         @auth_bp.route("/yahoo/login")
-        @require_google_auth
+        @require_login
         def yahoo_login():
             """Yahoo OAuth login - Requires Google authentication first"""
             yahoo = current_app.oauth.create_client("yahoo")
@@ -145,7 +179,7 @@ class AuthRouter:
             return yahoo.authorize_redirect(redirect_uri=redirect_uri)
 
         @auth_bp.route("/yahoo/callback")
-        @require_google_auth
+        @require_login
         def yahoo_callback():
             """Yahoo OAuth callback - Requires Google authentication first"""
             try:
@@ -172,52 +206,25 @@ class AuthRouter:
 
                 session["user"] = user_guid
 
-                # Create YahooAuth object for database insertion
-                yahoo_auth = YahooAuth(
-                    yahoo_user_id=user_guid,
-                    access_token=token["access_token"],
-                    refresh_token=token["refresh_token"],
-                    username=username,
-                )
-
-                # Insert or update user in database using AuthService
-                auth_service = AuthService()
+                # Tokens are secrets: only the error is logged, never the tokens. A storage
+                # failure must not stop the connection, the tokens are also in the session.
                 try:
-                    auth_service.create_or_update_yahoo_user(yahoo_auth)
+                    retry_once(lambda: self.auth_service.create_or_update_yahoo_user(YahooAuth(
+                        yahoo_user_id=user_guid,
+                        access_token=token["access_token"],
+                        refresh_token=token["refresh_token"],
+                        username=username,
+                    )), "saving Yahoo login")
+                    # Idempotent, so reconnecting later refreshes the link without errors
+                    FantasyService().connect_fantasy_platform(GoogleFantasy(
+                        google_user_id=current_user_id(),
+                        fantasy_user_id=user_guid,
+                        fantasy_platform="yahoo",
+                    ))
+                    session["fantasy_connected"] = True
                 except Exception as e:
-                    print(f"❌ Database operation failed: {e}")
-                    # Continue with login even if database fails
-
-                google_user_info = session.get("google_user", {})
-                google_user_id = google_user_info.get("sub")
-
-                if google_user_id:
-                    try:
-                        # Create the fantasy connection
-                        google_fantasy = GoogleFantasy(
-                            google_user_id=google_user_id,
-                            fantasy_user_id=user_guid,  # This is the Yahoo user ID
-                            fantasy_platform="yahoo",
-                        )
-
-                        # Use FantasyService to create the connection
-                        fantasy_service = FantasyService()
-                        fantasy_connection = fantasy_service.connect_fantasy_platform(
-                            google_fantasy
-                        )
-
-                        # Store connection info in session for reference
-                        session["fantasy_connected"] = True
-                        session["fantasy_connection_created_at"] = (
-                            fantasy_connection.created_at
-                        )
-
-                    except Exception as e:
-                        print(f"❌ Unexpected error creating fantasy connection: {str(e)}")
-                else:
-                    print(
-                        "❌ Could not find Google user ID in session for fantasy connection"
-                    )
+                    log_failure("Could not save the Yahoo connection", e)
+                rotate_session()
 
                 # Get leagues for selection
                 yahoo_service = YahooService(
@@ -228,7 +235,7 @@ class AuthRouter:
                 return render_template("pages/choose_league.html", leagues=league_options or [])
 
             except Exception as e:
-                print(f"❌ Error during Yahoo callback: {e}")
+                log_failure("Error during Yahoo callback", e)
                 return render_template(
                     "pages/message.html",
                     title="Yahoo didn't connect",

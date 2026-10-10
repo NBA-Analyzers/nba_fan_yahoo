@@ -13,7 +13,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="/"><span class="brand-ball">🏀</span> <span class="brand-name">Fantasy Basketball Helper</span></a>
-    {% if session.get('google_user') %}
+    {% if session.get('user_id') %}
     <nav>
       <a href="/dashboard">My leagues</a>
       <a href="/auth/logout">Log out</a>

@@ -1,12 +1,16 @@
-from typing import Dict
+from flask import Blueprint, jsonify, request
 
-from flask import Blueprint, request
+from ..ai.access import Access
 from ..ai.document_indexer import DocumentIndexer
 
 
 class DocumentRouter:
-    def __init__(self, document_indexer: DocumentIndexer):
+    """Re-index a league's files. The shared rules/stats index is refreshed by
+    `python -m appl.ingest run general_index`, not over HTTP."""
+
+    def __init__(self, document_indexer: DocumentIndexer, access: Access):
         self.document_indexer = document_indexer
+        self.access = access
         self._blueprint = self._create_blueprint()
 
     def _create_blueprint(self):
@@ -14,14 +18,16 @@ class DocumentRouter:
 
         @document_bp.route("/<league_id>/update_files", methods=["POST"])
         def update_league_files(league_id: str):
-            # TODO: validate all league files are in the list
-            files = request.get_json()
-            self.document_indexer.update_league_files(league_id, files)
-
-        @document_bp.route("/update_rules", methods=["POST"])
-        def update_rules(file: Dict[str, str]):
-            file = request.get_json()
-            self.document_indexer.update_rules(file)
+            user = self.access.current_user()
+            if user is None:
+                return jsonify({"error": "Not logged in"}), 401
+            if not self.access.can_access_league(user, league_id):
+                return jsonify({"error": "No access to this league"}), 403
+            files = request.get_json(silent=True)
+            if not isinstance(files, dict) or not files:
+                return jsonify({"error": "Expected a JSON object of files"}), 400
+            collection_id = self.document_indexer.update_league_files(league_id, files)
+            return jsonify({"collection_id": collection_id})
 
         return document_bp
 

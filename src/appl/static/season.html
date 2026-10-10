@@ -197,7 +197,7 @@
 {% block scripts %}
 <script>
 const pathParts = location.pathname.split("/").filter(Boolean);
-const kind = pathParts[1];            // "manual" or "yahoo"
+const kind = pathParts[1];            // "manual", "yahoo" or "espn"
 const leagueId = pathParts[2];
 const manual = kind === "manual";
 const base = `/season/${kind}/${leagueId}`;
@@ -532,7 +532,7 @@ async function loadPlayers() {
 
 // --- wiring ------------------------------------------------------------------
 
-$("back").href = manual ? `/manual/${leagueId}` : `/draft/${leagueId}`;
+$("back").href = manual ? `/manual/${leagueId}` : kind === "espn" ? `/draft/espn/${leagueId}` : `/draft/${leagueId}`;
 $("jev").checked = useJev;
 $("jev").onchange = (e) => { useJev = e.target.checked; store.set("jev", useJev); load(); };
 $("pref").value = preference;

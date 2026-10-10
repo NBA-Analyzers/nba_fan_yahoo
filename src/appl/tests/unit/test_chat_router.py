@@ -19,7 +19,7 @@ class FakeChatService:
 
 
 class FakeAccess:
-    def __init__(self, user=CurrentUser(google_id="g1", yahoo_id="y1"), leagues=("42",)):
+    def __init__(self, user=CurrentUser(user_id="g1", yahoo_id="y1"), leagues=("42",)):
         self.user, self.leagues, self.error = user, set(leagues), None
         self.checked = []
 
@@ -101,7 +101,7 @@ def test_session_ids_are_namespaced_per_user(service, access):
     app.register_blueprint(ChatRouter(service, access).get_bp())
     c = app.test_client()
     post(c, session_id="abc", user_message="hi")
-    access.user = CurrentUser(google_id="g2", yahoo_id=None)
+    access.user = CurrentUser(user_id="g2", yahoo_id=None)
     post(c, session_id="abc", user_message="hi")
     assert [r["session_id"] for r in service.requests] == ["g1:abc", "g2:abc"]
 
@@ -156,7 +156,7 @@ def test_current_user_reads_google_and_yahoo_ids_from_session(flask_app):
         from flask import session
 
         assert sa.current_user() is None
-        session["google_user"] = {"sub": "g-123"}
+        session["user_id"] = "g-123"
         assert sa.current_user() == CurrentUser("g-123", None)
         session["user"] = "y-9"
         assert sa.current_user() == CurrentUser("g-123", "y-9")

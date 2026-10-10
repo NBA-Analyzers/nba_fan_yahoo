@@ -81,8 +81,6 @@ class FakeTracker:
 @pytest.fixture
 def env(monkeypatch):
     """A Flask app with the draft blueprint, a fake Yahoo tracker and a synthetic pool."""
-    for var in ("SUPABASE_URL", "SUPABASE_KEY"):
-        monkeypatch.setenv(var, "test")
     routes = importlib.import_module("appl.router.draft_routes")
     from appl.draft import jev_chooser
 
@@ -103,7 +101,7 @@ def env(monkeypatch):
     app.register_blueprint(routes.DraftRouter().get_bp())
     client = app.test_client()
     with client.session_transaction() as session:
-        session["google_user"] = {"name": "Tester"}
+        session["user_id"] = "Tester"
     return type("Env", (), {"client": client, "tracker": tracker, "routes": routes,
                             "jev": jev_chooser, "monkeypatch": monkeypatch})
 

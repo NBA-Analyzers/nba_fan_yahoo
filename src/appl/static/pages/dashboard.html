@@ -12,11 +12,63 @@
   {% endif %}
 </div>
 
+{% if manual_leagues %}
+<div class="league-grid" style="margin-bottom: 18px;">
+  {% for league in manual_leagues %}
+  <div class="card league-card">
+    <h2>{{ league.name }}</h2>
+    <p class="muted">Manual league · {{ league.num_teams }} teams · {{ "season" if league.status == "finished" else "drafting" }}</p>
+    <div class="btn-row">
+      <a class="btn" href="/ai-chat/manual/{{ league.id }}">💬 Ask</a>
+      <a class="btn secondary" href="/manual/{{ league.id }}">📋 Draft</a>
+      <a class="btn secondary" href="/season/manual/{{ league.id }}">📈 Team analysis</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<p class="muted small" style="margin-bottom: 18px;">
+  <a href="/manual">Add or manage manual leagues</a>, or import one from screenshots with Claude Code.
+</p>
+{% else %}
 <div class="card" style="margin-bottom: 18px;">
   <h3>Drafting without Yahoo?</h3>
-  <p class="muted small">Enter your league settings by hand, log picks as they happen and keep notes.</p>
+  <p class="muted small">Enter your league settings by hand, log picks as they happen and keep notes, or import a league from screenshots with Claude Code.</p>
   <div class="btn-row" style="margin-top: 14px;"><a class="btn secondary" href="/manual">✍️ Manual league</a></div>
 </div>
+{% endif %}
+
+{% if espn_leagues %}
+<div class="league-grid" style="margin-bottom: 18px;">
+  {% for league in espn_leagues %}
+  <div class="card league-card">
+    <h2>{{ league.league_name or "Your league" }}</h2>
+    <p class="muted">ESPN · {{ league.team_name or "Your team" }}</p>
+    <div class="btn-row">
+      <a class="btn" href="/ai-chat/espn/{{ league.league_id }}">💬 Ask</a>
+      <a class="btn secondary" href="/draft/espn/{{ league.league_id }}">📋 Draft help</a>
+      <a class="btn secondary" href="/season/espn/{{ league.league_id }}">📈 Team analysis</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<details class="card" style="margin-bottom: 18px;">
+  <summary><strong>{{ "Add another ESPN league" if espn_leagues else "Connect an ESPN league" }}</strong></summary>
+  <form action="/espn/connect" method="post" autocomplete="off" style="margin-top: 14px; display: grid; gap: 10px; max-width: 420px;">
+    <label>League id <input name="league_id" inputmode="numeric" pattern="[0-9]+" required placeholder="the number after leagueId= in the league URL"></label>
+    <label>Season (the year it ends) <input name="season_year" inputmode="numeric" pattern="[0-9]{4}" placeholder="optional, e.g. 2026"></label>
+    <p class="muted small">Private league? Paste your <code>espn_s2</code> and <code>SWID</code> cookies from your browser's developer tools (Application, Cookies, espn.com). We store them encrypted and only use them to read your league. Public leagues don't need them.</p>
+    <label>espn_s2 <input name="espn_s2" type="password" autocomplete="off"></label>
+    <label>SWID <input name="swid" type="password" autocomplete="off" placeholder="{...}"></label>
+    <div class="btn-row"><button class="btn" type="submit">Connect ESPN</button></div>
+  </form>
+  {% if espn_leagues %}
+  <form action="/espn/disconnect" method="post" style="margin-top: 14px;" onsubmit="return confirm('Forget your ESPN leagues and cookies?');">
+    <button class="btn secondary" type="submit">Disconnect ESPN</button>
+  </form>
+  {% endif %}
+</details>
 
 {% if not yahoo_connected %}
 <div class="card">

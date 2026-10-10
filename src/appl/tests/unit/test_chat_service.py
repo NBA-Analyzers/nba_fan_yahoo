@@ -9,7 +9,7 @@ from appl.service.chat_session_manager import ChatSessionManager
 @pytest.fixture
 def retrieval(embedder, memory_store):
     r = RetrievalService(embedder, memory_store, top_k=3)
-    r.index("general", [Document(source="rules.pdf", text="steals count two points")])
+    r.index("general_rules", [Document(source="rules.pdf", text="steals count two points")])
     r.index("league_9", [Document(source="roster.json", text="my roster has Curry")])
     return r
 

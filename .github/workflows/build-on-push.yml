@@ -18,21 +18,15 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Create and start virtual environment
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-      
       - name: Install dependencies
         run: pip install -r requirements.txt
-        
+
       - name: Python Syntax Check
-        run: |
-          source venv/bin/activate
-          python -m py_compile src/appl/app.py
-          find src -name "*.py" -exec python -m py_compile {} \;
-        
-      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
+        run: find src -name "*.py" -exec python -m py_compile {} +
+
+      # Unit tests only (pytest.ini skips -m integration, which needs real Firestore)
+      - name: Unit tests
+        run: python -m pytest -q
 
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4

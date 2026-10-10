@@ -19,8 +19,8 @@ DEFAULT_AUCTION_BUDGET = 200
 
 # league_id -> {yahoo player_id: full name}; names never change mid-draft
 _player_names: dict[str, dict[int, str]] = {}
-# league_id -> static league info
-_league_info: dict[str, dict] = {}
+# (league_id, user) -> static league info. Per user: it holds "my team".
+_league_info: dict[tuple[str, str | None], dict] = {}
 # league_id -> {normalized name: set of Yahoo eligible positions}
 _eligibility: dict[str, dict[str, set[str]]] = {}
 # league_id -> {normalized name: {"rank", "adp", "avg_cost"}}
@@ -70,16 +70,18 @@ def _flatten_player(entry) -> dict:
 
 
 class YahooDraftTracker:
-    def __init__(self, league: yfa.League):
+    def __init__(self, league: yfa.League, user: str | None = None):
+        """`user` is the Yahoo guid of whoever is looking; league info is cached per user."""
         self.league = league
         self.league_id = league.league_id
+        self._info_key = (self.league_id, user)
         self._names = _player_names.setdefault(self.league_id, {})
 
     # --- static league info -------------------------------------------------
 
     def league_info(self) -> dict:
-        if self.league_id in _league_info:
-            return _league_info[self.league_id]
+        if self._info_key in _league_info:
+            return _league_info[self._info_key]
 
         settings = self.league.settings()
         teams = self.league.teams()
@@ -121,7 +123,7 @@ class YahooDraftTracker:
                 for key, t in teams.items()
             },
         }
-        _league_info[self.league_id] = info
+        _league_info[self._info_key] = info
         return info
 
     # --- live draft ---------------------------------------------------------

@@ -1,8 +1,10 @@
 import logging
+from functools import wraps
 
 from flask import (
     Blueprint,
     current_app,
+    g,
     jsonify,
     redirect,
     render_template,
@@ -12,21 +14,24 @@ from flask import (
 )
 
 from ..draft import advice, jev_chooser, positions
+from ..draft.api_tokens import ApiTokenStore, default_token_store
 from ..draft.manual_league import (
     ManualDraftTracker,
     ManualLeagueError,
     ManualLeagueStore,
     default_store,
-    user_key,
 )
+from ..draft.espn_draft import EspnDraftTracker
 from ..draft.player_pool import load_player_pool
+from ..fantasy_integrations.espn.espn_service import EspnError, EspnService
 from ..draft.ranker import DraftRanker, categories_from_yahoo
 from ..draft.yahoo_draft import (
     DEFAULT_AUCTION_BUDGET,
     YahooDraftTracker,
 )
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import get_yahoo_sdk
-from ..middleware.auth_decorators import require_google_auth
+from ..middleware.auth_decorators import require_login
+from ..identity.session import current_user_id
 from ..season.service import manual_chat_id
 
 logger = logging.getLogger(__name__)
@@ -164,8 +169,11 @@ def _nominee_card(nominee, lookup, ranker, info, state, plan, punts, taken, mine
 
 
 class DraftRouter:
-    def __init__(self, store: ManualLeagueStore | None = None):
+    def __init__(self, store: ManualLeagueStore | None = None, tokens: ApiTokenStore | None = None,
+                 espn: EspnService | None = None):
         self._store = store or default_store()
+        self._tokens = tokens or default_token_store()
+        self._espn = espn or EspnService(None)
         self._blueprint = self._create_blueprint()
         self._manual_blueprint = self._create_manual_blueprint()
 
@@ -175,7 +183,7 @@ class DraftRouter:
         if not user_guid or user_guid not in token_store:
             return None
         yahoo_game = get_yahoo_sdk(token_store, {"user": user_guid})
-        return YahooDraftTracker(yahoo_game.to_league(league_id))
+        return YahooDraftTracker(yahoo_game.to_league(league_id), user=user_guid)
 
     def _get_ranker(self, league_id: str, tracker: YahooDraftTracker) -> DraftRanker:
         key = getattr(tracker, "cache_key", league_id)
@@ -313,12 +321,12 @@ class DraftRouter:
         draft_bp = Blueprint("draft", __name__, url_prefix="/draft")
 
         @draft_bp.route("/<league_id>")
-        @require_google_auth
+        @require_login
         def draft_page(league_id):
             return render_template("draft.html", league_id=league_id)
 
         @draft_bp.route("/<league_id>/state", methods=["GET", "POST"])
-        @require_google_auth
+        @require_login
         def draft_state(league_id):
             """Draft state + recommendations.
 
@@ -329,7 +337,7 @@ class DraftRouter:
             return self._state_response(league_id, self._get_tracker)
 
         @draft_bp.route("/<league_id>/players")
-        @require_google_auth
+        @require_login
         def draft_players(league_id):
             """Every rankable player's name, for the nominee search box."""
             try:
@@ -342,6 +350,45 @@ class DraftRouter:
                 logger.error(f"League {league_id}: player list failed: {e}", exc_info=True)
                 return jsonify({"error": str(e)}), 500
 
+        # --- ESPN leagues: the same page and engine, an ESPN tracker ---
+
+        def espn_tracker(league_id: str) -> EspnDraftTracker:
+            user = current_user_id()
+            league, swid = self._espn.load_league(user, league_id)
+            return EspnDraftTracker(league, league_id, swid=swid, user=user)
+
+        def espn_guard(league_id: str, action):
+            try:
+                return action()
+            except KeyError:
+                return jsonify({"error": "League not found"}), 404
+            except Exception as e:
+                logger.error(f"ESPN league {league_id}: draft call failed: {e}", exc_info=True)
+                return jsonify({"error": str(e) if isinstance(e, EspnError) else "Could not read the league from ESPN"}), 500
+
+        @draft_bp.route("/espn/<league_id>")
+        @require_login
+        def espn_draft_page(league_id):
+            if not self._espn.league_repo.league_exist_for_user(league_id, current_user_id()):
+                return redirect("/dashboard")
+            return render_template("draft.html", league_id=league_id)
+
+        @draft_bp.route("/espn/<league_id>/state", methods=["GET", "POST"])
+        @require_login
+        def espn_draft_state(league_id):
+            return espn_guard(league_id, lambda: (
+                self._espn.load_league(current_user_id(), league_id),  # 404 unless it's yours
+                self._state_response(league_id, espn_tracker))[1])
+
+        @draft_bp.route("/espn/<league_id>/players")
+        @require_login
+        def espn_draft_players(league_id):
+            def run():
+                ranker = self._get_ranker(league_id, espn_tracker(league_id))
+                return jsonify({"players": sorted(p["name"] for p in ranker.players)})
+
+            return espn_guard(league_id, run)
+
         return draft_bp
 
     def _create_manual_blueprint(self):
@@ -350,7 +397,24 @@ class DraftRouter:
         store = self._store
 
         def user() -> str:
-            return user_key(session.get("google_user"))
+            return g.get("api_user") or current_user_id()
+
+        def token_or_google(view):
+            """Accept a personal access token (`Authorization: Bearer fbh_...`) as
+            well as the browser login, for the endpoints tools like Claude Code call."""
+            @wraps(view)
+            def wrapper(*args, **kwargs):
+                header = request.headers.get("Authorization", "")
+                if header:
+                    scheme, _, token = header.partition(" ")
+                    found = self._tokens.user_for(token.strip()) if scheme.lower() == "bearer" else None
+                    if not found:
+                        return jsonify({"error": "Invalid or revoked access token"}), 401
+                    g.api_user = found
+                    return view(*args, **kwargs)
+                return require_login(view)(*args, **kwargs)
+
+            return wrapper
 
         def tracker_for(league_id: str) -> ManualDraftTracker:
             return ManualDraftTracker(store.get(user(), league_id))
@@ -369,12 +433,12 @@ class DraftRouter:
             return jsonify({"ok": True})
 
         @bp.route("")
-        @require_google_auth
+        @require_login
         def manual_home():
             return send_from_directory(current_app.static_folder, "manual.html")
 
         @bp.route("/api/leagues", methods=["GET", "POST"])
-        @require_google_auth
+        @token_or_google
         def leagues():
             if request.method == "GET":
                 return jsonify({"leagues": store.list(user())})
@@ -384,8 +448,77 @@ class DraftRouter:
                 return jsonify({"error": str(e)}), 400
             return jsonify({"id": league["id"]}), 201
 
+        @bp.route("/api/import", methods=["POST"])
+        @token_or_google
+        def import_league():
+            """Create a league from finished rosters. Names are matched to the stats
+            list first; unknown ones come back with suggestions and nothing is saved
+            unless `force` is set. `dry_run` only reports the matching."""
+            raw = request.get_json(silent=True) or {}
+            teams = raw.get("teams")
+            if not isinstance(teams, list):
+                return jsonify({"error": "Send the rosters as `teams`: [{name, players}]"}), 400
+            ranker = _rankers.get("names")
+            if ranker is None:
+                ranker = _rankers["names"] = DraftRanker(load_player_pool())
+
+            matched, unknown = [], []
+            for team in teams:
+                team = team if isinstance(team, dict) else {}
+                players = []
+                for typed in team.get("players") or []:
+                    typed = str(typed).strip()
+                    if not typed:
+                        continue
+                    key = ranker.resolve_key(typed)
+                    if key:
+                        players.append({"typed": typed, "name": ranker._by_key[key]["name"], "found": True})
+                    else:
+                        players.append({"typed": typed, "name": typed, "found": False,
+                                        "suggestions": ranker.suggest_names(typed)})
+                        unknown.append(typed)
+                matched.append({"name": team.get("name", ""), "players": players})
+
+            report = {"teams": matched, "unknown": unknown}
+            if raw.get("dry_run"):
+                return jsonify(report)
+            if unknown and not raw.get("force"):
+                return jsonify({**report, "error": f"{len(unknown)} player(s) not in the stats list: "
+                                + ", ".join(unknown) + ". Fix them or send force: true."}), 400
+            body = dict(raw, teams=[{"name": t["name"], "players": [p["name"] for p in t["players"]]}
+                                    for t in matched])
+            try:
+                league = store.import_league(user(), body)
+            except ManualLeagueError as e:
+                return jsonify({**report, "error": str(e)}), 400
+            return jsonify({**report, "id": league["id"], "name": league["name"],
+                            "links": {"draft": f"/manual/{league['id']}",
+                                      "season": f"/season/manual/{league['id']}",
+                                      "ask": f"/ai-chat/manual/{league['id']}"}}), 201
+
+        # --- access tokens (browser login only: a token can't mint more tokens) ---
+
+        @bp.route("/api/tokens", methods=["GET", "POST"])
+        @require_login
+        def tokens():
+            if request.method == "GET":
+                return jsonify({"tokens": self._tokens.list(user())})
+            raw = request.get_json(silent=True) or {}
+            try:
+                token = self._tokens.create(user(), raw.get("label", ""))
+            except ValueError as e:
+                return jsonify({"error": str(e)}), 400
+            return jsonify({"token": token}), 201
+
+        @bp.route("/api/tokens/<token_id>", methods=["DELETE"])
+        @require_login
+        def revoke_token(token_id):
+            if not self._tokens.revoke(user(), token_id):
+                return jsonify({"error": "Token not found"}), 404
+            return jsonify({"ok": True})
+
         @bp.route("/<league_id>")
-        @require_google_auth
+        @require_login
         def league_page(league_id):
             try:
                 store.get(user(), league_id)
@@ -394,7 +527,7 @@ class DraftRouter:
             return render_template("draft.html", league_id=manual_chat_id(league_id))
 
         @bp.route("/<league_id>/state")
-        @require_google_auth
+        @require_login
         def league_state(league_id):
             try:
                 tracker_for(league_id)
@@ -403,7 +536,7 @@ class DraftRouter:
             return state_json(league_id)
 
         @bp.route("/<league_id>/players")
-        @require_google_auth
+        @require_login
         def league_players(league_id):
             try:
                 tracker = tracker_for(league_id)
@@ -413,13 +546,13 @@ class DraftRouter:
             return jsonify({"players": sorted(p["name"] for p in ranker.players)})
 
         @bp.route("/<league_id>/settings", methods=["PUT"])
-        @require_google_auth
+        @require_login
         def settings(league_id):
             raw = request.get_json(silent=True) or {}
             return guarded(lambda: store.update_settings(user(), league_id, raw))
 
         @bp.route("/<league_id>/status", methods=["PUT"])
-        @require_google_auth
+        @require_login
         def status(league_id):
             raw = request.get_json(silent=True) or {}
             return guarded(lambda: store.set_status(user(), league_id, raw.get("status")))
@@ -448,40 +581,40 @@ class DraftRouter:
             return guarded(lambda: save(name, raw))
 
         @bp.route("/<league_id>/picks", methods=["POST"])
-        @require_google_auth
+        @require_login
         def add_pick(league_id):
             return save_pick(league_id, lambda name, raw: store.add_pick(
                 user(), league_id, name, raw.get("team"), raw.get("cost")))
 
         @bp.route("/<league_id>/picks/last", methods=["DELETE"])
-        @require_google_auth
+        @require_login
         def undo_pick(league_id):
             return guarded(lambda: store.undo_pick(user(), league_id))
 
         @bp.route("/<league_id>/picks/<int:number>", methods=["PUT"])
-        @require_google_auth
+        @require_login
         def edit_pick(league_id, number):
             return save_pick(league_id, lambda name, raw: store.edit_pick(
                 user(), league_id, number, name, raw.get("team"), raw.get("cost")))
 
         @bp.route("/<league_id>/picks/<int:number>", methods=["DELETE"])
-        @require_google_auth
+        @require_login
         def delete_pick(league_id, number):
             return guarded(lambda: store.delete_pick(user(), league_id, number))
 
         @bp.route("/<league_id>/notes", methods=["POST"])
-        @require_google_auth
+        @require_login
         def add_note(league_id):
             raw = request.get_json(silent=True) or {}
             return guarded(lambda: store.add_note(user(), league_id, raw.get("text")))
 
         @bp.route("/<league_id>/notes/<note_id>", methods=["DELETE"])
-        @require_google_auth
+        @require_login
         def delete_note(league_id, note_id):
             return guarded(lambda: store.delete_note(user(), league_id, note_id))
 
         @bp.route("/<league_id>", methods=["DELETE"])
-        @require_google_auth
+        @require_login
         def delete_league(league_id):
             return guarded(lambda: store.delete(user(), league_id))
 

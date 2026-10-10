@@ -39,7 +39,7 @@ Unlike conventional fantasy tools that rely purely on statistical analysis, this
 
 - **Backend**: Python (Flask)
 - **AI Engine**: LiteLLM (Gemini by default, any provider by config)
-- **Database**: Supabase
+- **Database**: Firestore
 - **Authentication**: Google OAuth + Yahoo Fantasy OAuth
 - **APIs**: Yahoo Fantasy Sports API, NBA API
 - **Frontend**: Web-based interface
@@ -50,7 +50,6 @@ Unlike conventional fantasy tools that rely purely on statistical analysis, this
 - Yahoo Fantasy Sports API credentials
 - OpenAI API key
 - Google OAuth credentials
-- Supabase account
 
 
 ## 💬 How to Use
@@ -89,7 +88,7 @@ src/
 │   ├── services/             # Business logic
 │   ├── middleware/           # Authentication decorators
 │   └── config/               # Configuration files
-├── supaBase/                 # Database layer
+├── firestore/                # User, Yahoo-link and league storage
 │   ├── models/              # Data models
 │   ├── repositories/        # Data access layer
 │   └── services/            # Database services
@@ -120,9 +119,6 @@ GOOGLE_CLOUD_PROJECT=your_gcp_project_id
 # One-time: create the vector index (dimension = EMBEDDING_DIMENSIONS)
 #   gcloud firestore indexes composite create --collection-group=chunks #     --query-scope=COLLECTION #     --field-config=field-path=embedding,vector-config='{"dimension":"768","flat":"{}"}'
 
-# Supabase Configuration
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_anon_key
 
 # Google OAuth
 GOOGLE_CLIENT_ID=your_google_client_id
