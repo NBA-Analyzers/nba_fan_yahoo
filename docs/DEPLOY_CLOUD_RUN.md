@@ -5,7 +5,28 @@ URL `https://fantasy-ai-276008835589.europe-west1.run.app`). Verified: landing p
 one instance, runs as the `fantasy-app` service account. **Not yet verified:** a logged-in chat on the live site (needs the Google/Yahoo
 client IDs below) and the service account actually reading Firestore (the `roles/datastore.user` grant exists).
 
-## What was actually run
+## Automatic deploys (GitHub Actions)
+
+`.github/workflows/build-on-push.yml` tests every branch. On `main`, once the tests pass, the `deploy` job
+builds the `Dockerfile`, pushes the image to `europe-west1-docker.pkg.dev/nbafantasy-511015/cloud-run-source-deploy/fantasy-ai:<commit sha>`
+and runs `gcloud run deploy fantasy-ai --image ...`. Only the image changes; env vars, secrets, memory and the
+`fantasy-app` identity are carried over from the current revision, so change those with `gcloud run services update`.
+
+GitHub logs in with Workload Identity Federation, so no key file exists:
+- pool `github`, provider `nba-fan-yahoo` (issuer `https://token.actions.githubusercontent.com`), which only accepts
+  tokens where `assertion.repository=='NBA-Analyzers/nba_fan_yahoo'`.
+- service account `github-deployer`, which that repo may impersonate (`roles/iam.workloadIdentityUser`). It has
+  `roles/run.admin` on the project, `roles/artifactregistry.writer` on `cloud-run-source-deploy` and
+  `roles/iam.serviceAccountUser` on `fantasy-app`.
+
+Roll back by sending traffic to an earlier revision (each revision's image tag is the commit it was built from):
+`gcloud run revisions list --service fantasy-ai --region europe-west1`, then
+`gcloud run services update-traffic fantasy-ai --region europe-west1 --to-revisions <REVISION>=100`.
+The next deploy sends all traffic to the new revision again.
+
+The old Azure Web App workflow (`main_fantasy.yml`) was removed on 2026-10-14; the Azure app itself was not deleted.
+
+## What was actually run (first manual deploy)
 1. Enabled `run`, `cloudbuild`, `artifactregistry`, `secretmanager`, `iam` APIs.
 2. Created service account `fantasy-app` + `roles/datastore.user`.
 3. Secrets `gemini-api-key`, `flask-secret` (new random value for production) in Secret Manager, with `secretAccessor` for `fantasy-app`.

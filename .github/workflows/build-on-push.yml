@@ -1,8 +1,14 @@
-name: Build on Push
+name: CI/CD
 
 on:
   push:
-    branches: ['**']  # Triggers on push to any branch
+    branches: ['**']  # Every branch is tested; only main is deployed
+
+env:
+  PROJECT_ID: nbafantasy-511015
+  REGION: europe-west1
+  SERVICE: fantasy-ai
+  IMAGE: europe-west1-docker.pkg.dev/nbafantasy-511015/cloud-run-source-deploy/fantasy-ai
 
 jobs:
   build:
@@ -27,3 +33,37 @@ jobs:
       # Unit tests only (pytest.ini skips -m integration, which needs real Firestore)
       - name: Unit tests
         run: python -m pytest -q
+
+  deploy:
+    needs: build                               # only after tests pass
+    if: github.ref == 'refs/heads/main'        # only for main
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false                # never stop a deploy halfway
+    permissions:
+      contents: read
+      id-token: write                          # lets the runner get its GitHub ID card for Workload Identity Federation
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Google Cloud (no key file)
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/276008835589/locations/global/workloadIdentityPools/github/providers/nba-fan-yahoo
+          service_account: github-deployer@nbafantasy-511015.iam.gserviceaccount.com
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: Build the Docker image
+        run: docker build -t "$IMAGE:$GITHUB_SHA" .
+
+      - name: Push the image to Artifact Registry
+        run: |
+          gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
+          docker push "$IMAGE:$GITHUB_SHA"
+
+      - name: Deploy to Cloud Run
+        run: gcloud run deploy "$SERVICE" --image "$IMAGE:$GITHUB_SHA" --region "$REGION" --project "$PROJECT_ID" --quiet
