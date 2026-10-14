@@ -1,2 +1,7 @@
+from pathlib import Path
+
 from dotenv import load_dotenv
-load_dotenv(".env") # Loads from .env or .env.vault if DOTENV_KEY is set
+
+# The one place .env is loaded: src/.env, whatever the working directory. Values already
+# in the environment (Cloud Run secrets, CI) win.
+load_dotenv(Path(__file__).resolve().parents[1] / ".env")

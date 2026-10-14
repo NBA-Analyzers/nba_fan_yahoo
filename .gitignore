@@ -76,3 +76,17 @@ Desktop.ini
 # Other
 *.log
 host.json
+# Yahoo OAuth token files (contain consumer secret and tokens)
+oauth22.json
+**/oauth*.json
+
+# Manual draft leagues are per-user data
+src/appl/data/draft/manual/
+# Hashes of personal access tokens (per-user data)
+src/appl/data/api_tokens.json
+
+# Daily in-season stats cache
+src/appl/data/draft/player_pool_inseason*.json
+
+# Ingest job output when no DATASET_BUCKET is set (python -m appl.ingest)
+src/appl/data/datasets/

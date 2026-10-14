@@ -38,8 +38,8 @@ Unlike conventional fantasy tools that rely purely on statistical analysis, this
 ## 🛠 Tech Stack
 
 - **Backend**: Python (Flask)
-- **AI Engine**: OpenAI GPT API
-- **Database**: Supabase
+- **AI Engine**: LiteLLM (Gemini by default, any provider by config)
+- **Database**: Firestore
 - **Authentication**: Google OAuth + Yahoo Fantasy OAuth
 - **APIs**: Yahoo Fantasy Sports API, NBA API
 - **Frontend**: Web-based interface
@@ -50,7 +50,6 @@ Unlike conventional fantasy tools that rely purely on statistical analysis, this
 - Yahoo Fantasy Sports API credentials
 - OpenAI API key
 - Google OAuth credentials
-- Supabase account
 
 
 ## 💬 How to Use
@@ -89,7 +88,7 @@ src/
 │   ├── services/             # Business logic
 │   ├── middleware/           # Authentication decorators
 │   └── config/               # Configuration files
-├── supaBase/                 # Database layer
+├── firestore/                # User, Yahoo-link and league storage
 │   ├── models/              # Data models
 │   ├── repositories/        # Data access layer
 │   └── services/            # Database services
@@ -104,16 +103,26 @@ src/
 
 Create a `.env` file with the following variables:
 ```env
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key_here
+# LLM (via LiteLLM - swap provider by changing the model string)
+LLM_MODEL=gemini/gemini-3.8-flash          # e.g. openai/gpt-4o-mini
+EMBEDDING_MODEL=gemini/gemini-embedding-001
+EMBEDDING_DIMENSIONS=768                    # must match the Firestore vector index
+LLM_FALLBACK_MODEL=gemini/gemini-3.7-flash # optional: tried if the main model keeps failing
+LLM_TIMEOUT_SECONDS=30                     # optional
+GEMINI_API_KEY=your_gemini_api_key         # or OPENAI_API_KEY etc. for other providers
 
-# Supabase Configuration
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_anon_key
+# Optional archive of synced league JSON (default: none). BLOB_STORAGE=gcs|azure|none
+# GCS_BUCKET=your-bucket
 
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
+# Retrieval vectors live in Firestore (uses Google application-default credentials)
+GOOGLE_CLOUD_PROJECT=your_gcp_project_id
+# One-time: create the vector index (dimension = EMBEDDING_DIMENSIONS)
+#   gcloud firestore indexes composite create --collection-group=chunks #     --query-scope=COLLECTION #     --field-config=field-path=embedding,vector-config='{"dimension":"768","flat":"{}"}'
+
+
+# Firebase Auth (sign-in)
+FIREBASE_API_KEY=your_firebase_web_api_key
+FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 
 # Flask Configuration
 FLASK_SECRET_KEY=your_secret_key_here
@@ -171,3 +180,10 @@ Having issues or questions?
 ---
 
 **Ready to dominate your fantasy league with AI? [Get Started Now!](#quick-start)**
+
+
+## 🧪 Tests
+```
+pytest                         # offline unit tests
+FIRESTORE_TEST_PROJECT=<id> pytest -m integration   # Firestore contract tests
+```

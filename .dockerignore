@@ -1,0 +1,12 @@
+.git
+.env*
+**/.env*
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.azure
+.github
+.vscode
+docs
+nba_fan_yahoo
+src/appl/tests

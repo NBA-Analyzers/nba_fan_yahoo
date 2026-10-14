@@ -1,116 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fantasy Basketball Helper</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-    <div class="container">
-        <header class="header">
-            <h1>🏀 Fantasy Basketball Helper</h1>
-            <p>Ask me anything about your fantasy basketball league!</p>
-            {% if league_id and session_id %}
-            <div class="session-info-header">
-                <p><strong>League ID:</strong> {{ league_id }}</p>
-                <p><strong>Session ID:</strong> {{ session_id }}</p>
-            </div>
-            {% endif %}
-        </header>
-        
-        <!-- Initial Screen - Choose New or Continue -->
-        <div class="screen" id="initialScreen">
-            <div class="choice-container">
-                <div class="choice-card" id="newChatOption">
-                    <div class="choice-icon">💬</div>
-                    <h3>Start New Chat</h3>
-                    <p>Begin a fresh conversation with the Fantasy Basketball Helper</p>
-                    <button class="choice-button">Start New Chat</button>
-                </div>
-                
-                <div class="choice-card" id="continueChatOption">
-                    <div class="choice-icon">🔄</div>
-                    <h3>Continue Chat</h3>
-                    <p>Resume a previous conversation using your session ID</p>
-                    <button class="choice-button">Continue Chat</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Session ID Input Screen -->
-        <div class="screen hidden" id="sessionIdScreen">
-            <div class="session-input-container">
-                <div class="session-input-card">
-                    <h3>Enter Session ID</h3>
-                    <p>Please enter your session ID to continue your previous conversation:</p>
-                    <div class="input-group">
-                        <input type="text" id="sessionIdInput" placeholder="Enter your session ID..." autocomplete="off">
-                        <button id="continueSessionButton" class="continue-button">Continue</button>
-                    </div>
-                    <button id="backToInitialButton" class="back-button">← Back to Options</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Chat Screen -->
-        <div class="screen hidden" id="chatScreen">
-            <div class="chat-container">
-                <div class="chat-header">
-                    <div class="session-info">
-                        <span>Session: <span id="currentSessionId">{{ session_id if session_id else 'Loading...' }}</span></span>
-                        {% if league_id %}
-                        <span class="league-info">League: {{ league_id }}</span>
-                        {% endif %}
-                        <div class="header-buttons">
-                            <button id="newSessionFromChatButton" class="new-session-button">New Session</button>
-                            <button id="quitSessionButton" class="quit-session-button">Quit Session</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message system-message">
-                        <div class="message-content">
-                            Welcome to Fantasy Basketball Helper! I'm here to help you with your league management, player analysis, and strategic advice. Type 'quit' to end the conversation.
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="input-container">
-                    <div class="input-group">
-                        <input type="text" id="messageInput" placeholder="Type your message here..." autocomplete="off">
-                        <button id="sendButton" class="send-button">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="22" y1="2" x2="11" y2="13"></line>
-                                <polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="status-bar">
-            <span id="connectionStatus" class="status-indicator">Ready</span>
-        </div>
+{% extends "pages/base.html" %}
+{% set active_tab = "ask" %}
+{% block title %}Ask · Fantasy Basketball Helper{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/styles.css">{% endblock %}
+{% block page_class %}chat-page{% endblock %}
+{% block content %}
+<section class="chat card" aria-label="Chat">
+  <div class="chat-head">
+    <div>
+      <h2>Ask about your league</h2>
+      <p class="muted small">Answers use your team, your league's rules and recent stats.</p>
     </div>
-    
-    <script>
-        // Pass server-side variables to JavaScript
-        window.LEAGUE_ID = "{{ league_id if league_id else '' }}";
-        window.SESSION_ID = "{{ session_id if session_id else '' }}";
-        
-        // Debug logging
-        console.log('Server-side variables:', {
-            league_id: "{{ league_id if league_id else 'None' }}",
-            session_id: "{{ session_id if session_id else 'None' }}"
-        });
-        
-        // Additional debug
-        console.log('window.LEAGUE_ID after template render:', window.LEAGUE_ID);
-        console.log('window.SESSION_ID after template render:', window.SESSION_ID);
-    </script>
-    <script src="/static/script.js"></script>
-</body>
-</html>
+    <button id="newChatButton" class="btn quiet" type="button">＋ New chat</button>
+  </div>
+
+  <div class="chat-messages" id="chatMessages" aria-live="polite">
+    <div class="empty" id="emptyState">
+      <div class="big-emoji">💬</div>
+      <h3>What would you like to know?</h3>
+      <p class="muted small">Try one of these, or write your own.</p>
+      <div class="suggestions">
+        <button type="button" class="suggestion">Who should I start this week?</button>
+        <button type="button" class="suggestion">Which free agents are worth picking up?</button>
+        <button type="button" class="suggestion">Where is my team strong and weak?</button>
+        <button type="button" class="suggestion">How does scoring work in my league?</button>
+      </div>
+    </div>
+  </div>
+
+  <form class="composer" id="composer">
+    <textarea id="messageInput" rows="1" placeholder="Ask a question…" aria-label="Your question" autocomplete="off"></textarea>
+    <button id="sendButton" class="send" type="submit" aria-label="Send">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </button>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  window.LEAGUE_ID = {{ (league_id or "") | tojson }};
+</script>
+<script src="/static/script.js"></script>
+{% endblock %}

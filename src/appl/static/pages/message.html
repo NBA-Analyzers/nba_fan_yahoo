@@ -1,0 +1,13 @@
+{% extends "pages/base.html" %}
+{% block title %}{{ title }} · Fantasy Basketball Helper{% endblock %}
+{% block page_class %}narrow{% endblock %}
+{% block content %}
+<div class="card center" style="margin-top: 24px;">
+  <div class="big-emoji">{{ emoji or "😕" }}</div>
+  <h1>{{ title }}</h1>
+  <p class="muted" style="margin-top: 8px;">{{ text }}</p>
+  <div class="btn-row">
+    <a class="btn" href="{{ link or '/dashboard' }}">{{ link_text or "Back to my leagues" }}</a>
+  </div>
+</div>
+{% endblock %}

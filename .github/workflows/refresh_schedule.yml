@@ -1,0 +1,44 @@
+name: Refresh NBA schedule
+
+# The new season's schedule is published in the summer. Every October 1st this
+# rebuilds data/schedule/NBA_schedule.json and opens a pull request with it.
+# Run it by hand from the Actions tab (optionally with a season start year).
+on:
+  schedule:
+    - cron: '0 6 1 10 *'  # 06:00 UTC on October 1st
+  workflow_dispatch:
+    inputs:
+      season_start_year:
+        description: 'Season start year, e.g. 2026 for 2026-27 (blank = automatic)'
+        required: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - run: pip install requests
+
+      - name: Rebuild the schedule
+        run: python src/appl/scripts/schedule/refresh_schedule.py ${{ github.event.inputs.season_start_year }}
+
+      - name: Open a pull request with the new schedule
+        uses: peter-evans/create-pull-request@v6
+        with:
+          add-paths: src/appl/data/schedule/NBA_schedule.json
+          branch: chore/refresh-nba-schedule
+          commit-message: Refresh the NBA schedule for the new season
+          title: Refresh the NBA schedule for the new season
+          body: |
+            Rebuilt by the "Refresh NBA schedule" workflow from ESPN's scoreboard.
+            Games between teams still to be decided (NBA Cup knockout slots) are not
+            in the file until ESPN lists them, so each team shows 80 of its 82 games.

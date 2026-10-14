@@ -1,0 +1,12 @@
+rules_version = '2';
+// Every collection is read and written by the server only (Admin/ADC credentials
+// bypass these rules). No browser or mobile client may touch Firestore directly:
+// users, identities, yahoo_auth (OAuth tokens), fantasy_connections, yahoo_leagues,
+// api_tokens, manual_leagues, espn_auth, rag_collections.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

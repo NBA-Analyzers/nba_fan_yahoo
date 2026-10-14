@@ -1,29 +1,18 @@
-from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 class FilePurpose(Enum):
-    GENERAL = "general"
+    GENERAL = "general"  # legacy single shared collection; replaced by GeneralCollection
     LEAGUE = "league"
 
 
-@dataclass
-class FileMetadata:
-    file_id: str
-    file_name: str
-    openai_file_id: str
-    league_id: Optional[str]
-    file_path_s3: str
+class GeneralCollection(Enum):
+    """The shared (non-league) AI index, one collection per source so refreshing one
+    never wipes another."""
+
+    RULES = "general_rules"
+    STATS = "general_stats"
+    SCHEDULE = "general_schedule"
 
 
-@dataclass
-class UpdateFile:
-    file_name: str
-    file_path: str
-
-
-@dataclass
-class OpenaiStoredFiles:
-    openai_vs_id: str
-    file_metadata: list[FileMetadata]
+GENERAL_COLLECTIONS = [c.value for c in GeneralCollection]
