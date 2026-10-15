@@ -39,7 +39,8 @@ def _flag(name: str) -> bool:
 
 class SeasonRouter:
     def __init__(self, store: ManualLeagueStore | None = None, briefs=None, llm_factory=None, schedule=None,
-                 espn: EspnService | None = None):
+                 espn: EspnService | None = None, indexer=None):
+        self._indexer = indexer  # re-indexes a manual league for the chat after its moves change
         self._store = store or default_store()
         self._espn = espn or EspnService(None)
         self._briefs = briefs or report_writer.BriefStore()
@@ -48,6 +49,16 @@ class SeasonRouter:
         self._blueprint = self._create_blueprint()
 
     # --- building blocks ----------------------------------------------------
+
+    def _reindex(self, user_id: str, league_id: str) -> None:
+        """Refresh the chat's copy of a manual league in the background (it skips the work
+        when nothing changed). Never fails the request that changed the league."""
+        if self._indexer is None:
+            return
+        try:
+            service.index_manual_league_async(self._indexer, self._store.get(user_id, league_id))
+        except Exception as e:
+            logger.warning(f"Could not start re-indexing manual league {league_id}: {e}")
 
     @staticmethod
     def _ranker(snap):
@@ -189,6 +200,7 @@ class SeasonRouter:
                             fixed.append(name)
                     clean[side] = fixed
                 store.add_move(user(), league_id, clean)
+                self._reindex(user(), league_id)
                 return jsonify({"ok": True})
 
             return errors(run)
@@ -198,6 +210,7 @@ class SeasonRouter:
         def delete_move(league_id, move_id):
             def run():
                 store.delete_move(user(), league_id, move_id)
+                self._reindex(user(), league_id)
                 return jsonify({"ok": True})
 
             return errors(run)

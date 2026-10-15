@@ -6,6 +6,8 @@ from ..ai.access import SessionAccess
 from ..fantasy_integrations.espn.espn_service import EspnService
 from ..draft.manual_league import default_store
 from ..ai.chat_router import ChatRouter
+from ..ai.tools import league_toolkit_factory
+from ..season.schedule import Schedule
 from ..repository.firestore import YahooLeagueRepository
 from ..repository.firestore.espn_data import EspnLeagueRepository
 from .auth_routes import AuthRouter
@@ -27,10 +29,12 @@ def register_routes(app):
     yahoo_router = YahooRouter(document_indexer())
     espn_router = EspnRouter(document_indexer(), espn_service)
     access = SessionAccess(YahooLeagueRepository, manual_store, EspnLeagueRepository)
+    # The chat gets the season tools for every league type once the stores they read exist
+    chat_service().tools_factory = league_toolkit_factory(manual_store, espn_service, Schedule.load())
     chat_router = ChatRouter(chat_service(), access)
     document_router = DocumentRouter(document_indexer(), access)
-    draft_router = DraftRouter(manual_store, espn=espn_service)
-    season_router = SeasonRouter(manual_store, espn=espn_service)
+    draft_router = DraftRouter(manual_store, espn=espn_service, indexer=document_indexer())
+    season_router = SeasonRouter(manual_store, espn=espn_service, indexer=document_indexer())
 
     # Register blueprints
     app.register_blueprint(main_router.get_bp())

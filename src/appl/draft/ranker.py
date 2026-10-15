@@ -16,8 +16,8 @@ CATEGORIES = ["FG%", "FT%", "3PTM", "PTS", "REB", "AST", "STL", "BLK", "TO"]
 
 # Yahoo stat_categories() display names -> internal keys
 YAHOO_CATEGORY_ALIASES = {
-    "FG%": "FG%", "FT%": "FT%", "3PTM": "3PTM", "PTS": "PTS", "REB": "REB",
-    "AST": "AST", "ST": "STL", "STL": "STL", "BLK": "BLK", "TO": "TO",
+    "FG%": "FG%", "FT%": "FT%", "3PTM": "3PTM", "3PM": "3PTM", "PTS": "PTS", "REB": "REB",
+    "AST": "AST", "ST": "STL", "STL": "STL", "BLK": "BLK", "TO": "TO", "TOV": "TO",
 }
 
 COUNTING_STATS = {
@@ -43,6 +43,16 @@ def categories_from_yahoo(stat_categories: list[dict]) -> list[str]:
         if c.get("display_name") in YAHOO_CATEGORY_ALIASES
     ]
     return mapped or CATEGORIES
+
+
+def unsupported_categories(stat_categories: list[dict]) -> list[str]:
+    """Display names of scored stats we can't rank (DD, TD, A/T, GP ...), so the app
+    can say the analysis ignores them instead of dropping them silently."""
+    return [
+        c["display_name"]
+        for c in stat_categories
+        if c.get("display_name") and c["display_name"] not in YAHOO_CATEGORY_ALIASES
+    ]
 
 
 def _league_pcts(players: list[dict]) -> dict:

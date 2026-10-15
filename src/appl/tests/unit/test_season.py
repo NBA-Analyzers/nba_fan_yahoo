@@ -404,6 +404,32 @@ def test_indexing_uses_the_manual_chat_id_and_skips_unchanged_leagues(store, poo
     assert len(indexer.calls) == 2
 
 
+def test_background_reindexes_finish_in_order(store, pool):
+    """Two quick edits: the older re-index must never land after the newer one."""
+    import threading
+
+    league = _drafted_league(store)
+    store.add_note(USER, league["id"], "first edit")
+    older = store.get(USER, league["id"])
+    store.add_note(USER, league["id"], "second edit")
+    newer = store.get(USER, league["id"])
+    release, written = threading.Event(), []
+
+    class SlowIndexer:
+        def update_league_files(self, chat_id, files):
+            notes = [n["text"] for n in files["league_notes"]]
+            if notes[-1] == "first edit":
+                release.wait(5)  # the older thread is still embedding when the newer one starts
+            written.append(notes[-1])
+
+    first = service.index_manual_league_async(SlowIndexer(), older)
+    second = service.index_manual_league_async(SlowIndexer(), newer)
+    second.join(0.5)
+    release.set()
+    first.join(5), second.join(5)
+    assert written[-1] == "second edit"
+
+
 def test_chat_access_for_manual_leagues(store):
     from appl.ai.access import CurrentUser, SessionAccess
 

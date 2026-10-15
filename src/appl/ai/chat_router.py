@@ -1,6 +1,7 @@
+import json
 import logging
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, Response, jsonify, request, stream_with_context
 
 from .access import Access
 from .litellm_adapters import LLMError
@@ -55,6 +56,8 @@ class ChatRouter:
                 request_for_service["session_id"] = f"{user.user_id}:{client_session_id}"
 
             try:
+                if chat_request.get("stream") is True:
+                    return self._stream_response(request_for_service)
                 return self.chat_service.chat(request_for_service)
             except ValueError as e:
                 return jsonify(error=str(e)), 400
@@ -62,6 +65,26 @@ class ChatRouter:
                 return jsonify(error="The AI service is unavailable, please try again"), 502
 
         return chat_bp
+
+    def _stream_response(self, request_for_service: dict) -> Response:
+        """The answer as it is written: one JSON object per line, {"delta": text} pieces and
+        a closing {"done": true}, or {"error": message} if the model fails part-way (the
+        status is already sent by then). A bad request still gets its 400 first."""
+        pieces = self.chat_service.chat_stream(request_for_service)
+
+        def lines():
+            try:
+                for piece in pieces:
+                    yield json.dumps({"delta": piece}) + "\n"
+                yield json.dumps({"done": True}) + "\n"
+            except LLMError:
+                yield json.dumps({"error": "The AI service is unavailable, please try again"}) + "\n"
+            except Exception:
+                logger.exception("Chat stream failed")
+                yield json.dumps({"error": "Something went wrong. Please try again."}) + "\n"
+
+        return Response(stream_with_context(lines()), mimetype="application/x-ndjson",
+                        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
     def get_bp(self):
         return self._blueprint

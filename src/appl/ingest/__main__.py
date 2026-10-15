@@ -3,7 +3,8 @@
 Jobs:
   general_index  player stats, schedule and rules -> the shared AI index (Firestore)
   player_pool    preseason + in-season draft pools -> dataset store
-  all            both, in that order; exits non-zero if either fails
+  player_status  injury report + fantasy ownership -> dataset store (cheap: run it often)
+  all            general_index, player_pool and player_status in that order; exits non-zero if any fails
 """
 
 import argparse
@@ -30,7 +31,14 @@ def _player_pool():
     return player_pool.run()
 
 
-JOBS = {"general_index": _general_index, "player_pool": _player_pool}
+def _player_status():
+    from .jobs import player_status
+    from .sinks.datasets import build_dataset_store
+
+    return player_status.run(build_dataset_store())
+
+
+JOBS = {"general_index": _general_index, "player_pool": _player_pool, "player_status": _player_status}
 
 
 def main(argv=None) -> int:

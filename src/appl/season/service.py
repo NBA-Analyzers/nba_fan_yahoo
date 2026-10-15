@@ -150,14 +150,30 @@ def index_manual_league(indexer, league: dict) -> str:
     return collection
 
 
+# Per league: a lock so re-indexes run one at a time, and the newest request's number, so a
+# re-index that a newer one has replaced is skipped instead of landing last with older data
+_league_locks: dict[str, threading.Lock] = {}
+_latest_request: dict[str, int] = {}
+
+
 def index_manual_league_async(indexer, league: dict) -> threading.Thread:
-    """Same as index_manual_league, in a background thread so the chat opens at once."""
+    """Same as index_manual_league, in a background thread so the chat opens at once.
+    Quick edits start one thread each; they run in order and only the newest does the work."""
+    league_id = league["id"]
+    with _index_lock:
+        lock = _league_locks.setdefault(league_id, threading.Lock())
+        number = _latest_request[league_id] = _latest_request.get(league_id, 0) + 1
+
     def run():
-        try:
-            index_manual_league(indexer, league)
-            logger.info(f"Manual league {league['id']}: indexed for chat")
-        except Exception as e:
-            logger.error(f"Manual league {league['id']}: chat indexing failed: {e}", exc_info=True)
+        with lock:
+            with _index_lock:
+                if _latest_request[league_id] != number:
+                    return  # a newer edit's thread will index the newer league
+            try:
+                index_manual_league(indexer, league)
+                logger.info(f"Manual league {league_id}: indexed for chat")
+            except Exception as e:
+                logger.error(f"Manual league {league_id}: chat indexing failed: {e}", exc_info=True)
 
     thread = threading.Thread(target=run, daemon=True)
     thread.start()

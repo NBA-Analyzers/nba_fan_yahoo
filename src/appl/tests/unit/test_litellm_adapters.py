@@ -127,3 +127,39 @@ def test_embedder_rejects_vectors_of_the_wrong_size(monkeypatch):
     )
     with pytest.raises(LLMError, match="dimension"):
         LiteLLMEmbedder(model="e", dimensions=768).embed(["x"])
+
+
+def _tool_response(content, calls):
+    message = SimpleNamespace(content=content, tool_calls=[
+        SimpleNamespace(id=i, function=SimpleNamespace(name=n, arguments=a)) for i, n, a in calls
+    ])
+    return SimpleNamespace(choices=[SimpleNamespace(message=message)])
+
+
+def test_complete_with_tools_offers_tools_and_parses_calls(monkeypatch):
+    seen = {}
+
+    def fake_completion(**kwargs):
+        seen.update(kwargs)
+        return _tool_response(None, [("c1", "lookup_player", '{"name": "Jokic"}'), ("c2", "get_standings", "not json")])
+
+    monkeypatch.setattr(litellm, "completion", fake_completion)
+    tools = [{"type": "function", "function": {"name": "lookup_player"}}]
+    reply = LiteLLMClient(model="m").complete_with_tools([{"role": "user", "content": "x"}], tools)
+
+    assert seen["tools"] == tools
+    assert [(c.id, c.name, c.arguments) for c in reply.tool_calls] == [
+        ("c1", "lookup_player", {"name": "Jokic"}), ("c2", "get_standings", {}),
+    ]
+
+
+def test_complete_with_tools_returns_a_plain_answer(monkeypatch):
+    monkeypatch.setattr(litellm, "completion", lambda **kw: _tool_response("done", []))
+    reply = LiteLLMClient(model="m").complete_with_tools([], [{"type": "function"}])
+    assert reply.content == "done" and reply.tool_calls == ()
+
+
+def test_complete_with_tools_rejects_an_empty_turn(monkeypatch):
+    monkeypatch.setattr(litellm, "completion", lambda **kw: _tool_response(None, []))
+    with pytest.raises(LLMError):
+        LiteLLMClient(model="m", max_retries=0).complete_with_tools([], [{"type": "function"}])

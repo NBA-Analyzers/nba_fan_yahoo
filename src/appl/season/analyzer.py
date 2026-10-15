@@ -12,11 +12,20 @@ to those points:
   drops    - your players who add least to the categories you count
   streaming - free agents ranked by value times the games their team plays in
              the next week, so a four-game week beats a two-game one
+
+In a head-to-head categories league the objective changes: instead of roto points
+(a step function of ranks), a move is judged by the expected number of categories
+won in a weekly matchup against a typical opponent, using a normal model of
+week-to-week noise. Injured players count at reduced value in the totals, and
+moves must keep your starting lineup fillable when the league's slots are known.
 """
 
+import math
 from datetime import date
-from statistics import pstdev
+from statistics import mean, pstdev
 
+from ..draft.player_pool import normalize_name
+from ..draft.positions import FLEX_SLOT, assign, eligible_from_listed_position
 from ..draft.ranker import COUNTING_STATS, NEGATIVE_CATEGORIES, PERCENT_STATS
 from .schedule import WINDOW_DAYS, Schedule
 
@@ -42,6 +51,11 @@ CONCEDE_FACTOR = 2.0  # behind by more than twice the toss-up band: not worth ch
 DEFAULT_WEEK_GAMES = 3.5  # a player's games when the schedule can't say
 QUESTIONABLE_WEIGHT = 0.75  # a day-to-day player is expected to miss some games
 STRONG_Z = 0.75  # a category a streamer clearly helps
+OUT_WEIGHT = 0.3  # an injured-out player still counts a little: he may be back soon
+DOUBTFUL_WEIGHT = 0.9  # a day-to-day player misses an occasional game
+WEEKLY_NOISE = 0.10  # head-to-head: a team's weekly counting stat varies about 10% around its mean
+WEEKLY_NOISE_PCT = 0.03  # ... and a weekly FG% / FT% by about 3 points
+EPS = 0.005  # gains smaller than this are ties
 
 
 def _line(player: dict) -> tuple:
@@ -102,6 +116,10 @@ class SeasonAnalyzer:
         self.punts = [p for p in (punts or []) if p in self.categories]
         self.counted = [c for c in self.categories if c not in self.punts]
         self.me = snapshot.my_team
+        self.scoring = getattr(snapshot, "scoring", "roto")
+        self.h2h = self.scoring == "h2h"
+        self.slots = dict(getattr(snapshot, "slots", None) or {})
+        self._inj = {normalize_name(n): level for n, level in getattr(snapshot, "injuries", {}).items()}
         opp = opponent if opponent is not None else getattr(snapshot, "opponent", None)
         self.opponent = opp if opp is not None and 0 <= opp < len(snapshot.rosters) and opp != self.me else None
 
@@ -116,8 +134,14 @@ class SeasonAnalyzer:
                 else:
                     self.unmatched.append(name)
             self.players.append(found)
-        self.totals = [_sum(_line(p) for p in team) for team in self.players]
+        self.totals = [_sum(self._aline(p) for p in team) for team in self.players]
         self._values = {c: [category_value(t, c) for t in self.totals] for c in self.categories}
+        self._noise = {
+            c: WEEKLY_NOISE_PCT if c in PERCENT_STATS
+            else WEEKLY_NOISE * (mean(abs(v) for v in self._values[c]) or 1.0)
+            for c in self.categories
+        }
+        self._starters_now: int | None = None
         # Your weights honor your punts; rivals' punts are unknown
         self._weights = {
             team: ranker._need_weights(self._names(team), set(self.punts if team == self.me else []))
@@ -141,23 +165,49 @@ class SeasonAnalyzer:
             self._fits[key] = self.ranker._fit(player, self._weights[team])
         return self._fits[key]
 
-    def _my_points(self, changes: dict[int, tuple] | None = None) -> int:
-        """My roto points over the counted categories, with some teams' totals
-        replaced. Only my rank is needed, which keeps the trade search fast."""
+    def _aline(self, player: dict) -> tuple:
+        """A player's per-game line, scaled down while he is injured."""
+        weight = {"out": OUT_WEIGHT, "questionable": DOUBTFUL_WEIGHT}.get(self._injury(player["name"]), 1.0)
+        line = _line(player)
+        return line if weight == 1.0 else tuple(x * weight for x in line)
+
+    def _beat_prob(self, category: str, mine: float, theirs: float) -> float:
+        """Chance I win this category in a week against a team with `theirs`."""
+        edge = theirs - mine if category in NEGATIVE_CATEGORIES else mine - theirs
+        return 0.5 * (1 + math.erf(edge / (2 * self._noise[category])))
+
+    def _gain(self, value):
+        return value if isinstance(value, int) else round(value, 2)
+
+    def _score(self, team: int, changes: dict[int, tuple] | None = None,
+               categories: list[str] | None = None):
+        """A team's score over `categories` (default: my counted ones), with some teams'
+        totals replaced: roto points, or in a head-to-head league the expected categories
+        won per weekly matchup. Only that team's side is needed, which keeps searches fast."""
         changes = changes or {}
+        categories = self.counted if categories is None else categories
         n = len(self.totals)
-        mine_totals = changes.get(self.me, self.totals[self.me])
+        team_totals = changes.get(team, self.totals[team])
+
+        def other(i: int, c: str) -> float:
+            return category_value(changes[i], c) if i in changes else self._values[c][i]
+
+        if self.h2h:
+            expected = 0.0
+            for c in categories:
+                mine = category_value(team_totals, c)
+                expected += sum(
+                    self._beat_prob(c, mine, other(i, c)) for i in range(n) if i != team
+                ) / max(1, n - 1)
+            return expected
         points = 0
-        for c in self.counted:
-            values = self._values[c]
-            mine = category_value(mine_totals, c)
-            better = sum(
-                _better(c, category_value(changes[i], c) if i in changes else values[i], mine)
-                for i in range(n)
-                if i != self.me
-            )
-            points += n - better
+        for c in categories:
+            mine = category_value(team_totals, c)
+            points += n - sum(_better(c, other(i, c), mine) for i in range(n) if i != team)
         return points
+
+    def _my_points(self, changes: dict[int, tuple] | None = None):
+        return self._score(self.me, changes)
 
     def _with(self, changes: dict[int, tuple]) -> list[tuple]:
         return [changes.get(i, t) for i, t in enumerate(self.totals)]
@@ -182,7 +232,22 @@ class SeasonAnalyzer:
         return [self.ranker.find(r["name"]) for r in recs if self._injury(r["name"]) != "out"]
 
     def _injury(self, name: str) -> str | None:
-        return getattr(self.snapshot, "injuries", {}).get(name)
+        return self._inj.get(normalize_name(name))
+
+    def _starters(self, players: list[dict]) -> int:
+        eligible = [eligible_from_listed_position(p.get("pos")) or {FLEX_SLOT} for p in players]
+        return assign(eligible, self.slots)[0]
+
+    def _keeps_lineup(self, remove: list[dict], add: list[dict]) -> bool:
+        """True when swapping players in and out of my roster leaves as many starting
+        slots filled as now. Always True when the league's slots are unknown."""
+        if not self.slots:
+            return True
+        if self._starters_now is None:
+            self._starters_now = self._starters(self.players[self.me])
+        gone = {p["key"] for p in remove}
+        after = [p for p in self.players[self.me] if p["key"] not in gone] + add
+        return self._starters(after) >= self._starters_now
 
     def injuries(self) -> list[dict]:
         """Your injured players, worst first."""
@@ -246,19 +311,22 @@ class SeasonAnalyzer:
         for fa in self._free_agents():
             best = None
             for drop in self.players[self.me]:
-                changes = {self.me: _add(_add(self.totals[self.me], _line(drop), -1), _line(fa))}
+                if not self._keeps_lineup([drop], [fa]):
+                    continue
+                changes = {self.me: _add(_add(self.totals[self.me], self._aline(drop), -1), self._aline(fa))}
                 gain = self._my_points(changes) - base
                 value = self._value(self.me, fa) - self._value(self.me, drop)
-                if best is None or (gain, value) > best[:2]:
+                # Gains within EPS are ties (h2h scores are fractions), settled by value
+                if best is None or gain > best[0] + EPS or (abs(gain - best[0]) <= EPS and value > best[1]):
                     best = (gain, value, drop, changes)
-            if best and (best[0] > 0 or (best[0] == 0 and best[1] > 0)):
+            if best and (best[0] > EPS or (abs(best[0]) <= EPS and best[1] > 0)):
                 gain, value, drop, changes = best
                 found.append({
                     "add": fa["name"],
                     "add_team": fa.get("team"),
                     "injury": self._injury(fa["name"]),
                     "drop": drop["name"],
-                    "points_gain": gain,
+                    "points_gain": self._gain(gain),
                     "value_gain": round(value, 2),
                     "category_changes": self._rank_changes(self._with(changes)),
                 })
@@ -342,7 +410,7 @@ class SeasonAnalyzer:
         if not out:
             return []
         return [{"kind": "injury", "text": f"Out: {', '.join(out)}. Bench or replace them; an injured "
-                                           "player's stats still count in the standings above."}]
+                                           "player counts at reduced value in the totals above."}]
 
     def drops(self) -> list[dict]:
         mine = sorted(self.players[self.me], key=lambda p: self._value(self.me, p))
@@ -357,7 +425,8 @@ class SeasonAnalyzer:
 
     def trades(self) -> list[dict]:
         base = self._my_points()
-        base_points = _points(self.totals, self.categories)
+        # The partner's score in the same units as mine, over every category (their punts are unknown)
+        their_base = {team: self._score(team, categories=self.categories) for team in range(len(self.players))}
         mine = self.players[self.me]
         free_agent = next(iter(self._free_agents(limit=1)), None)
         offers = [[p] for p in mine] + [[a, b] for i, a in enumerate(mine) for b in mine[i + 1:]]
@@ -372,28 +441,28 @@ class SeasonAnalyzer:
 
             found = []
             for give in offers:
-                give_line = _sum(map(_line, give))
+                give_line = _sum(map(self._aline, give))
                 give_value = sum(self._value(partner, p) for p in give)
                 for get in theirs:
                     their_value = give_value - self._value(partner, get)
-                    my_totals = _add(_add(self.totals[self.me], give_line, -1), _line(get))
-                    their_totals = _add(_add(self.totals[partner], _line(get), -1), give_line)
+                    my_totals = _add(_add(self.totals[self.me], give_line, -1), self._aline(get))
+                    their_totals = _add(_add(self.totals[partner], self._aline(get), -1), give_line)
                     pickup = their_drop = None
                     if len(give) == 2:
                         # You have an open spot to fill; they must cut someone
                         if free_agent:
-                            my_totals = _add(my_totals, _line(free_agent))
+                            my_totals = _add(my_totals, self._aline(free_agent))
                             pickup = free_agent["name"]
                         left = [p for p in self.players[partner] if p is not get] + give
                         cut = min(left, key=lambda p: self._value(partner, p))
-                        their_totals = _add(their_totals, _line(cut), -1)
+                        their_totals = _add(their_totals, self._aline(cut), -1)
                         their_value -= self._value(partner, cut)
                         their_drop = cut["name"]
                     if their_value < -FAIR_MARGIN:
                         continue  # they wouldn't say yes
                     changes = {self.me: my_totals, partner: their_totals}
                     gain = self._my_points(changes) - base
-                    if gain > 0:
+                    if gain > EPS and self._keeps_lineup(give, [get] + ([free_agent] if pickup else [])):
                         found.append((gain, their_value, give, get, pickup, their_drop, changes))
 
             found.sort(key=lambda t: t[:2], reverse=True)
@@ -412,8 +481,9 @@ class SeasonAnalyzer:
                     "get": [get["name"]],
                     "pickup": pickup,
                     "their_drop": their_drop,
-                    "points_gain": gain,
-                    "their_points_change": _points(totals, self.categories)[partner] - base_points[partner],
+                    "points_gain": self._gain(gain),
+                    "their_points_change": self._gain(
+                        self._score(partner, changes, self.categories) - their_base[partner]),
                     "my_value_change": round(
                         self._value(self.me, get) - sum(self._value(self.me, p) for p in give), 2
                     ),
@@ -503,4 +573,17 @@ class SeasonAnalyzer:
             "injuries": self.injuries(),
             "matchup": self.matchup(),
             "unmatched": self.unmatched,
+            "scoring": self.scoring,
+            "objective": "expected_category_wins" if self.h2h else "roto_points",
+            "warnings": self.warnings(),
         }
+
+    def warnings(self) -> list[str]:
+        notes = list(getattr(self.snapshot, "warnings", []) or [])
+        if self.unmatched:
+            notes.append("No stats were found for " + ", ".join(self.unmatched[:8])
+                         + ("..." if len(self.unmatched) > 8 else "")
+                         + ", so they are left out of the totals.")
+        if not self.slots:
+            notes.append("Roster slots are unknown, so moves are not checked against position eligibility.")
+        return notes

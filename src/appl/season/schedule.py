@@ -69,6 +69,21 @@ class Schedule:
     def games(self, team: str | None, start: date, days: int = WINDOW_DAYS) -> int:
         return len(self.dates(team, start, days))
 
+    def last_day(self) -> date | None:
+        """The last date the file has games for."""
+        return max(self._days) if self._days else None
+
+    def games_remaining(self, team: str | None, start: date) -> int:
+        """Games from `start` to the end of the file's schedule (the regular season)."""
+        last = self.last_day()
+        if last is None or last < start:
+            return 0
+        return self.games(team, start, (last - start).days + 1)
+
+    def games_rest_of_week(self, team: str | None, start: date) -> int:
+        """Games from `start` through that week's Sunday (fantasy weeks run Monday to Sunday)."""
+        return self.games(team, start, 7 - start.weekday())
+
     def back_to_backs(self, team: str | None, start: date, days: int = WINDOW_DAYS) -> int:
         played = self.dates(team, start, days)
         return sum(1 for a, b in zip(played, played[1:]) if (b - a).days == 1)

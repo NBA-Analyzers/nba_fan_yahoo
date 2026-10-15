@@ -170,7 +170,8 @@ def _nominee_card(nominee, lookup, ranker, info, state, plan, punts, taken, mine
 
 class DraftRouter:
     def __init__(self, store: ManualLeagueStore | None = None, tokens: ApiTokenStore | None = None,
-                 espn: EspnService | None = None):
+                 espn: EspnService | None = None, indexer=None):
+        self._indexer = indexer  # re-indexes a manual league for the chat after its notes change
         self._store = store or default_store()
         self._tokens = tokens or default_token_store()
         self._espn = espn or EspnService(None)
@@ -606,12 +607,14 @@ class DraftRouter:
         @require_login
         def add_note(league_id):
             raw = request.get_json(silent=True) or {}
-            return guarded(lambda: store.add_note(user(), league_id, raw.get("text")))
+            return guarded(lambda: (store.add_note(user(), league_id, raw.get("text")),
+                                    self._reindex(user(), league_id)))
 
         @bp.route("/<league_id>/notes/<note_id>", methods=["DELETE"])
         @require_login
         def delete_note(league_id, note_id):
-            return guarded(lambda: store.delete_note(user(), league_id, note_id))
+            return guarded(lambda: (store.delete_note(user(), league_id, note_id),
+                                    self._reindex(user(), league_id)))
 
         @bp.route("/<league_id>", methods=["DELETE"])
         @require_login
@@ -619,6 +622,16 @@ class DraftRouter:
             return guarded(lambda: store.delete(user(), league_id))
 
         return bp
+
+    def _reindex(self, user_id: str, league_id: str) -> None:
+        if self._indexer is None:
+            return
+        try:
+            from ..season.service import index_manual_league_async
+
+            index_manual_league_async(self._indexer, self._store.get(user_id, league_id))
+        except Exception as e:
+            logger.warning(f"Could not start re-indexing manual league {league_id}: {e}")
 
     def get_manual_bp(self):
         return self._manual_blueprint
