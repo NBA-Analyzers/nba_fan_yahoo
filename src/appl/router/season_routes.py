@@ -123,7 +123,7 @@ class SeasonRouter:
                 return jsonify({"error": str(e)}), 400
             except Exception as e:
                 logger.error(f"Season analysis failed: {e}", exc_info=True)
-                return jsonify({"error": str(e)}), 500
+                return jsonify({"error": "The season analysis failed, please try again"}), 500
 
         # --- manual leagues ---
 

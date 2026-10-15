@@ -36,6 +36,28 @@ from ..season.service import manual_chat_id
 
 logger = logging.getLogger(__name__)
 
+class BadRequest(ValueError):
+    """The request body or query had the wrong shape; shown to the caller as a 400."""
+
+
+def _name_list(value, field: str) -> list[str]:
+    """A list of player names, or empty when the field is missing."""
+    if value in (None, ""):
+        return []
+    if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
+        raise BadRequest(f"{field} must be a list of player names")
+    return value
+
+
+def _parse_punts(raw) -> list[str]:
+    """Punts as a list, from a list or a comma separated string."""
+    if isinstance(raw, list):
+        return _name_list(raw, "punts")
+    if isinstance(raw, str):
+        return [p for p in raw.split(",") if p]
+    raise BadRequest("punts must be a list or a comma separated string")
+
+
 # league_id -> DraftRanker; the ranking baseline only depends on league settings
 _rankers: dict[str, DraftRanker] = {}
 
@@ -202,12 +224,17 @@ class DraftRouter:
     def _state_response(self, league_id: str, get_tracker):
         """Draft state + recommendations for whichever tracker `get_tracker` returns."""
         body = request.get_json(silent=True) or {}
-        raw_punts = body.get("punts", request.args.get("punts", ""))
-        punts = (
-            raw_punts
-            if isinstance(raw_punts, list)
-            else [p for p in raw_punts.split(",") if p]
-        )
+        if not isinstance(body, dict):
+            return jsonify({"error": "JSON body must be an object"}), 400
+        try:
+            punts = _parse_punts(body.get("punts", request.args.get("punts", "")))
+            mock_taken = _name_list(body.get("mock_taken"), "mock_taken")
+            mock_mine = _name_list(body.get("mock_mine"), "mock_mine")
+            mock_costs = body.get("mock_costs")
+            if mock_costs is not None and not isinstance(mock_costs, dict):
+                raise BadRequest("mock_costs must be an object of player name to price")
+        except BadRequest as e:
+            return jsonify({"error": str(e)}), 400
         mock = bool(body.get("mock")) or request.args.get("mock") == "1"
         auto_punts = body.get("auto_punts") in (True, "1", 1) or request.args.get("auto_punts") == "1"
         mode = body.get("mode", request.args.get("mode", "manual"))
@@ -232,8 +259,7 @@ class DraftRouter:
             lookup = _eligibility_lookup(tracker, ranker)
 
             if mock:
-                taken = body.get("mock_taken") or []
-                mine = body.get("mock_mine") or []
+                taken, mine = mock_taken, mock_mine
                 state = {
                     "league_name": info["name"],
                     "is_auction": info["is_auction"],
@@ -245,7 +271,7 @@ class DraftRouter:
                     "mock": True,
                 }
                 if info["is_auction"]:
-                    state.update(_mock_auction_state(info, taken, mine, body.get("mock_costs")))
+                    state.update(_mock_auction_state(info, taken, mine, mock_costs))
             else:
                 state = tracker.state(draft_position)
                 taken, mine = state["taken_names"], state["my_roster"]
@@ -316,7 +342,7 @@ class DraftRouter:
             )
         except Exception as e:
             logger.error(f"League {league_id}: draft state failed: {e}", exc_info=True)
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "Could not build the draft state"}), 500
 
     def _create_blueprint(self):
         draft_bp = Blueprint("draft", __name__, url_prefix="/draft")
@@ -349,7 +375,7 @@ class DraftRouter:
                 return jsonify({"players": sorted(p["name"] for p in ranker.players)})
             except Exception as e:
                 logger.error(f"League {league_id}: player list failed: {e}", exc_info=True)
-                return jsonify({"error": str(e)}), 500
+                return jsonify({"error": "Could not load the player list"}), 500
 
         # --- ESPN leagues: the same page and engine, an ESPN tracker ---
 
