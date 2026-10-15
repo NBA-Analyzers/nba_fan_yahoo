@@ -75,20 +75,44 @@ function setBusy(value) {
   sendButton.disabled = value;
 }
 
-async function ask(question) {
+async function failure(res) {
+  if (res.status === 401) return new Error("Your sign-in has expired. Please refresh the page and sign in again.");
+  let message = "Something went wrong. Please try again.";
+  try { message = JSON.parse(await res.text()).error || message; } catch (e) {}
+  return new Error(message);
+}
+
+// The answer arrives as it is written: one JSON object per line ({delta}, then {done} or {error}).
+// `onText` gets the whole answer so far each time it grows.
+async function ask(question, onText) {
   const res = await fetch("/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ session_id: sessionId, user_message: question, league_id: leagueId }),
+    body: JSON.stringify({ session_id: sessionId, user_message: question, league_id: leagueId, stream: true }),
   });
-  const body = await res.text();
-  if (!res.ok) {
-    if (res.status === 401) throw new Error("Your sign-in has expired. Please refresh the page and sign in again.");
-    let message = "Something went wrong. Please try again.";
-    try { message = JSON.parse(body).error || message; } catch (e) {}
-    throw new Error(message);
+  if (!res.ok) throw await failure(res);
+  if (!res.body || !res.body.getReader) return res.text();  // an old browser: no streaming
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "", answer = "", finished = false;
+  const handle = (line) => {
+    if (!line.trim()) return;
+    const event = JSON.parse(line);
+    if (event.error) throw new Error(event.error);
+    if (event.delta) { answer += event.delta; onText(answer); }
+    if (event.done) finished = true;
+  };
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop();
+    lines.forEach(handle);
   }
-  return body;
+  handle(buffer);
+  if (!finished && !answer) throw new Error("The answer was cut off. Please try again.");
+  return answer;
 }
 
 async function send(question) {
@@ -100,7 +124,10 @@ async function send(question) {
   setBusy(true);
   const typing = addMessage("bot", '<span class="typing" aria-label="Thinking"><span></span><span></span><span></span></span>');
   try {
-    const answer = await ask(question);
+    const answer = await ask(question, (text) => {
+      typing.innerHTML = formatAnswer(text);
+      messages.scrollTop = messages.scrollHeight;
+    });
     typing.innerHTML = formatAnswer(answer);
   } catch (e) {
     typing.remove();

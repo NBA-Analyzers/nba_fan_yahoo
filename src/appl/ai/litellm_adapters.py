@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import time
-from typing import Callable, Optional
+from typing import Callable, Iterator, Optional
 
 import litellm
 
@@ -32,6 +32,10 @@ class LLMError(Exception):
     pass
 
 
+def _optional(value: Optional[str], cast):
+    return cast(value) if value not in (None, "") else None
+
+
 def _call_with_retries(call: Callable[[], object], max_retries: int, delay: float, sleep):
     """Run `call`, retrying transient provider errors with exponential backoff."""
     return with_retry(call, attempts=max_retries + 1, delay=delay, retry_on=_TRANSIENT,
@@ -47,9 +51,15 @@ class LiteLLMClient:
         max_retries: int = DEFAULT_MAX_RETRIES,
         retry_delay: float = DEFAULT_RETRY_DELAY,
         sleep: Callable[[float], None] = time.sleep,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
     ):
+        """`temperature` and `max_tokens` are left to the provider unless set (reasoning
+        models spend part of max_tokens on thinking, so a low cap can empty the answer)."""
         self.model = model
         self.fallback_model = fallback_model
+        self.temperature = temperature
+        self.max_tokens = max_tokens
         self.timeout = timeout
         self.max_retries = max_retries
         self.retry_delay = retry_delay
@@ -61,6 +71,8 @@ class LiteLLMClient:
             os.environ.get("LLM_MODEL", DEFAULT_LLM_MODEL),
             fallback_model=os.environ.get("LLM_FALLBACK_MODEL") or None,
             timeout=float(os.environ.get("LLM_TIMEOUT_SECONDS", DEFAULT_TIMEOUT_SECONDS)),
+            temperature=_optional(os.environ.get("LLM_TEMPERATURE"), float),
+            max_tokens=_optional(os.environ.get("LLM_MAX_TOKENS"), int),
         )
 
     def complete(self, messages: list[dict]) -> str:
@@ -82,15 +94,25 @@ class LiteLLMClient:
         # `from None`: the original exception text can contain the request URL (with the key)
         raise LLMError(f"LLM call failed: {scrub_secrets(str(last_error))}") from None
 
+    def _options(self, tools: Optional[list[dict]] = None) -> dict:
+        options = {}
+        if tools:
+            options["tools"] = tools
+        if self.temperature is not None:
+            options["temperature"] = self.temperature
+        if self.max_tokens is not None:
+            options["max_tokens"] = self.max_tokens
+        return options
+
     def _message(self, model: str, messages: list[dict], tools: Optional[list[dict]] = None):
-        extra = {"tools": tools} if tools else {}
+        options = self._options(tools)
         response = _call_with_retries(
             lambda: litellm.completion(
                 model=model,
                 messages=messages,
                 timeout=self.timeout,
                 num_retries=0,
-                **extra,
+                **options,
             ),
             self.max_retries,
             self.retry_delay,
@@ -104,8 +126,8 @@ class LiteLLMClient:
             raise ValueError("LLM returned an empty answer")
         return content
 
-    def _turn_with(self, model: str, messages: list[dict], tools: list[dict]) -> LLMReply:
-        message = self._message(model, messages, tools)
+    @staticmethod
+    def _reply_from(message) -> LLMReply:
         calls = []
         for call in getattr(message, "tool_calls", None) or []:
             try:
@@ -117,6 +139,56 @@ class LiteLLMClient:
         if not calls and not message.content:
             raise ValueError("LLM returned an empty answer")
         return LLMReply(content=message.content or "", tool_calls=tuple(calls))
+
+    def _turn_with(self, model: str, messages: list[dict], tools: list[dict]) -> LLMReply:
+        return self._reply_from(self._message(model, messages, tools))
+
+    # --- streaming ----------------------------------------------------------
+
+    def stream_turn(self, messages: list[dict], tools: Optional[list[dict]] = None) -> Iterator:
+        """One model turn as it is produced: yields text pieces (str) as they arrive and
+        finally the whole turn as an LLMReply (its tool calls included). The fallback model
+        is tried only if the first one fails before any text went out."""
+        models = [self.model] + ([self.fallback_model] if self.fallback_model else [])
+        last_error: Optional[Exception] = None
+        for model in models:
+            sent_text = False
+            try:
+                for item in self._stream_with(model, messages, tools):
+                    sent_text = sent_text or isinstance(item, str)
+                    yield item
+                return
+            except Exception as e:
+                last_error = e
+                logger.warning("LLM stream from %s failed: %s", model, scrub_secrets(str(e)))
+                if sent_text:
+                    break
+        raise LLMError(f"LLM call failed: {scrub_secrets(str(last_error))}") from None
+
+    def _stream_with(self, model: str, messages: list[dict], tools: Optional[list[dict]]) -> Iterator:
+        options = self._options(tools)
+        stream = _call_with_retries(
+            lambda: litellm.completion(
+                model=model,
+                messages=messages,
+                timeout=self.timeout,
+                num_retries=0,
+                stream=True,
+                **options,
+            ),
+            self.max_retries,
+            self.retry_delay,
+            self._sleep,
+        )
+        chunks = []
+        for chunk in stream:
+            chunks.append(chunk)
+            choices = getattr(chunk, "choices", None) or []
+            text = getattr(choices[0].delta, "content", None) if choices else None
+            if text:
+                yield text
+        built = litellm.stream_chunk_builder(chunks, messages=messages)
+        yield self._reply_from(built.choices[0].message)
 
 
 class LiteLLMEmbedder:

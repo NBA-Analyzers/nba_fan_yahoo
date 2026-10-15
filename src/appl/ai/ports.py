@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Protocol
+from typing import Iterator, Optional, Protocol
 
 from .chunker import Chunk
 
@@ -35,6 +35,9 @@ class LLMClient(Protocol):
     def complete(self, messages: list[dict]) -> str: ...
 
     def complete_with_tools(self, messages: list[dict], tools: list[dict]) -> LLMReply: ...
+
+    def stream_turn(self, messages: list[dict], tools: Optional[list[dict]] = None) -> Iterator:
+        """Yields text pieces (str) as they arrive, then the whole turn as an LLMReply."""
 
 
 class Embedder(Protocol):

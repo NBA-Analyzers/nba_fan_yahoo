@@ -4,6 +4,7 @@ import math
 import pytest
 
 from appl.ai.memory_store import InMemoryVectorStore
+from appl.ai.ports import LLMReply
 
 
 class FakeEmbedder:
@@ -31,10 +32,18 @@ class FakeLLMClient:
     def __init__(self, reply: str = "ok"):
         self.reply = reply
         self.calls: list[list[dict]] = []
+        self.turns: list[LLMReply] = []
+        self.tools_offered: list[dict] = []
 
     def complete(self, messages: list[dict]) -> str:
         self.calls.append([dict(m) for m in messages])
         return self.reply
+
+    def complete_with_tools(self, messages: list[dict], tools: list[dict]) -> LLMReply:
+        """Plays the scripted `turns` in order, then answers with `reply`."""
+        self.calls.append([dict(m) for m in messages])
+        self.tools_offered = tools
+        return self.turns.pop(0) if self.turns else LLMReply(content=self.reply)
 
 
 @pytest.fixture
