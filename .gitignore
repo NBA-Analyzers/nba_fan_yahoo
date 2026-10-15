@@ -90,3 +90,7 @@ src/appl/data/draft/player_pool_inseason*.json
 
 # Ingest job output when no DATASET_BUCKET is set (python -m appl.ingest)
 src/appl/data/datasets/
+
+# Node (firebase client deps)
+node_modules/
+.claude/scheduled_tasks.lock
