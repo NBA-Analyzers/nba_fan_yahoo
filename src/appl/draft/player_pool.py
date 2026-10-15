@@ -1,5 +1,6 @@
 """
-Draft player pool: blended per-game averages from the last two NBA seasons.
+Draft player pool: blended per-game averages from the last two NBA seasons, plus ESPN
+fantasy projections for players those seasons don't cover (rookies, a lost season).
 
 Per-game stats come from ESPN's public stats feed (a few paged requests for
 all players), falling back to nba_api if ESPN fails. stats.nba.com blocks some
@@ -70,7 +71,13 @@ def _fetch_season_nba_api(season: str) -> dict[int, dict]:
 
 def blend_seasons(seasons: list[tuple[dict[int, dict], float]]) -> list[dict]:
     """Blend per-game stats across seasons, weighting each season by its
-    configured weight and by how many games the player actually played."""
+    configured weight and by how many games the player actually played.
+
+    Games played (the durability factor) blend with the plain season weights, from
+    the newest season back to the player's oldest one: a season he missed counts as
+    0 games, while seasons before his debut don't count at all. So a star hurt last
+    season keeps part of his healthy year instead of falling out of the pool. It is
+    never below the newest season's games, so older seasons can only help."""
     player_ids = {pid for stats, _ in seasons for pid in stats}
     pool = []
     for pid in player_ids:
@@ -84,14 +91,17 @@ def blend_seasons(seasons: list[tuple[dict[int, dict], float]]) -> list[dict]:
             continue
 
         latest = entries[0][0]
+        debut = max(i for i, (stats, _) in enumerate(seasons) if pid in stats)
+        counted = seasons[: debut + 1]
+        games = sum(stats[pid]["GP"] * w for stats, w in counted if pid in stats)
+        last_season_games = seasons[0][0].get(pid, {}).get("GP", 0)
         player = {
             "nba_id": pid,
             "name": latest["name"],
             "team": latest["team"],
             # Listed position from the newest season that has one
             "pos": next((stats.get("pos") for stats, _ in entries if stats.get("pos")), None),
-            # Most recent season's games played drives the durability factor
-            "GP": latest["GP"],
+            "GP": max(round(games / sum(w for _, w in counted), 1), last_season_games),
         }
         for field in STAT_FIELDS:
             player[field] = round(
@@ -99,6 +109,31 @@ def blend_seasons(seasons: list[tuple[dict[int, dict], float]]) -> list[dict]:
             )
         pool.append(player)
     return pool
+
+
+def add_projections(pool: list[dict], projections: dict[int, dict]) -> list[dict]:
+    """The pool plus a row for every projected player it has no row for, matched by
+    id and by name. Rows the history covers are kept as they are; added rows are
+    marked "projected" so the app can say the numbers are a projection."""
+    ids = {p["nba_id"] for p in pool}
+    names = {normalize_name(p["name"]) for p in pool}
+    added = []
+    for pid, line in projections.items():
+        key = normalize_name(line["name"])
+        if pid in ids or key in names or line["GP"] <= 0:
+            continue
+        names.add(key)
+        added.append({"nba_id": pid, **{k: line.get(k) for k in ("name", "team", "pos")},
+                      "GP": line["GP"], **{f: line[f] for f in STAT_FIELDS},
+                      "projected": True})
+    if added:
+        logger.info(f"Added {len(added)} projected players: "
+                    + ", ".join(p["name"] for p in added[:10]))
+    return pool + added
+
+
+def _fetch_projections(season: str) -> dict[int, dict]:
+    return EspnSource().projections(season)
 
 
 def _fetch_season(season: str) -> dict[int, dict]:
@@ -120,6 +155,11 @@ def build_player_pool() -> list[dict]:
     pool = blend_seasons(
         [(_fetch_season(season), weight) for season, weight in SOURCE_SEASONS]
     )
+    try:
+        pool = add_projections(pool, _fetch_projections(DRAFT_SEASON))
+    except Exception as e:
+        logger.warning(f"{DRAFT_SEASON}: ESPN projections unavailable ({e}); "
+                       "the pool has no rookies")
     _store().put(f"player_pool_{DRAFT_SEASON}", pool)
     _preseason[DRAFT_SEASON] = (time.monotonic(), pool)
     return pool

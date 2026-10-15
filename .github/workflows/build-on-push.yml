@@ -8,6 +8,7 @@ env:
   PROJECT_ID: nbafantasy-511015
   REGION: europe-west1
   SERVICE: fantasy-ai
+  INGEST_JOB: ingest-nightly
   IMAGE: europe-west1-docker.pkg.dev/nbafantasy-511015/cloud-run-source-deploy/fantasy-ai
 
 jobs:
@@ -67,3 +68,7 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: gcloud run deploy "$SERVICE" --image "$IMAGE:$GITHUB_SHA" --region "$REGION" --project "$PROJECT_ID" --quiet
+
+      # The daily data refresh runs the same code, so it moves to the new image too
+      - name: Update the nightly ingest job
+        run: gcloud run jobs update "$INGEST_JOB" --image "$IMAGE:$GITHUB_SHA" --region "$REGION" --project "$PROJECT_ID" --quiet
