@@ -35,7 +35,7 @@ The old Azure Web App workflow (`main_fantasy.yml`) was removed on 2026-10-14; t
 5. Sign-in is Firebase Auth (see the Firebase section below). For Yahoo: `gcloud run services update fantasy-ai --update-env-vars YAHOO_CLIENT_ID=...` and attach the secret with `--update-secrets YAHOO_CLIENT_SECRET=yahoo-client-secret:latest`.
 6. Register `https://fantasy-ai-276008835589.europe-west1.run.app/auth/yahoo/callback` in your Yahoo app.
 
-## Nightly data refresh (Cloud Run Job + Cloud Scheduler) — not yet run
+## Nightly data refresh (Cloud Run Job + Cloud Scheduler)
 
 `python -m appl.ingest run all` refreshes the shared AI index (player stats, schedule, rules; one
 Firestore collection each, skipped when unchanged) and the draft/in-season player pools (stored in
@@ -61,7 +61,7 @@ GCS under `datasets/`). It runs from the same image as the service.
      --task-timeout 3600 --max-retries 1 --memory 1Gi
    gcloud run jobs execute ingest-nightly --region europe-west1 --wait
    ```
-   On redeploys, point the job at the new image: `gcloud run jobs update ingest-nightly --image <IMAGE>`.
+   The deploy workflow points the job at each new image after it deploys the service.
 4. Schedule it at 09:00 UTC (after the night's NBA games):
    ```
    gcloud scheduler jobs create http ingest-nightly --location europe-west1 --schedule "0 9 * * *" --time-zone UTC \
