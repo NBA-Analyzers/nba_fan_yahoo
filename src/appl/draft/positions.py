@@ -49,7 +49,18 @@ def parse_eligible(raw) -> set[str]:
     return eligible
 
 
+# ESPN's combo spots -> the spots a player needs one of to start there
+COMBO_SLOTS = {
+    "SG/SF": {"SG", "SF"},
+    "G/F": {"PG", "SG", "G", "SF", "PF", "F"},
+    "PF/C": {"PF", "C"},
+    "F/C": {"SF", "PF", "F", "C"},
+}
+
+
 def _can_fill(slot: str, eligible: set[str]) -> bool:
+    if slot in COMBO_SLOTS:
+        return bool(COMBO_SLOTS[slot] & eligible)
     return slot == FLEX_SLOT or slot in eligible
 
 

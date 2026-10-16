@@ -145,6 +145,15 @@ def test_a_move_may_not_leave_a_position_slot_empty(ranker):
     assert a._keeps_lineup([guard], [free_guard])
 
 
+def test_a_combo_slot_needs_one_of_its_positions(ranker):
+    snap, _ = league(ranker, slots={"G/F": 1, "C": 1})
+    a = SeasonAnalyzer(ranker, snap)
+    guards = a.players[0][1:]  # both of my guards out: only a guard or forward can take G/F
+    free_bigs = [ranker.find(n) for n in ("Big Ah", "Big Ai")]
+    assert not a._keeps_lineup(guards, free_bigs)
+    assert a._keeps_lineup(guards, [free_bigs[0], ranker.find("Guard Ba")])
+
+
 def test_unknown_slots_do_not_restrict_moves(ranker):
     snap, _ = league(ranker)
     a = SeasonAnalyzer(ranker, snap)
@@ -218,7 +227,7 @@ def test_espn_snapshot_reads_unsupported_stats_and_slots():
     # ESPN slot ids: 0 PG, 4 C, 8 G/F, 11 UT (flex), 12 bench, 13 IR
     league.espn_request.league_get = espn_settings_request({"0": 1, "4": 1, "8": 1, "11": 2, "12": 3, "13": 1})
     snap = snapshots.from_espn(league, "9100", swid=SWID, user="u9")
-    assert snap.scoring == "h2h" and snap.slots == {"PG": 1, "C": 1, "Util": 3}  # G/F has no match: a flex
+    assert snap.scoring == "h2h" and snap.slots == {"PG": 1, "C": 1, "G/F": 1, "Util": 2}
     assert snap.warnings == ["These scored stats aren't analyzed: stat 99."]
 
 
