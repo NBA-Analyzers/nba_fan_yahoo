@@ -9,6 +9,7 @@ from appl.draft.manual_league import ManualLeagueError, ManualLeagueStore, curre
 from appl.draft.ranker import DraftRanker
 from appl.season import jev_advisor, report_writer, service, snapshot as snapshots
 from appl.season.analyzer import SeasonAnalyzer
+from appl.season.schedule import Schedule
 from appl.tests.unit.conftest import FakeLLMClient
 from appl.tests.unit.test_draft import _name, _player
 
@@ -263,7 +264,8 @@ def client(tmp_path, monkeypatch):
 
     store = ManualLeagueStore(tmp_path)
     llm = FakeLLMClient("What's working: rebounds.")
-    router = routes.SeasonRouter(store, report_writer.BriefStore(use_firestore=False), lambda: llm)
+    router = routes.SeasonRouter(store, report_writer.BriefStore(use_firestore=False), lambda: llm,
+                                 Schedule.load(), espn=object())
     static = str(Path(routes.__file__).parents[1] / "static")
     app = Flask(__name__, static_folder=static, template_folder=static)
     app.secret_key = "test"

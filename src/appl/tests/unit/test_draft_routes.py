@@ -86,8 +86,7 @@ def env(monkeypatch):
 
     pool = [_player(_name("Big", i), True, i) for i in range(80)]
     pool += [_player(_name("Guard", i), False, 100 + i) for i in range(120)]
-    monkeypatch.setattr(routes, "load_player_pool", lambda: pool)
-    monkeypatch.setattr(routes, "_rankers", {})
+    monkeypatch.setattr("appl.draft.service.load_player_pool", lambda: pool)
     monkeypatch.setattr(jev_chooser, "_cache", {})
     monkeypatch.setattr(jev_chooser, "_failed_until", 0.0)
     monkeypatch.delenv("JEV_API_KEY", raising=False)
@@ -98,7 +97,7 @@ def env(monkeypatch):
     static = str(Path(routes.__file__).parents[1] / "static")
     app = Flask(__name__, static_folder=static, template_folder=static)
     app.secret_key = "test"
-    app.register_blueprint(routes.DraftRouter().get_bp())
+    app.register_blueprint(routes.DraftRouter(store=object(), tokens=object(), espn=object()).get_bp())
     client = app.test_client()
     with client.session_transaction() as session:
         session["user_id"] = "Tester"

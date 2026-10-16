@@ -694,3 +694,25 @@ def default_store() -> ManualLeagueStore:
     if kind == "firestore":
         return ManualLeagueStore(backend=FirestoreBackend())
     return ManualLeagueStore()
+
+
+def match_import_teams(ranker, teams: list) -> tuple[list, list]:
+    """Match typed rosters to the stats pool. Returns the teams with each player's
+    pool spelling (or suggestions when not found) and the names that were not found."""
+    matched, unknown = [], []
+    for team in teams:
+        team = team if isinstance(team, dict) else {}
+        players = []
+        for typed in team.get("players") or []:
+            typed = str(typed).strip()
+            if not typed:
+                continue
+            player = ranker.find(typed)
+            if player:
+                players.append({"typed": typed, "name": player["name"], "found": True})
+            else:
+                players.append({"typed": typed, "name": typed, "found": False,
+                                "suggestions": ranker.suggest_names(typed)})
+                unknown.append(typed)
+        matched.append({"name": team.get("name", ""), "players": players})
+    return matched, unknown

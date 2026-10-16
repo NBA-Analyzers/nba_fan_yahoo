@@ -72,7 +72,7 @@ class MainRouter:
                         )
                         leagues = yahoo_service.get_user_synced_leagues(session["user"]) or []
                     except Exception as e:
-                        print(f"Error getting synced leagues: {e}")
+                        logger.warning("Could not list synced Yahoo leagues for user %s: %s", session.get("user_id"), e, exc_info=True)
                         leagues_error = True
 
                 manual_leagues = []

@@ -47,6 +47,33 @@ def ranker_for(snap) -> DraftRanker:
 
 # --- chat ids ----------------------------------------------------------------
 
+def resolve_move_names(ranker, raw: dict) -> tuple[dict, dict | None]:
+    """A move request with its player names in the pool's spelling, so they match the
+    roster. An unknown name being added needs a confirmation (`force`): then the second
+    value is the 400 body to send back, otherwise None."""
+    clean = dict(raw)
+    for side in ("add", "drop"):
+        names = raw.get(side) or []
+        names = names.split(",") if isinstance(names, str) else names
+        fixed = []
+        for name in (str(n).strip() for n in names):
+            if not name:
+                continue
+            player = ranker.find(name)
+            if player:
+                fixed.append(player["name"])
+            elif side == "add" and raw.get("kind") == "add" and not raw.get("force"):
+                return clean, {
+                    "error": f'No player called "{name}" in the stats list.',
+                    "unknown_player": True,
+                    "suggestions": ranker.suggest_names(name),
+                }
+            else:
+                fixed.append(name)
+        clean[side] = fixed
+    return clean, None
+
+
 def manual_chat_id(league_id: str) -> str:
     return f"{MANUAL_CHAT_PREFIX}{league_id}"
 

@@ -2,11 +2,9 @@ import logging
 
 from flask import Blueprint, jsonify, redirect, render_template, request, session
 
-from ..ai.litellm_adapters import LiteLLMClient
 from ..draft.manual_league import (
     ManualLeagueError,
     ManualLeagueStore,
-    default_store,
 )
 from ..fantasy_integrations.espn.espn_service import EspnError, EspnService
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import get_yahoo_sdk
@@ -38,14 +36,14 @@ def _flag(name: str) -> bool:
 
 
 class SeasonRouter:
-    def __init__(self, store: ManualLeagueStore | None = None, briefs=None, llm_factory=None, schedule=None,
-                 espn: EspnService | None = None, indexer=None):
+    def __init__(self, store: ManualLeagueStore, briefs: report_writer.BriefStore, llm_factory,
+                 schedule: Schedule, espn: EspnService, indexer=None):
         self._indexer = indexer  # re-indexes a manual league for the chat after its moves change
-        self._store = store or default_store()
-        self._espn = espn or EspnService(None)
-        self._briefs = briefs or report_writer.BriefStore()
-        self._llm_factory = llm_factory or LiteLLMClient.from_env
-        self._schedule = schedule if schedule is not None else Schedule.load()
+        self._store = store
+        self._espn = espn
+        self._briefs = briefs
+        self._llm_factory = llm_factory
+        self._schedule = schedule
         self._blueprint = self._create_blueprint()
 
     # --- building blocks ----------------------------------------------------
@@ -178,27 +176,9 @@ class SeasonRouter:
             def run():
                 raw = request.get_json(silent=True) or {}
                 ranker = self._ranker(snapshots.from_manual(manual_league(league_id)))
-                # Pool spelling, so the move matches the roster; unknown pickups need a confirm
-                clean = dict(raw)
-                for side in ("add", "drop"):
-                    names = raw.get(side) or []
-                    names = names.split(",") if isinstance(names, str) else names
-                    fixed = []
-                    for name in (str(n).strip() for n in names):
-                        if not name:
-                            continue
-                        key = ranker.resolve_key(name)
-                        if key:
-                            fixed.append(ranker._by_key[key]["name"])
-                        elif side == "add" and raw.get("kind") == "add" and not raw.get("force"):
-                            return jsonify({
-                                "error": f'No player called "{name}" in the stats list.',
-                                "unknown_player": True,
-                                "suggestions": ranker.suggest_names(name),
-                            }), 400
-                        else:
-                            fixed.append(name)
-                    clean[side] = fixed
+                clean, problem = service.resolve_move_names(ranker, raw)
+                if problem:
+                    return jsonify(problem), 400
                 store.add_move(user(), league_id, clean)
                 self._reindex(user(), league_id)
                 return jsonify({"ok": True})

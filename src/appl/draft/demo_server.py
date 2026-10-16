@@ -17,6 +17,9 @@ from flask import Flask, redirect, request, session  # noqa: E402
 
 from ..router import draft_routes  # noqa: E402
 from .player_pool import load_player_pool  # noqa: E402
+from .manual_league import default_store  # noqa: E402
+from .api_tokens import default_token_store  # noqa: E402
+from ..fantasy_integrations.espn.espn_service import EspnService  # noqa: E402
 from .ranker import DraftRanker  # noqa: E402
 
 STAT_CATEGORIES = ["FG%", "FT%", "3PTM", "PTS", "REB", "AST", "ST", "BLK", "TO"]
@@ -97,7 +100,9 @@ def create_app() -> Flask:
         return FakeYahooTracker(auction=request.args.get("auction") == "1" or session.get("auction", False))
 
     draft_routes.DraftRouter._get_tracker = get_tracker
-    app.register_blueprint(draft_routes.DraftRouter().get_bp())
+    app.register_blueprint(
+        draft_routes.DraftRouter(default_store(), default_token_store(), EspnService(None)).get_bp()
+    )
 
     @app.route("/demo")
     def demo():
