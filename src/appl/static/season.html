@@ -125,6 +125,7 @@
 
       <section class="card">
         <h2>This week's matchup <small>projected from games played and injuries</small></h2>
+        <a id="prep_link" href="#">Open the full matchup prep &rarr;</a>
         <select id="opp" aria-label="Opponent"></select>
         <div id="matchup"></div>
       </section>
@@ -532,6 +533,7 @@ async function loadPlayers() {
 
 // --- wiring ------------------------------------------------------------------
 
+$("prep_link").href = `${base}/matchup`;
 $("back").href = manual ? `/manual/${leagueId}` : kind === "espn" ? `/draft/espn/${leagueId}` : `/draft/${leagueId}`;
 $("jev").checked = useJev;
 $("jev").onchange = (e) => { useJev = e.target.checked; store.set("jev", useJev); load(); };
