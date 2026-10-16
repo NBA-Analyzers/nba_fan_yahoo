@@ -257,13 +257,17 @@ def test_inseason_pool_falls_back_when_the_feed_fails(monkeypatch, tmp_path):
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
+    return _client(tmp_path, monkeypatch)
+
+
+def _client(tmp_path, monkeypatch, indexer=None):
     routes = importlib.import_module("appl.router.season_routes")
     monkeypatch.setattr(service, "load_inseason_pool", lambda: POOL)
     monkeypatch.setattr(service, "_rankers", {})
 
     store = ManualLeagueStore(tmp_path)
     llm = FakeLLMClient("What's working: rebounds.")
-    router = routes.SeasonRouter(store, report_writer.BriefStore(use_firestore=False), lambda: llm)
+    router = routes.SeasonRouter(store, report_writer.BriefStore(use_firestore=False), lambda: llm, indexer=indexer)
     static = str(Path(routes.__file__).parents[1] / "static")
     app = Flask(__name__, static_folder=static, template_folder=static)
     app.secret_key = "test"
@@ -285,6 +289,18 @@ def test_page_and_report_for_a_manual_league(client):
     assert len(data["teams"]) == 4
     assert len(data["manual"]["rosters"][0]["players"]) == 6
     assert data["recommendation"] is None
+
+
+def test_a_move_reaches_the_chat_before_the_response(tmp_path, monkeypatch):
+    """Cloud Run starves background threads of CPU, so the re-index runs in the request."""
+    monkeypatch.setattr(service, "index_manual_league_async", lambda *a: None)
+    seen = []
+    indexer = type("I", (), {"update_league_files": lambda self, chat_id, files: seen.append(files["transactions"])})()
+    env = _client(tmp_path, monkeypatch, indexer)
+    mine = env.http.get(f"/season/manual/{env.id}/report").get_json()["my_team"]["players"]
+    free = POOL[60]["name"]
+    env.http.post(f"/season/manual/{env.id}/moves", json={"kind": "add", "team": 1, "add": [free], "drop": [mine[0]]})
+    assert seen and seen[-1][0]["added_or_received"] == [free]
 
 
 def test_recording_a_move_through_the_api(client):
