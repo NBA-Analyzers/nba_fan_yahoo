@@ -339,6 +339,48 @@ def test_fetch_falls_back_to_nba_api_when_espn_fails(monkeypatch):
     assert player_pool._fetch_season("2025-26") == {7: {"name": "X"}}
 
 
+class _EspnReply:
+    def __init__(self, payload):
+        self._payload = payload
+
+    def raise_for_status(self):
+        pass
+
+    def json(self):
+        return self._payload
+
+
+# What ESPN's byathlete feed returns before tip-off: season info but no players
+_PRESEASON = {"currentSeason": {"year": 2027, "displayName": "2026-27",
+                                "type": {"id": "1", "name": "Preseason"}}}
+
+
+def test_espn_returns_no_stats_for_a_season_that_hasnt_started():
+    from appl.ingest.sources.espn import EspnSource
+
+    source = EspnSource(get=lambda *a, **k: _EspnReply(_PRESEASON), sleep=lambda s: None)
+    assert source.season("2026-27") == {}
+
+
+def test_espn_without_players_for_a_past_season_is_still_an_error():
+    from appl.ingest.sources.espn import EspnSource
+
+    source = EspnSource(get=lambda *a, **k: _EspnReply(_PRESEASON), sleep=lambda s: None)
+    with pytest.raises(Exception):
+        source.season("2025-26")
+
+
+def test_a_season_with_no_stats_yet_doesnt_fall_back_to_nba_api(monkeypatch):
+    from appl.draft import player_pool
+
+    def unreachable(season):
+        raise AssertionError("stats.nba.com shouldn't be asked")
+
+    monkeypatch.setattr(player_pool, "_fetch_season_espn", lambda season: {})
+    monkeypatch.setattr(player_pool, "_fetch_season_nba_api", unreachable)
+    assert player_pool._fetch_season("2026-27") == {}
+
+
 # --- positions ---------------------------------------------------------------
 
 def test_required_slots_ignores_bench_and_injured_list():
