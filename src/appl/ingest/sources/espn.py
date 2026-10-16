@@ -101,6 +101,14 @@ def parse_espn_projections(payload: dict, season_year: int) -> dict[int, dict]:
     return players
 
 
+def _not_started(payload: dict, season: str) -> bool:
+    """ESPN's reply for the season it calls current, before any regular-season game:
+    no players and no pagination. The same reply for any other season is an error."""
+    current = (payload.get("currentSeason") or {}).get("year")
+    return ("pagination" not in payload and not payload.get("athletes")
+            and current == espn_season_year(season))
+
+
 class EspnSource:
     def __init__(self, get=None, limiter: RateLimiter | None = None, sleep=None):
         if get is None:
@@ -131,11 +139,15 @@ class EspnSource:
         return with_retry(call, label=f"ESPN {season} p{page}", **self._retry_kwargs)
 
     def season(self, season: str) -> dict[int, dict]:
-        """{espn_id: per-game line} for every player with stats that season."""
+        """{espn_id: per-game line} for every player with stats that season. Empty when
+        the season hasn't started: ESPN then answers with season info and no players."""
         players: dict[int, dict] = {}
         page, pages = 1, 1
         while page <= pages:
             payload = self._page(season, page)
+            if page == 1 and _not_started(payload, season):
+                logger.info(f"ESPN: {season} hasn't started, no stats yet")
+                return {}
             pages = int(payload["pagination"]["pages"])
             players.update(parse_espn_athletes(payload))
             page += 1
