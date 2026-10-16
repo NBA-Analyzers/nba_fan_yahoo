@@ -161,16 +161,15 @@ LiteLLM adapters → session history → ChatService → DocumentIndexer → rou
 6. **Pre-existing bug, untouched:** the `/update_rules` route in `router/document_router.py` declares `update_rules(file: Dict)` as a Flask view and doesn't return a response.
 7. **Login still requires an HTTPS tunnel locally** (`_scheme="https"` in `auth_routes.py`); unrelated to this change.
 
-## 10b. Archive storage (Azure no longer required)
+## 10b. Archive storage (Azure removed)
 
 League sync used to stop with "Azure Storage not configured" *before* the new indexing ran, so Azure was a hard requirement for league-aware answers.
-`appl/storage/blob_storage.py` now provides a `BlobStorage` interface with three backends, picked by `build_blob_storage()`:
+`appl/storage/blob_storage.py` provides a `BlobStorage` interface with two backends (the Azure backend was removed), picked by `build_blob_storage()`:
 
 | `BLOB_STORAGE` | Behavior |
 |---|---|
 | `none` (default when nothing is configured) | no archive; sync + indexing still run |
-| `gcs` (auto when `GCS_BUCKET` is set) | `GcsBlobStorage`: JSON saved to the bucket under `<container>/<leagueId>/<file>.json`, retries with backoff, skips unchanged content via a SHA-256 stored in object metadata (same semantics as the Azure class) |
-| `azure` (auto when `AZURE_STORAGE_CONNECTION_STRING` is set) | the existing `AzureBlobStorage`, loaded lazily so the Azure SDK is optional |
+| `gcs` (auto when `GCS_BUCKET` is set) | `GcsBlobStorage`: JSON saved to the bucket under `<container>/<leagueId>/<file>.json`, retries with backoff, skips unchanged content via a SHA-256 stored in object metadata  |
 
 The archive is a backup/audit copy only; the chat reads from the Firestore index, not from blobs.
 

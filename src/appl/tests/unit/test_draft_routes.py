@@ -190,7 +190,35 @@ def test_errors_return_json_500(env):
 
     env.monkeypatch.setattr(env.routes.DraftRouter, "_get_tracker", boom)
     response = env.client.get("/draft/L1/state")
-    assert response.status_code == 500 and "yahoo down" in response.get_json()["error"]
+    assert response.status_code == 500
+    assert "yahoo down" not in response.get_json()["error"]  # the cause goes to the log, not the browser
+
+
+def test_player_list_errors_do_not_leak_the_cause(env):
+    def boom(self, league_id):
+        raise RuntimeError("secret sk-abcdefghijklmnop")
+
+    env.monkeypatch.setattr(env.routes.DraftRouter, "_get_tracker", boom)
+    response = env.client.get("/draft/L1/players")
+    assert response.status_code == 500 and "sk-" not in response.get_data(as_text=True)
+
+
+@pytest.mark.parametrize("body", [
+    {"punts": 5},
+    {"punts": {"a": 1}},
+    {"mock": True, "mock_taken": "LeBron James"},
+    {"mock": True, "mock_mine": 7},
+    {"mock": True, "mock_taken": [1, 2]},
+])
+def test_bad_state_bodies_are_400_not_500(env, body):
+    response = env.client.post("/draft/L1/state", json=body)
+    assert response.status_code == 400 and response.get_json()["error"]
+
+
+def test_bad_mock_costs_are_400_in_auction_leagues(env):
+    env.monkeypatch.setattr(env.tracker, "auction", True)
+    response = env.client.post("/draft/L1/state", json={"mock": True, "mock_costs": ["x"]})
+    assert response.status_code == 400
 
 
 # --- auction ---------------------------------------------------------------

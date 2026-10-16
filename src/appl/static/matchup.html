@@ -1,0 +1,539 @@
+{% extends "pages/base.html" %}
+{% set active_tab = "matchup" %}
+{% block title %}Matchup · Fantasy Basketball Helper{% endblock %}
+{% block head %}
+<style>
+  body { font-size: 15px; }
+  .topbar, .page.matchup-page { max-width: 1240px; }
+  .error, .warn { display: none; margin-bottom: 16px; }
+  .head { margin: 4px 0 18px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 10px; }
+  .status { color: var(--muted); margin-top: 6px; }
+  .status strong { display: inline-block; color: var(--accent-strong); background: var(--accent-soft); padding: 2px 12px; border-radius: 999px; font-weight: 800; }
+
+  .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px 24px; margin-bottom: 18px; padding: 18px; }
+  .controls .label { display: block; font-weight: 700; margin-bottom: 4px; }
+  .controls .help { color: var(--muted); font-size: .85rem; margin-bottom: 8px; }
+  .controls .wide { grid-column: 1 / -1; }
+  .field { width: 100%; font: inherit; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); }
+  .field:focus { border-color: var(--accent); outline: none; }
+  #punts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .punt { display: inline-flex; padding: 5px 12px; border: 1.5px solid var(--line); border-radius: 999px; cursor: pointer; user-select: none; font-weight: 700; font-size: .85rem; background: var(--surface); }
+  .punt:hover { border-color: var(--accent); }
+  .punt.on { background: var(--surface-soft); color: var(--muted); text-decoration: line-through; }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tabs button { font: inherit; font-weight: 700; padding: 8px 18px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .panel { display: none; flex-direction: column; gap: 18px; min-width: 0; }
+  .panel.on { display: flex; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .card { padding: 18px; min-width: 0; }
+  .card.table-card { overflow-x: auto; }
+  .card h2 { margin: 0 0 10px; font-size: 1.05rem; }
+  .card h2 small { color: var(--muted); font-weight: 600; font-size: .8rem; margin-left: 6px; }
+  .hint { color: var(--muted); font-size: .88rem; margin-top: 8px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: .78rem; color: var(--muted); font-weight: 700; }
+  th.c, td.c { text-align: center; }
+  tr.punted td { color: var(--muted); text-decoration: line-through; }
+  tr.pick { cursor: pointer; }
+  tr.pick:hover td { background: var(--surface-soft); }
+  tr.pick.sel td { background: var(--accent-soft); }
+  .heat { display: inline-block; min-width: 38px; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: .82rem; text-align: center; }
+
+  .bar { position: relative; display: inline-block; width: 90px; height: 10px; border-radius: 999px; background: var(--surface-soft); vertical-align: middle; margin-right: 8px; overflow: hidden; }
+  .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; }
+  .bar i.good { background: var(--good); }
+  .bar i.mid { background: var(--accent); }
+  .bar i.bad { background: var(--bad); }
+  .chip { font-size: .75rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+  .chip.protect { background: var(--good-soft); color: var(--good); }
+  .chip.chase { background: var(--accent-soft); color: var(--accent-strong); }
+  .chip.concede, .chip.bad { background: var(--bad-soft); color: var(--bad); }
+  .chip.punted { background: var(--surface-soft); color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+
+  .headline { font-size: 1.15rem; font-weight: 800; }
+  .sub { color: var(--muted); margin-top: 4px; }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { padding: 9px 0; border-bottom: 1px solid var(--line); font-size: .93rem; }
+  li:last-child { border-bottom: 0; }
+  li .kind { display: inline-block; min-width: 74px; font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; color: var(--accent-strong); }
+  .brief { white-space: pre-wrap; font-size: .93rem; line-height: 1.5; }
+  .brief:empty { display: none; }
+  .btn.mini { font-size: .78rem; padding: 6px 11px; margin-top: 8px; }
+  svg.zchart { width: 100%; height: auto; display: block; }
+  svg.zchart text { fill: var(--text); font-size: 12px; font-family: inherit; }
+  svg.zchart .axis { stroke: var(--line); stroke-width: 1; }
+  svg.zchart .zbar.pos { fill: var(--good); }
+  svg.zchart .zbar.neg { fill: var(--bad); }
+  svg.zchart .zbar.off { fill: var(--muted); opacity: .4; }
+</style>
+{% endblock %}
+{% block page_class %}matchup-page{% endblock %}
+{% block content %}
+  <div class="notice bad error" id="error"></div>
+
+  <div class="head">
+    <div>
+      <h1 id="title">Matchup prep</h1>
+      <div class="status" id="status">Loading&hellip;</div>
+    </div>
+    <a class="btn secondary" id="back" href="#">Season analysis</a>
+  </div>
+  <div class="notice info warn" id="warn"></div>
+
+  <section class="card controls" aria-label="Settings">
+    <div>
+      <label class="label" for="opp">This week's opponent</label>
+      <div class="help">Picked for you when the platform knows it.</div>
+      <select id="opp" class="field"></select>
+    </div>
+    <div class="wide">
+      <span class="label">Categories you're punting</span>
+      <div class="help">Tap a category you've given up on. The plan will ignore it.</div>
+      <div id="punts"></div>
+    </div>
+  </section>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tab_prep" data-tab="prep">This week</button>
+    <button role="tab" id="tab_team" data-tab="team">My team</button>
+    <button role="tab" id="tab_league" data-tab="league">League</button>
+  </div>
+
+  <div class="panel" id="panel_prep">
+    <section class="card" id="summary"></section>
+    <section class="card table-card">
+      <h2>Scoreboard <small>so far, projected final and your chance to win each category</small></h2>
+      <table>
+        <thead><tr><th>Category</th><th class="c">You so far</th><th class="c">Them so far</th><th class="c">You final</th><th class="c">Them final</th><th>Win chance</th><th>Plan</th></tr></thead>
+        <tbody id="board"></tbody>
+      </table>
+      <div class="hint" id="board_hint"></div>
+    </section>
+    <div class="grid2">
+      <section class="card">
+        <h2>What to do</h2>
+        <ul id="plan"></ul>
+      </section>
+      <section class="card">
+        <h2>Game plan <small>written by the AI from the numbers</small></h2>
+        <div class="hint" id="brief_hint">A short coaching note for this matchup.</div>
+        <div class="brief" id="brief"></div>
+        <button class="btn mini" id="brief_btn">Write my game plan</button>
+      </section>
+    </div>
+    <section class="card table-card">
+      <h2>Days left <small>who plays, and where a slot is open</small></h2>
+      <table>
+        <thead><tr><th>Day</th><th class="c">Yours playing</th><th class="c">Theirs playing</th><th class="c">Can start</th><th class="c">Open slots</th><th>Sit</th></tr></thead>
+        <tbody id="days"></tbody>
+      </table>
+      <div class="hint" id="days_hint"></div>
+    </section>
+    <section class="card">
+      <h2>Streamers <small>free agents, only on days you have a slot</small></h2>
+      <ul id="streamers"></ul>
+    </section>
+  </div>
+
+  <div class="panel" id="panel_team">
+    <section class="card">
+      <h2>Where you stand <small>standard deviations from the league average, right is better</small></h2>
+      <div id="zchart"></div>
+    </section>
+    <section class="card table-card">
+      <h2>Your players <small>what each adds per category (z-score), best first</small></h2>
+      <table>
+        <thead id="contrib_head"></thead>
+        <tbody id="contrib"></tbody>
+      </table>
+      <div class="hint">Red marks a player well below average in a category you count: a drag on it.</div>
+    </section>
+    <div class="grid2">
+      <section class="card"><h2>Who carries each category</h2><ul id="carriers"></ul></section>
+      <section class="card"><h2>Playing more lately <small>minutes up on the season</small></h2><ul id="risers"></ul></section>
+    </div>
+  </div>
+
+  <div class="panel" id="panel_league">
+    <section class="card table-card">
+      <h2>Your chance against every team <small>typical week from season totals, hardest first</small></h2>
+      <table>
+        <thead id="grid_head"></thead>
+        <tbody id="grid"></tbody>
+      </table>
+      <div class="hint">Tap a team to scout it.</div>
+    </section>
+    <section class="card" id="scout"></section>
+  </div>
+{% endblock %}
+{% block scripts %}
+<script>
+const pathParts = location.pathname.split("/").filter(Boolean);
+const kind = pathParts[1];            // "manual", "yahoo" or "espn"
+const leagueId = pathParts[2];
+const base = `/season/${kind}/${leagueId}`;
+
+const $ = (id) => document.getElementById(id);
+const el = (tag, text, cls) => {
+  const node = document.createElement(tag);
+  if (text !== undefined && text !== null) node.textContent = text;
+  if (cls) node.className = cls;
+  return node;
+};
+// Same keys as the Season page, so the opponent and punts carry over between the two
+const store = {
+  get(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(`season:${kind}:${leagueId}:${key}`)) ?? fallback; }
+    catch (e) { return fallback; }
+  },
+  set(key, value) {
+    try { localStorage.setItem(`season:${kind}:${leagueId}:${key}`, JSON.stringify(value)); } catch (e) {}
+  },
+};
+
+let punts = store.get("punts", []);
+let opponent = store.get("opponent", "");
+let tab = store.get("matchupTab", "prep");
+let scouted = null;
+let last = null;
+
+function showError(msg) { $("error").textContent = msg || ""; $("error").style.display = msg ? "block" : "none"; }
+
+async function api(path, method = "GET", body) {
+  const res = await fetch(`${base}${path}`, {
+    method,
+    headers: body === undefined ? {} : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw Object.assign(new Error(data.error || res.statusText), { data });
+  return data;
+}
+
+function query() {
+  return `?punts=${encodeURIComponent(punts.join(","))}${opponent ? `&opponent=${opponent}` : ""}`;
+}
+
+const pct = (p) => `${Math.round(p * 100)}%`;
+const signed = (n) => `${n > 0 ? "+" : ""}${n}`;
+const show = (v) => (v === null || v === undefined ? "–" : String(v));
+
+// Green above a coin flip, red below; stronger the further from 50%
+function heat(p) {
+  const rgb = p >= 0.5 ? "31,157,85" : "214,69,69";
+  return `rgba(${rgb},${(0.08 + Math.abs(p - 0.5) * 0.9).toFixed(2)})`;
+}
+// z-scores: 0 is neutral, about +-2 is strong
+function heatZ(z) {
+  const rgb = z >= 0 ? "31,157,85" : "214,69,69";
+  return `rgba(${rgb},${Math.min(0.55, 0.05 + Math.abs(z) * 0.2).toFixed(2)})`;
+}
+
+function table(head, headers) {
+  head.textContent = "";
+  const tr = el("tr");
+  headers.forEach(([text, cls]) => tr.append(el("th", text, cls)));
+  head.append(tr);
+}
+
+function setTab(name) {
+  tab = name;
+  store.set("matchupTab", name);
+  ["prep", "team", "league"].forEach((t) => {
+    $(`panel_${t}`).classList.toggle("on", t === name);
+    $(`tab_${t}`).setAttribute("aria-selected", String(t === name));
+  });
+}
+
+// --- settings -------------------------------------------------------------------
+
+function renderPunts(categories) {
+  const box = $("punts");
+  box.textContent = "";
+  categories.forEach((c) => {
+    const chip = el("span", c, "punt" + (punts.includes(c) ? " on" : ""));
+    chip.onclick = () => {
+      punts = punts.includes(c) ? punts.filter((p) => p !== c) : [...punts, c];
+      store.set("punts", punts);
+      load();
+    };
+    box.append(chip);
+  });
+}
+
+function renderOpponents(d) {
+  const sel = $("opp");
+  sel.textContent = "";
+  sel.append(new Option("Choose this week's opponent", ""));
+  d.teams.forEach((t) => { if (!t.is_mine) sel.append(new Option(t.name, t.index + 1)); });
+  sel.value = d.available ? String(d.summary.opponent.index + 1) : "";
+  sel.onchange = () => { opponent = sel.value; store.set("opponent", opponent); scouted = null; load(); };
+}
+
+// --- this week -------------------------------------------------------------------
+
+function renderSummary(d) {
+  const box = $("summary");
+  box.textContent = "";
+  if (!d.available) {
+    box.append(el("div", "Pick your opponent above to prepare for the week.", "headline"));
+    box.append(el("div", "Once you do, this page shows the scoreboard, the days left and what to do.", "sub"));
+    return;
+  }
+  const s = d.summary, r = s.record;
+  box.append(el("div", `Projected ${r.wins}-${r.losses}${r.ties ? "-" + r.ties : ""} against ${s.opponent.name}`, "headline"));
+  box.append(el("div", `${s.expected_wins} categories expected out of ${s.categories} · ${s.days_left} day${s.days_left === 1 ? "" : "s"} left · ` +
+    `${s.player_games_left.mine} player-games left for you, ${s.player_games_left.theirs} for them`, "sub"));
+  const w = d.week;
+  box.append(el("div", `Week ${w.number ?? ""} ${w.start} to ${w.end}`.replace("  ", " "), "hint"));
+}
+
+function renderBoard(d) {
+  const body = $("board");
+  body.textContent = "";
+  d.scoreboard.forEach((r) => {
+    const tr = el("tr", undefined, r.punted ? "punted" : "");
+    tr.append(el("td", r.category), el("td", show(r.mine_so_far), "c"), el("td", show(r.theirs_so_far), "c"),
+      el("td", String(r.mine), "c"), el("td", String(r.theirs), "c"));
+    const odds = el("td");
+    const bar = el("span", undefined, "bar");
+    const fill = el("i", undefined, r.win_prob >= 0.6 ? "good" : r.win_prob <= 0.4 ? "bad" : "mid");
+    fill.style.width = pct(r.win_prob);
+    bar.append(fill);
+    odds.append(bar, `${pct(r.win_prob)} ${r.verdict}`);
+    tr.append(odds, el("td"));
+    tr.lastChild.append(el("span", r.stance, `chip ${r.stance}`));
+    body.append(tr);
+  });
+  const unknown = d.scoreboard.filter((r) => !r.known && !r.punted).length;
+  $("board_hint").textContent = d.available && unknown
+    ? `${unknown} categor${unknown === 1 ? "y has" : "ies have"} no score yet from the platform, so the whole week is projected for ${unknown === 1 ? "it" : "them"}.`
+    : "";
+}
+
+function renderPlan(d) {
+  const list = $("plan");
+  list.textContent = "";
+  d.plan.forEach((t) => {
+    const li = el("li");
+    li.append(el("span", t.kind, "kind"), t.text);
+    list.append(li);
+  });
+  if (!d.plan.length) list.append(el("li", "Nothing to do yet."));
+}
+
+function renderDays(d) {
+  const body = $("days");
+  body.textContent = "";
+  d.days.forEach((r) => {
+    const tr = el("tr");
+    tr.append(el("td", r.day), el("td", String(r.mine), "c"), el("td", String(r.theirs), "c"),
+      el("td", show(r.starters), "c"), el("td", show(r.open_slots), "c"), el("td", r.sit.join(", ")));
+    if (r.open_slots) tr.children[4].style.fontWeight = "800";
+    body.append(tr);
+  });
+  $("days_hint").textContent = !d.available ? "" : d.days.length ? "" : "No NBA schedule for this week, so the days can't be shown.";
+}
+
+function renderStreamers(d) {
+  const list = $("streamers");
+  list.textContent = "";
+  d.streamers.forEach((s) => {
+    const li = el("li");
+    li.append(el("b", s.name), ` ${s.team || ""} · ${s.days.join(", ")}`);
+    if (s.injury) li.append(" · " + s.injury);
+    const chips = el("div", undefined, "chips");
+    s.helps.forEach((c) => chips.append(el("span", `+ ${c}`, "chip protect")));
+    s.hurts.forEach((c) => chips.append(el("span", `- ${c}`, "chip bad")));
+    li.append(chips);
+    list.append(li);
+  });
+  if (!d.streamers.length) list.append(el("li", d.days.length ? "No free agent fits your open days." : "Needs this week's NBA schedule."));
+}
+
+// --- my team ---------------------------------------------------------------------
+
+function renderZChart(d) {
+  const box = $("zchart");
+  box.textContent = "";
+  const NS = "http://www.w3.org/2000/svg";
+  const row = 26, left = 70, right = 590, mid = (left + right) / 2, unit = (right - left) / 6;
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("class", "zchart");
+  svg.setAttribute("viewBox", `0 0 600 ${d.profile.length * row + 8}`);
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", "Each category's distance from the league average, in standard deviations");
+  const axis = document.createElementNS(NS, "line");
+  axis.setAttribute("class", "axis");
+  axis.setAttribute("x1", mid); axis.setAttribute("x2", mid);
+  axis.setAttribute("y1", 0); axis.setAttribute("y2", d.profile.length * row + 4);
+  svg.append(axis);
+  d.profile.forEach((r, i) => {
+    const y = i * row + 4, z = Math.max(-3, Math.min(3, r.z));
+    const label = document.createElementNS(NS, "text");
+    label.setAttribute("x", 0); label.setAttribute("y", y + 14);
+    label.textContent = r.category;
+    const bar = document.createElementNS(NS, "rect");
+    bar.setAttribute("class", `zbar ${r.punted ? "off" : z >= 0 ? "pos" : "neg"}`);
+    bar.setAttribute("x", z >= 0 ? mid : mid + z * unit);
+    bar.setAttribute("y", y + 2); bar.setAttribute("height", row - 10);
+    bar.setAttribute("width", Math.max(1, Math.abs(z) * unit)); bar.setAttribute("rx", 3);
+    const value = document.createElementNS(NS, "text");
+    value.setAttribute("y", y + 14);
+    value.setAttribute("x", z >= 0 ? mid + z * unit + 6 : mid + z * unit - 6);
+    value.setAttribute("text-anchor", z >= 0 ? "start" : "end");
+    value.textContent = `${signed(r.z)} · rank ${r.rank}`;
+    const tip = document.createElementNS(NS, "title");
+    tip.textContent = `${r.category}: ${r.value} (league average ${r.league_avg}), ${r.label}`;
+    bar.append(tip);
+    svg.append(label, bar, value);
+  });
+  box.append(svg);
+}
+
+function renderContributions(d) {
+  const cats = d.categories;
+  table($("contrib_head"), [["Player"], ["Status"], ["Games this week", "c"], ["Next week", "c"], ["Total", "c"], ...cats.map((c) => [c, "c"])]);
+  const body = $("contrib");
+  body.textContent = "";
+  d.contributions.players.forEach((p) => {
+    const tr = el("tr");
+    tr.append(el("td", p.name), el("td", p.injury || ""), el("td", show(p.games_this_week), "c"),
+      el("td", show(p.games_next_week), "c"), el("td", signed(p.value), "c"));
+    cats.forEach((c) => {
+      const cell = el("td", undefined, "c");
+      const badge = el("span", signed(Math.round(p.z[c] * 10) / 10), "heat");
+      if (!d.punts.includes(c)) badge.style.background = heatZ(p.z[c]);
+      if (p.drags.includes(c)) badge.style.outline = "2px solid var(--bad)";
+      cell.append(badge);
+      tr.append(cell);
+    });
+    body.append(tr);
+  });
+}
+
+function renderCarriers(d) {
+  const list = $("carriers"), risers = $("risers");
+  list.textContent = "";
+  risers.textContent = "";
+  Object.entries(d.contributions.carriers).forEach(([c, names]) => {
+    const li = el("li");
+    li.append(el("b", c), "  " + (names.length ? names.join(", ") : "nobody stands out"));
+    list.append(li);
+  });
+  d.contributions.risers.forEach((r) => risers.append(el("li", `${r.name}: ${signed(r.minutes_trend)} minutes a game`)));
+  if (!d.contributions.risers.length) risers.append(el("li", "No one on your team stands out."));
+}
+
+// --- league ----------------------------------------------------------------------
+
+function renderGrid(d) {
+  const cats = d.grid.length ? Object.keys(d.grid[0].categories) : [];
+  table($("grid_head"), [["Team"], ["Expected", "c"], ["Record", "c"], ...cats.map((c) => [c, "c"])]);
+  const body = $("grid");
+  body.textContent = "";
+  d.grid.forEach((g) => {
+    const tr = el("tr", undefined, "pick" + (scouted === g.index ? " sel" : ""));
+    const r = g.record;
+    tr.append(el("td", g.name), el("td", String(g.expected_wins), "c"),
+      el("td", `${r.wins}-${r.losses}${r.ties ? "-" + r.ties : ""}`, "c"));
+    cats.forEach((c) => {
+      const cell = el("td", undefined, "c");
+      const badge = el("span", pct(g.categories[c]), "heat");
+      badge.style.background = heat(g.categories[c]);
+      cell.append(badge);
+      tr.append(cell);
+    });
+    tr.onclick = () => { scouted = g.index; renderGrid(d); renderScout(d); };
+    body.append(tr);
+  });
+}
+
+function renderScout(d) {
+  const box = $("scout");
+  box.textContent = "";
+  const card = d.scouting.find((c) => c.index === scouted);
+  if (!card) { box.append(el("div", "Pick a team in the table to see where they are strong and weak.", "hint")); return; }
+  box.append(el("h2", card.name));
+  const line = (label, items, cls) => {
+    const row = el("div");
+    row.append(el("b", label + " "));
+    if (!items.length) row.append("none");
+    items.forEach((x) => row.append(el("span", x, `chip ${cls}`), " "));
+    box.append(row);
+  };
+  line("Strong in", card.strengths, "protect");
+  line("Weak in", card.weaknesses, "bad");
+  line("Best players", card.top_players, "punted");
+  line("Hurt", card.injuries.map((i) => `${i.name} (${i.status})`), "bad");
+  box.append(el("div", card.you_offer.length ? `You could offer ${card.you_offer.join(", ")}: they are weak there and you are strong.` : "Nothing you are strong in is something they lack.", "hint"));
+  box.append(el("div", card.you_need.length ? `You could look to them for ${card.you_need.join(", ")}: they are strong there and you are weak.` : "They are not strong anywhere you are weak.", "hint"));
+}
+
+// --- load ------------------------------------------------------------------------
+
+function render(d) {
+  last = d;
+  $("title").textContent = d.league_name;
+  $("status").textContent = "";
+  $("status").append(el("strong", d.my_team.name), d.available ? ` vs ${d.summary.opponent.name}` : "");
+  renderPunts(d.categories);
+  renderOpponents(d);
+  renderSummary(d);
+  renderBoard(d);
+  renderPlan(d);
+  renderDays(d);
+  renderStreamers(d);
+  renderZChart(d);
+  renderContributions(d);
+  renderCarriers(d);
+  renderGrid(d);
+  renderScout(d);
+  $("brief").textContent = "";
+  $("brief_btn").textContent = "Write my game plan";
+  $("brief_btn").dataset.done = "";
+  $("brief_btn").disabled = !d.available;
+  const warn = d.warnings || [];
+  $("warn").textContent = warn.join(" ");
+  $("warn").style.display = warn.length ? "block" : "none";
+}
+
+async function load() {
+  showError("");
+  try { render(await api(`/matchup/report${query()}`)); }
+  catch (e) { showError("Could not load the matchup: " + e.message); }
+}
+
+// --- wiring ----------------------------------------------------------------------
+
+$("back").href = `/season/${kind}/${leagueId}`;
+["prep", "team", "league"].forEach((t) => { $(`tab_${t}`).onclick = () => setTab(t); });
+setTab(["prep", "team", "league"].includes(tab) ? tab : "prep");
+
+$("brief_btn").onclick = async () => {
+  const btn = $("brief_btn");
+  btn.disabled = true;
+  $("brief_hint").textContent = "Writing…";
+  try {
+    const b = await api(`/matchup/brief${query()}`, "POST", { punts, refresh: btn.dataset.done === "1" });
+    // The model writes light markdown; show it as plain text
+    $("brief").textContent = b.text.replace(/\*\*/g, "").replace(/^#+\s*/gm, "");
+    $("brief_hint").textContent = `Written ${new Date(b.ts).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}`;
+    btn.textContent = "Rewrite";
+    btn.dataset.done = "1";
+  } catch (e) {
+    $("brief_hint").textContent = "Couldn't write the game plan: " + e.message;
+  }
+  btn.disabled = false;
+};
+
+load();
+</script>
+{% endblock %}

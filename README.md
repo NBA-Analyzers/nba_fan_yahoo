@@ -111,7 +111,7 @@ LLM_FALLBACK_MODEL=gemini/gemini-3.7-flash # optional: tried if the main model k
 LLM_TIMEOUT_SECONDS=30                     # optional
 GEMINI_API_KEY=your_gemini_api_key         # or OPENAI_API_KEY etc. for other providers
 
-# Optional archive of synced league JSON (default: none). BLOB_STORAGE=gcs|azure|none
+# Optional archive of synced league JSON (default: none). BLOB_STORAGE=gcs|none
 # GCS_BUCKET=your-bucket
 
 # Retrieval vectors live in Firestore (uses Google application-default credentials)

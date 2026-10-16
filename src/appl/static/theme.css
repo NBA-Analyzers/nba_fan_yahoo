@@ -176,3 +176,9 @@ p { margin: 0; }
 }
 .league-tabs a:hover { color: var(--text); }
 .league-tabs a.active { background: var(--surface); color: var(--accent-strong); box-shadow: var(--shadow); }
+@media (max-width: 480px) {
+  /* Four tabs must fit a phone: tighter padding, and scroll rather than overflow the page */
+  .league-tabs { max-width: 100%; overflow-x: auto; }
+  .league-tabs { gap: 0; }
+  .league-tabs a { padding: 8px 9px; font-size: .85rem; }
+}

@@ -28,10 +28,13 @@
       <a href="/ai-chat/manual/{{ manual_id | urlencode }}" {% if active_tab == 'ask' %}class="active" aria-current="page"{% endif %}>💬 Ask</a>
       <a href="/manual/{{ manual_id | urlencode }}" {% if active_tab == 'draft' %}class="active" aria-current="page"{% endif %}>📋 Draft</a>
       <a href="/season/manual/{{ manual_id | urlencode }}" {% if active_tab == 'season' %}class="active" aria-current="page"{% endif %}>📈 Season</a>
+      <a href="/season/manual/{{ manual_id | urlencode }}/matchup" {% if active_tab == 'matchup' %}class="active" aria-current="page"{% endif %}>🎯 Matchup</a>
       {% else %}
       <a href="/ai-chat/{{ league_id | urlencode }}" {% if active_tab == 'ask' %}class="active" aria-current="page"{% endif %}>💬 Ask</a>
       <a href="/draft/{{ league_id | urlencode }}" {% if active_tab == 'draft' %}class="active" aria-current="page"{% endif %}>📋 Draft</a>
-      <a href="/season/yahoo/{{ league_id | urlencode }}" {% if active_tab == 'season' %}class="active" aria-current="page"{% endif %}>📈 Season</a>
+      {% set season_kind = league_kind or 'yahoo' %}
+      <a href="/season/{{ season_kind }}/{{ league_id | urlencode }}" {% if active_tab == 'season' %}class="active" aria-current="page"{% endif %}>📈 Season</a>
+      <a href="/season/{{ season_kind }}/{{ league_id | urlencode }}/matchup" {% if active_tab == 'matchup' %}class="active" aria-current="page"{% endif %}>🎯 Matchup</a>
       {% endif %}
     </nav>
     {% endif %}

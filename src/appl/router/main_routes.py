@@ -185,7 +185,8 @@ class MainRouter:
 
         # Serve the main page
         @main_bp.route("/agent")
-        async def read_index():
+        @require_login
+        def read_index():
             return render_template(
                 "index.html",
                 request=request,
