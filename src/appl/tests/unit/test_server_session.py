@@ -1,7 +1,6 @@
 """Server-side sessions: the cookie is an opaque id, the data stays on the server."""
 from datetime import datetime, timedelta, timezone
 
-import pytest
 from flask import Flask, jsonify, session
 
 from appl.config.server_session import (COLLECTION, COOKIE_NAME, FirestoreSessionStore,

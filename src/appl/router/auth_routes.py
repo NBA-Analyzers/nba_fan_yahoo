@@ -2,7 +2,6 @@ import logging
 import time
 import xml.etree.ElementTree as ET
 
-from ..config.app_config import DEBUG
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import YahooService
 from flask import Blueprint, current_app, jsonify, redirect, render_template, request, session, url_for
 from ..middleware.auth_decorators import require_login

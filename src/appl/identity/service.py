@@ -88,7 +88,7 @@ def sign_in(store: IdentityStore, claims: dict) -> dict:
         return retry_once(lambda: resolve_user(store, claims), "identity lookup")
     except (UnverifiedEmail, KeyError):
         raise
-    except Exception as exc:
+    except Exception:
         provider, provider_id = _provider(claims)
         email = (claims.get("email") or "").strip().lower()
         logger.exception("Identity store unavailable; signing in %s user without it", provider)

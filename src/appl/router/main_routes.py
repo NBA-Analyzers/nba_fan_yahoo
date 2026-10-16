@@ -72,7 +72,7 @@ class MainRouter:
                         )
                         leagues = yahoo_service.get_user_synced_leagues(session["user"]) or []
                     except Exception as e:
-                        print(f"Error getting synced leagues: {e}")
+                        logger.warning("Could not list synced Yahoo leagues for user %s: %s", session.get("user_id"), e, exc_info=True)
                         leagues_error = True
 
                 manual_leagues = []
@@ -115,7 +115,6 @@ class MainRouter:
 
             @require_login
             def chat_content():
-                user_info = current_profile()
                 user_guid = session.get("user")
 
                 # Verify Yahoo authentication
@@ -185,7 +184,8 @@ class MainRouter:
 
         # Serve the main page
         @main_bp.route("/agent")
-        async def read_index():
+        @require_login
+        def read_index():
             return render_template(
                 "index.html",
                 request=request,

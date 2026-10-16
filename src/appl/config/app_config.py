@@ -1,4 +1,7 @@
+import logging
 import os
+
+logger = logging.getLogger(__name__)
 
 # .env is loaded once, by the appl package (appl/__init__.py)
 
@@ -23,7 +26,7 @@ def configure_app(app):
     from .server_session import build_session_interface
 
     app.session_interface = build_session_interface()
-    print("✓ Flask session configuration set")
+    logger.info("Flask session configuration set (secure cookies: %s)", secure)
 
 # Environment variables
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"

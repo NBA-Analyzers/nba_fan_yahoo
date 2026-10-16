@@ -9,6 +9,7 @@ from appl.draft.manual_league import ManualLeagueError, ManualLeagueStore, curre
 from appl.draft.ranker import DraftRanker
 from appl.season import jev_advisor, report_writer, service, snapshot as snapshots
 from appl.season.analyzer import SeasonAnalyzer
+from appl.season.schedule import Schedule
 from appl.tests.unit.conftest import FakeLLMClient
 from appl.tests.unit.test_draft import _name, _player
 
@@ -267,7 +268,8 @@ def _client(tmp_path, monkeypatch, indexer=None):
 
     store = ManualLeagueStore(tmp_path)
     llm = FakeLLMClient("What's working: rebounds.")
-    router = routes.SeasonRouter(store, report_writer.BriefStore(use_firestore=False), lambda: llm, indexer=indexer)
+    router = routes.SeasonRouter(store, report_writer.BriefStore(use_firestore=False), lambda: llm,
+                                 Schedule.load(), espn=object(), indexer=indexer)
     static = str(Path(routes.__file__).parents[1] / "static")
     app = Flask(__name__, static_folder=static, template_folder=static)
     app.secret_key = "test"
@@ -334,6 +336,16 @@ def test_brief_is_cached_until_the_league_changes(client):
     assert len(client.llm.calls) == 1
     refreshed = client.http.post(f"/season/manual/{client.id}/brief", json={"refresh": True}).get_json()
     assert refreshed["cached"] is False and len(client.llm.calls) == 2
+
+
+def test_season_errors_do_not_leak_the_cause(client, monkeypatch):
+    def boom(*args, **kwargs):
+        raise RuntimeError("firestore says key=abc123secret")
+
+    monkeypatch.setattr(service, "load_inseason_pool", boom)
+    monkeypatch.setattr(service, "_rankers", {})
+    response = client.http.get(f"/season/manual/{client.id}/report")
+    assert response.status_code == 500 and "abc123secret" not in response.get_data(as_text=True)
 
 
 def test_yahoo_report_needs_a_yahoo_login(client):
@@ -462,6 +474,19 @@ def test_chat_access_for_manual_leagues(store):
     assert not access.can_access_league(owner, "manual-aaaaaaaaaaaa")
     assert not access.can_access_league(owner, "manual-../../x")
     assert not SessionAccess(NoYahoo).can_access_league(owner, f"manual-{league['id']}")
+
+
+def test_the_chat_page_needs_a_sign_in(store):
+    main_routes = importlib.import_module("appl.router.main_routes")
+    static = str(Path(main_routes.__file__).parents[1] / "static")
+    app = Flask(__name__, static_folder=static, template_folder=static)
+    app.secret_key = "test"
+    app.register_blueprint(main_routes.MainRouter(FakeIndexer(), store).get_bp())
+    http = app.test_client()
+    assert http.get("/agent", headers={"Accept": "text/html"}).status_code == 302
+    with http.session_transaction() as session:
+        session["user_id"] = USER
+    assert http.get("/agent").status_code == 200
 
 
 def test_opening_the_manual_chat_indexes_and_redirects(store, pool, monkeypatch):

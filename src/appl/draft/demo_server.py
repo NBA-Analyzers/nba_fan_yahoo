@@ -9,7 +9,6 @@ Run from src/:
 then open http://localhost:5055/demo        (or /demo?auction=1 for an auction league)
 """
 
-import os
 
 from pathlib import Path  # noqa: E402
 
@@ -17,6 +16,9 @@ from flask import Flask, redirect, request, session  # noqa: E402
 
 from ..router import draft_routes  # noqa: E402
 from .player_pool import load_player_pool  # noqa: E402
+from .manual_league import default_store  # noqa: E402
+from .api_tokens import default_token_store  # noqa: E402
+from ..fantasy_integrations.espn.espn_service import EspnService  # noqa: E402
 from .ranker import DraftRanker  # noqa: E402
 
 STAT_CATEGORIES = ["FG%", "FT%", "3PTM", "PTS", "REB", "AST", "ST", "BLK", "TO"]
@@ -90,14 +92,17 @@ class FakeYahooTracker:
 
 
 def create_app() -> Flask:
-    app = Flask(__name__, static_folder=str(Path(draft_routes.__file__).parents[1] / "static"))
+    static = str(Path(draft_routes.__file__).parents[1] / "static")
+    app = Flask(__name__, static_folder=static, template_folder=static)
     app.secret_key = "demo"
 
     def get_tracker(self, league_id):
         return FakeYahooTracker(auction=request.args.get("auction") == "1" or session.get("auction", False))
 
     draft_routes.DraftRouter._get_tracker = get_tracker
-    app.register_blueprint(draft_routes.DraftRouter().get_bp())
+    app.register_blueprint(
+        draft_routes.DraftRouter(default_store(), default_token_store(), EspnService(None)).get_bp()
+    )
 
     @app.route("/demo")
     def demo():

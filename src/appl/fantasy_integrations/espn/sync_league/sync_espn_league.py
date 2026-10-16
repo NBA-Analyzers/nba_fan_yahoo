@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from ...i_sync_league import SyncLeagueData
 from ....ingest.http import with_retry

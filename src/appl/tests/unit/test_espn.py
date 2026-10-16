@@ -290,7 +290,7 @@ class FakeRouteService:
 
 
 def route_client(service):
-    from flask import Blueprint, render_template_string
+    from flask import Blueprint
     from pathlib import Path
     static = str(Path(__file__).resolve().parents[2] / "static")
     app = Flask(__name__, template_folder=static)
@@ -468,7 +468,7 @@ def test_draft_and_season_pages_hide_other_users_leagues(key):
     home.add_url_rule("/", "homepage", lambda: "home")
     app.register_blueprint(home)
     app.register_blueprint(DraftRouter(store=object(), tokens=object(), espn=svc).get_bp())
-    app.register_blueprint(SeasonRouter(store=object(), briefs=object(), schedule=object(), espn=svc).get_bp())
+    app.register_blueprint(SeasonRouter(store=object(), briefs=object(), llm_factory=None, schedule=object(), espn=svc).get_bp())
     c = app.test_client()
     with c.session_transaction() as s:
         s["user_id"] = "u2"

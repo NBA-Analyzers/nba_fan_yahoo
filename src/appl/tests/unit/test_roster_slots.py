@@ -139,8 +139,7 @@ def client(tmp_path, monkeypatch):
 
     pool = [{**_player(_name("Big", i), True, i), "pos": "C"} for i in range(40)]
     pool += [{**_player(_name("Guard", i), False, 100 + i), "pos": "G"} for i in range(60)]
-    monkeypatch.setattr(routes, "load_player_pool", lambda: pool)
-    monkeypatch.setattr(routes, "_rankers", {})
+    monkeypatch.setattr("appl.draft.service.load_player_pool", lambda: pool)
     monkeypatch.setattr(jev_chooser, "_cache", {})
     monkeypatch.delenv("JEV_API_KEY", raising=False)
 
@@ -150,7 +149,7 @@ def client(tmp_path, monkeypatch):
     auth = Blueprint("auth", __name__)
     auth.add_url_rule("/login", "google_login", lambda: "login")
     app.register_blueprint(auth)
-    app.register_blueprint(routes.DraftRouter(ManualLeagueStore(tmp_path)).get_manual_bp())
+    app.register_blueprint(routes.DraftRouter(ManualLeagueStore(tmp_path), tokens=object(), espn=object()).get_manual_bp())
     test_client = app.test_client()
     with test_client.session_transaction() as session:
         session["user_id"] = USER

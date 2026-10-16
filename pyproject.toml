@@ -1,0 +1,9 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+src = ["src"]
+extend-exclude = ["src/appl/scripts"]
+
+[tool.ruff.lint]
+# Real mistakes only: pyflakes (undefined names, unused imports/variables) and syntax errors.
+select = ["F", "E9"]

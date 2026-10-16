@@ -134,8 +134,8 @@ class YahooLeague(SyncLeagueData):
         end = int(settings.get("end_week") or DEFAULT_END_WEEK)
         try:
             end = min(end, int(self.league.current_week()))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Could not read the current week, using the league's last week: {e}")
         return start, end
 
     def sync_full_league(self, blob_storage: BlobStorage) -> Dict[str, Any]:

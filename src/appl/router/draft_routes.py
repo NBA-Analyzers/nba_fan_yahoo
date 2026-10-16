@@ -13,22 +13,18 @@ from flask import (
     session,
 )
 
-from ..draft import advice, jev_chooser, positions
-from ..draft.api_tokens import ApiTokenStore, default_token_store
+from ..draft import jev_chooser
+from ..draft.api_tokens import ApiTokenStore
 from ..draft.manual_league import (
     ManualDraftTracker,
     ManualLeagueError,
     ManualLeagueStore,
-    default_store,
+    match_import_teams,
 )
 from ..draft.espn_draft import EspnDraftTracker
-from ..draft.player_pool import load_player_pool
+from ..draft.service import DraftService, StateOptions
 from ..fantasy_integrations.espn.espn_service import EspnError, EspnService
-from ..draft.ranker import DraftRanker, categories_from_yahoo
-from ..draft.yahoo_draft import (
-    DEFAULT_AUCTION_BUDGET,
-    YahooDraftTracker,
-)
+from ..draft.yahoo_draft import YahooDraftTracker
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import get_yahoo_sdk
 from ..middleware.auth_decorators import require_login
 from ..identity.session import current_user_id
@@ -36,145 +32,36 @@ from ..season.service import manual_chat_id
 
 logger = logging.getLogger(__name__)
 
-# league_id -> DraftRanker; the ranking baseline only depends on league settings
-_rankers: dict[str, DraftRanker] = {}
+class BadRequest(ValueError):
+    """The request body or query had the wrong shape; shown to the caller as a 400."""
 
 
-def _mock_auction_state(info: dict, taken: list, mine: list, costs) -> dict:
-    """Budgets for a hand-run mock auction: everyone starts with the default budget
-    and only the prices the manager typed in are spent."""
-    costs = {k: int(v) for k, v in (costs or {}).items() if str(v).lstrip("-").isdigit()}
-    total = info["num_teams"] * DEFAULT_AUCTION_BUDGET
-    return {
-        "league_budget_total": total,
-        "league_budget_left": total - sum(costs.get(n, 0) for n in taken),
-        "my_budget_left": DEFAULT_AUCTION_BUDGET - sum(costs.get(n, 0) for n in mine),
-        "my_open_spots": max(info["roster_size"] - len(mine), 0),
-        "league_spots_left": max(info["num_teams"] * info["roster_size"] - len(taken), 0),
-        "teams": [],
-    }
+def _name_list(value, field: str) -> list[str]:
+    """A list of player names, or empty when the field is missing."""
+    if value in (None, ""):
+        return []
+    if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
+        raise BadRequest(f"{field} must be a list of player names")
+    return value
 
 
-def _eligibility_lookup(tracker, ranker):
-    """Spots a player can fill: Yahoo's answer for Yahoo leagues, otherwise (and when
-    Yahoo can't find the player) the position listed in the stats pool."""
-
-    def lookup(name):
-        found = tracker.eligible_positions(name) if hasattr(tracker, "eligible_positions") else None
-        if found:
-            return found
-        player = ranker.find(name)
-        return positions.eligible_from_listed_position(player.get("pos")) if player else None
-
-    return lookup
-
-
-def _position_report(lookup, info: dict, mine: list) -> dict | None:
-    """Which starting slots the roster can't fill yet (warn-only). None if the
-    league's slots aren't known."""
-    slots = info.get("slots")
-    if not slots:
-        return None
-    eligible = [lookup(name) for name in mine]
-    report = positions.roster_report([e or {positions.FLEX_SLOT} for e in eligible], slots)
-    report["incomplete"] = any(e is None for e in eligible)
-    return report
-
-
-THIN_PACE = 0.6  # warn when winning would leave under this share of the room's average $ per open spot
-
-
-def _bid_pace(state: dict, bid: int) -> dict:
-    """What winning at `bid` does to your money for the remaining spots."""
-    left, spots = state.get("my_budget_left"), state.get("my_open_spots")
-    room_left, room_spots = state.get("league_budget_left"), state.get("league_spots_left")
-    if None in (left, spots, room_left, room_spots) or spots <= 0 or not room_spots:
-        return {}
-    spots_after = spots - 1
-    left_after = left - bid
-    room_avg = room_left / room_spots
-    per_spot = left_after / spots_after if spots_after else None
-    pace = {
-        "walk_away_above": bid,
-        "left_after_bid": left_after,
-        "spots_after_bid": spots_after,
-        "per_spot_after_bid": round(per_spot, 1) if per_spot is not None else None,
-        "room_avg_per_spot": round(room_avg, 1),
-        "thin_after_bid": bool(spots_after and per_spot < THIN_PACE * room_avg),
-    }
-    return pace
-
-
-def _nominee_card(nominee, lookup, ranker, info, state, plan, punts, taken, mine) -> dict | None:
-    """Everything the manager needs while a player is on the block."""
-    if not nominee or not state["is_auction"]:
-        return None
-    player = ranker.find(nominee)
-    if player is None:
-        return {"query": nominee, "found": False}
-
-    name = player["name"]
-    card = {"query": nominee, "found": True, "name": name, "team": player["team"]}
-
-    sale = next((p for p in state.get("picks", []) if ranker.resolve_key(p["player_name"]) == player["key"]), None)
-    if sale or ranker.resolve_key(name) in {ranker.resolve_key(t) for t in taken}:
-        card.update(sold=True, sold_to=sale["team_name"] if sale else None,
-                    cost=sale["cost"] if sale else None)
-        return card
-
-    ranked = ranker.rank(punts=punts, taken_names=taken, my_roster_names=mine, limit=len(ranker.players))
-    rec = next((r for r in ranked if r["name"] == name), None)
-    my_value, market = plan["mine"].get(name, 1), plan["market"].get(name, 1)
-    max_bid = plan["max_bid"]
-    avg_cost = ranker.yahoo_ranks.get(player["key"], {}).get("avg_cost")
-
-    if my_value >= market:
-        verdict = "target"      # worth at least what the room will pay
-    elif my_value >= 0.8 * market:
-        verdict = "fair"
-    else:
-        verdict = "overpriced"  # the room will likely pay more than he's worth to you
-
-    card.update(_bid_pace(state, min(my_value, max_bid)))
-
-    teams = [t for t in state.get("teams", []) if not t["is_mine"]]
-    card.update(
-        sold=False,
-        my_value=my_value,
-        market=market,
-        yahoo_avg_cost=avg_cost,
-        max_bid=max_bid,
-        bid_up_to=min(my_value, max_bid),
-        verdict=verdict,
-        my_rank=ranked.index(rec) + 1 if rec else None,
-        z=rec["z"] if rec else player["z"],
-        strengths=rec["strengths"] if rec else [],
-        weaknesses=rec["weaknesses"] if rec else [],
-        rivals_who_can_pay_market=sum(t["max_bid"] >= market for t in teams) if teams else None,
-        richest_rivals=[
-            {"name": t["name"], "max_bid": t["max_bid"]}
-            for t in sorted(teams, key=lambda t: t["max_bid"], reverse=True)[:3]
-        ],
-    )
-
-    slots = info.get("slots")
-    if slots:
-        roster = [lookup(n) or {positions.FLEX_SLOT} for n in mine]
-        nominee_slots = lookup(name)
-        if nominee_slots:
-            report = positions.roster_report(roster, slots, nominee_slots)
-            card["fills_open_slot"] = report["fills_open_slot"]
-            card["eligible"] = sorted(nominee_slots - {positions.FLEX_SLOT})
-    return card
+def _parse_punts(raw) -> list[str]:
+    """Punts as a list, from a list or a comma separated string."""
+    if isinstance(raw, list):
+        return _name_list(raw, "punts")
+    if isinstance(raw, str):
+        return [p for p in raw.split(",") if p]
+    raise BadRequest("punts must be a list or a comma separated string")
 
 
 class DraftRouter:
-    def __init__(self, store: ManualLeagueStore | None = None, tokens: ApiTokenStore | None = None,
-                 espn: EspnService | None = None, indexer=None):
+    def __init__(self, store: ManualLeagueStore, tokens: ApiTokenStore, espn: EspnService,
+                 drafts: DraftService | None = None, indexer=None):
         self._indexer = indexer  # re-indexes a manual league for the chat after its notes change
-        self._store = store or default_store()
-        self._tokens = tokens or default_token_store()
-        self._espn = espn or EspnService(None)
+        self._store = store
+        self._tokens = tokens
+        self._espn = espn
+        self._drafts = drafts or DraftService()
         self._blueprint = self._create_blueprint()
         self._manual_blueprint = self._create_manual_blueprint()
 
@@ -186,28 +73,20 @@ class DraftRouter:
         yahoo_game = get_yahoo_sdk(token_store, {"user": user_guid})
         return YahooDraftTracker(yahoo_game.to_league(league_id), user=user_guid)
 
-    def _get_ranker(self, league_id: str, tracker: YahooDraftTracker) -> DraftRanker:
-        key = getattr(tracker, "cache_key", league_id)
-        if key not in _rankers:
-            info = tracker.league_info()
-            _rankers[key] = DraftRanker(
-                load_player_pool(),
-                categories=categories_from_yahoo(info["stat_categories"]),
-                num_teams=info["num_teams"],
-                roster_size=info["roster_size"],
-                yahoo_ranks=tracker.yahoo_ranks(),
-            )
-        return _rankers[key]
-
     def _state_response(self, league_id: str, get_tracker):
         """Draft state + recommendations for whichever tracker `get_tracker` returns."""
         body = request.get_json(silent=True) or {}
-        raw_punts = body.get("punts", request.args.get("punts", ""))
-        punts = (
-            raw_punts
-            if isinstance(raw_punts, list)
-            else [p for p in raw_punts.split(",") if p]
-        )
+        if not isinstance(body, dict):
+            return jsonify({"error": "JSON body must be an object"}), 400
+        try:
+            punts = _parse_punts(body.get("punts", request.args.get("punts", "")))
+            mock_taken = _name_list(body.get("mock_taken"), "mock_taken")
+            mock_mine = _name_list(body.get("mock_mine"), "mock_mine")
+            mock_costs = body.get("mock_costs")
+            if mock_costs is not None and not isinstance(mock_costs, dict):
+                raise BadRequest("mock_costs must be an object of player name to price")
+        except BadRequest as e:
+            return jsonify({"error": str(e)}), 400
         mock = bool(body.get("mock")) or request.args.get("mock") == "1"
         auto_punts = body.get("auto_punts") in (True, "1", 1) or request.args.get("auto_punts") == "1"
         mode = body.get("mode", request.args.get("mode", "manual"))
@@ -222,101 +101,20 @@ class DraftRouter:
         except (TypeError, ValueError):
             draft_position = None
 
+        options = StateOptions(
+            punts=punts, mock=mock, auto_punts=auto_punts, mode=mode, preference=preference,
+            nominee=nominee, draft_position=draft_position,
+            mock_taken=mock_taken, mock_mine=mock_mine, mock_costs=mock_costs,
+        )
+
         try:
             tracker = get_tracker(league_id)
             if tracker is None:
                 return jsonify({"error": "User not authenticated"}), 401
-
-            ranker = self._get_ranker(league_id, tracker)
-            info = tracker.league_info()
-            lookup = _eligibility_lookup(tracker, ranker)
-
-            if mock:
-                taken = body.get("mock_taken") or []
-                mine = body.get("mock_mine") or []
-                state = {
-                    "league_name": info["name"],
-                    "is_auction": info["is_auction"],
-                    "num_teams": info["num_teams"],
-                    "roster_size": info["roster_size"],
-                    "picks": [],
-                    "taken_names": taken,
-                    "my_roster": mine,
-                    "mock": True,
-                }
-                if info["is_auction"]:
-                    state.update(_mock_auction_state(info, taken, mine, body.get("mock_costs")))
-            else:
-                state = tracker.state(draft_position)
-                taken, mine = state["taken_names"], state["my_roster"]
-
-            # Once a few players are on the team: which one category to skip, and what that
-            # does to the best available. With auto_punts it is applied to everything below.
-            suggestion = advice.build_suggestion(ranker, mine, punts, taken)
-            chosen_punts = punts
-            if auto_punts and suggestion:
-                chosen_punts = punts + [suggestion["category"]]
-            user_punts, punts = punts, chosen_punts
-
-            recommendations = ranker.rank(
-                punts=punts, taken_names=taken, my_roster_names=mine
-            )
-
-            plan = None
-            if state["is_auction"]:
-                plan = ranker.auction_plan(
-                    punts, taken, mine,
-                    league_budget_left=state["league_budget_left"],
-                    league_budget_total=state["league_budget_total"],
-                    league_spots_left=state["league_spots_left"],
-                    my_budget_left=state["my_budget_left"],
-                    my_open_spots=state["my_open_spots"],
-                )
-                for rec in recommendations:
-                    rec["bid"] = plan["mine"].get(rec["name"])
-                    rec["market"] = plan["market"].get(rec["name"])
-                state["auction"] = {
-                    "inflation_pct": plan["inflation_pct"],
-                    "max_bid": plan["max_bid"],
-                }
-                state["cash_advice"] = advice.cash_advice(plan, state)
-
-            roster_profile = ranker.roster_profile(mine)
-            decision = jev_chooser.decide(
-                mode,
-                recommendations[: jev_chooser.SHORTLIST_SIZE],
-                mine,
-                punts,
-                ranker.categories,
-                roster_profile,
-                preference,
-            )
-
-            return jsonify(
-                {
-                    **state,
-                    "decision": decision,
-                    "jev_configured": jev_chooser.is_configured(),
-                    "categories": ranker.categories,
-                    "punts": user_punts,
-                    "effective_punts": punts,
-                    "auto_punts": auto_punts,
-                    "build_suggestion": suggestion,
-                    "suggested_punts": ranker.suggest_punts(mine),
-                    "roster_profile": roster_profile,
-                    "roster_unmatched": ranker.unmatched(mine),
-                    "taken_unmatched": ranker.unmatched(taken),
-                    "has_yahoo_ranks": bool(ranker.yahoo_ranks),
-                    "recommendations": recommendations,
-                    "positions": _position_report(lookup, info, mine),
-                    "nominee_card": _nominee_card(
-                        nominee, lookup, ranker, info, state, plan, punts, taken, mine
-                    ),
-                }
-            )
+            return jsonify(self._drafts.state(league_id, tracker, options))
         except Exception as e:
             logger.error(f"League {league_id}: draft state failed: {e}", exc_info=True)
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "Could not build the draft state"}), 500
 
     def _create_blueprint(self):
         draft_bp = Blueprint("draft", __name__, url_prefix="/draft")
@@ -345,11 +143,11 @@ class DraftRouter:
                 tracker = self._get_tracker(league_id)
                 if tracker is None:
                     return jsonify({"error": "User not authenticated"}), 401
-                ranker = self._get_ranker(league_id, tracker)
+                ranker = self._drafts.ranker_for(league_id, tracker)
                 return jsonify({"players": sorted(p["name"] for p in ranker.players)})
             except Exception as e:
                 logger.error(f"League {league_id}: player list failed: {e}", exc_info=True)
-                return jsonify({"error": str(e)}), 500
+                return jsonify({"error": "Could not load the player list"}), 500
 
         # --- ESPN leagues: the same page and engine, an ESPN tracker ---
 
@@ -385,7 +183,7 @@ class DraftRouter:
         @require_login
         def espn_draft_players(league_id):
             def run():
-                ranker = self._get_ranker(league_id, espn_tracker(league_id))
+                ranker = self._drafts.ranker_for(league_id, espn_tracker(league_id))
                 return jsonify({"players": sorted(p["name"] for p in ranker.players)})
 
             return espn_guard(league_id, run)
@@ -459,26 +257,9 @@ class DraftRouter:
             teams = raw.get("teams")
             if not isinstance(teams, list):
                 return jsonify({"error": "Send the rosters as `teams`: [{name, players}]"}), 400
-            ranker = _rankers.get("names")
-            if ranker is None:
-                ranker = _rankers["names"] = DraftRanker(load_player_pool())
+            ranker = self._drafts.names_ranker()
 
-            matched, unknown = [], []
-            for team in teams:
-                team = team if isinstance(team, dict) else {}
-                players = []
-                for typed in team.get("players") or []:
-                    typed = str(typed).strip()
-                    if not typed:
-                        continue
-                    key = ranker.resolve_key(typed)
-                    if key:
-                        players.append({"typed": typed, "name": ranker._by_key[key]["name"], "found": True})
-                    else:
-                        players.append({"typed": typed, "name": typed, "found": False,
-                                        "suggestions": ranker.suggest_names(typed)})
-                        unknown.append(typed)
-                matched.append({"name": team.get("name", ""), "players": players})
+            matched, unknown = match_import_teams(ranker, teams)
 
             report = {"teams": matched, "unknown": unknown}
             if raw.get("dry_run"):
@@ -543,7 +324,7 @@ class DraftRouter:
                 tracker = tracker_for(league_id)
             except KeyError:
                 return jsonify({"error": "League not found"}), 404
-            ranker = self._get_ranker(league_id, tracker)
+            ranker = self._drafts.ranker_for(league_id, tracker)
             return jsonify({"players": sorted(p["name"] for p in ranker.players)})
 
         @bp.route("/<league_id>/settings", methods=["PUT"])
@@ -563,7 +344,7 @@ class DraftRouter:
             raw = request.get_json(silent=True) or {}
             name = str(raw.get("player_name") or "").strip()
             try:
-                ranker = self._get_ranker(league_id, tracker_for(league_id))
+                ranker = self._drafts.ranker_for(league_id, tracker_for(league_id))
             except KeyError:
                 return jsonify({"error": "League not found"}), 404
             # Store the pool's spelling so the same player is never logged twice

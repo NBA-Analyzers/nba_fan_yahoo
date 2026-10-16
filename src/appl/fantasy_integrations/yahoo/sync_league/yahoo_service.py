@@ -1,5 +1,4 @@
 import logging
-import os
 import threading
 import time
 from datetime import datetime, timezone
@@ -49,34 +48,34 @@ class YahooService:
             return []
 
     def sync_league_data_async(
-        self, league_id: str, user_guid: str, azure_container: str = "fantasy1"
+        self, league_id: str, user_guid: str, container: str = "fantasy1"
     ):
         """
-        Trigger non-blocking sync of league data to Azure.
+        Trigger non-blocking sync of league data.
         Uses background thread to avoid blocking the HTTP request.
 
         Args:
             league_id: League identifier
             user_guid: User GUID from session
-            azure_container: Azure container name
+            container: archive folder name
         """
         thread = threading.Thread(
             target=self._sync_league_data_background,
-            args=(league_id, user_guid, azure_container),
+            args=(league_id, user_guid, container),
             daemon=True,  # Thread dies when main program exits
         )
         thread.start()
         logger.info(f"League {league_id}: Background sync thread started")
 
     def _sync_league_data_background(
-        self, league_id: str, user_guid: str, azure_container: str
+        self, league_id: str, user_guid: str, container: str
     ):
         """
         Background worker for syncing league data.
         Wraps sync_league_data() with error handling.
         """
         try:
-            result = self.sync_league_data(league_id, user_guid, azure_container)
+            result = self.sync_league_data(league_id, user_guid, container)
             if result.get("success"):
                 logger.info(
                     f"League {league_id}: Background sync completed successfully"
@@ -92,22 +91,22 @@ class YahooService:
             )
 
     def sync_league_data(
-        self, league_id: str, user_guid: str, azure_container: str = "fantasy1"
+        self, league_id: str, user_guid: str, container: str = "fantasy1"
     ) -> Dict[str, Any]:
         """
-        Sync league data to Azure with TTL checking, locking, and smart updates.
+        Sync league data with TTL checking, locking, and smart updates.
 
         Process:
         1. Check if sync needed (TTL)
         2. Acquire lock (prevent concurrent syncs)
-        3. Fetch Yahoo data and upload to Azure
+        3. Fetch Yahoo data and archive it
         4. Update last_blob_sync only if critical blobs succeeded
         5. Release lock
 
         Args:
             league_id: League identifier
             user_guid: User GUID from session
-            azure_container: Azure container name
+            container: archive folder name
 
         Returns:
             Dict with keys:
@@ -168,9 +167,9 @@ class YahooService:
                 }
 
             try:
-                # Step 4: fetch and archive (GCS / Azure / none, see BLOB_STORAGE)
+                # Step 4: fetch and archive (GCS or none, see BLOB_STORAGE)
                 yahoo_league = YahooLeague(league)
-                sync_results = yahoo_league.sync_full_league(build_blob_storage(azure_container))
+                sync_results = yahoo_league.sync_full_league(build_blob_storage(container))
 
                 if sync_results:
                     self.document_indexer.update_league_files(league_id, sync_results)

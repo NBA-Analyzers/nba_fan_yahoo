@@ -163,8 +163,7 @@ def _client(tmp_path, monkeypatch, indexer=None):
 
     pool = [_player(_name("Big", i), True, i) for i in range(80)]
     pool += [_player(_name("Guard", i), False, 100 + i) for i in range(120)]
-    monkeypatch.setattr(routes, "load_player_pool", lambda: pool)
-    monkeypatch.setattr(routes, "_rankers", {})
+    monkeypatch.setattr("appl.draft.service.load_player_pool", lambda: pool)
     monkeypatch.setattr(jev_chooser, "_cache", {})
     monkeypatch.delenv("JEV_API_KEY", raising=False)
 
@@ -176,7 +175,7 @@ def _client(tmp_path, monkeypatch, indexer=None):
     home.add_url_rule("/", "homepage", lambda: "home")  # the target of the login redirect
     app.register_blueprint(home)
     tokens = ApiTokenStore(FileTokenBackend(tmp_path / "tokens.json"))
-    app.register_blueprint(routes.DraftRouter(ManualLeagueStore(tmp_path), tokens, indexer=indexer).get_manual_bp())
+    app.register_blueprint(routes.DraftRouter(ManualLeagueStore(tmp_path), tokens, espn=object(), indexer=indexer).get_manual_bp())
     test_client = app.test_client()
     with test_client.session_transaction() as session:
         session["user_id"] = USER
@@ -363,7 +362,7 @@ def test_bad_or_revoked_tokens_are_refused_and_tokens_cant_make_tokens(client):
     with client.session_transaction() as session:
         session.clear()
     auth = {"Authorization": f"Bearer {token}"}
-    assert client.post("/manual/api/tokens", json={}, headers=auth).status_code == 302  # browser login only
+    assert client.post("/manual/api/tokens", json={}, headers=auth).status_code == 401  # browser login only
 
     with client.session_transaction() as session:
         session["user_id"] = "someone-else"

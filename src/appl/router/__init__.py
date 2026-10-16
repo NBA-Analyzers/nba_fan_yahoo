@@ -1,13 +1,16 @@
 from ..config.dependencies import (
+    brief_store,
     chat_service,
     document_indexer,
+    draft_service,
+    espn_service,
+    llm_factory,
+    manual_store,
+    schedule,
+    token_store,
 )
 from ..ai.access import SessionAccess
-from ..fantasy_integrations.espn.espn_service import EspnService
-from ..draft.manual_league import default_store
 from ..ai.chat_router import ChatRouter
-from ..ai.tools import league_toolkit_factory
-from ..season.schedule import Schedule
 from ..repository.firestore import YahooLeagueRepository
 from ..repository.firestore.espn_data import EspnLeagueRepository
 from .auth_routes import AuthRouter
@@ -21,20 +24,17 @@ from .document_router import DocumentRouter
 
 def register_routes(app):
     """Register all route blueprints with the Flask app"""
-    # Create router instances with dependencies
-    manual_store = default_store()
-    espn_service = EspnService(document_indexer())
-    main_router = MainRouter(document_indexer(), manual_store, espn_service)
-    auth_router = AuthRouter(document_indexer())
-    yahoo_router = YahooRouter(document_indexer())
-    espn_router = EspnRouter(document_indexer(), espn_service)
-    access = SessionAccess(YahooLeagueRepository, manual_store, EspnLeagueRepository)
-    # The chat gets the season tools for every league type once the stores they read exist
-    chat_service().tools_factory = league_toolkit_factory(manual_store, espn_service, Schedule.load())
+    # Every router gets its collaborators from config/dependencies.py
+    indexer, espn, store = document_indexer(), espn_service(), manual_store()
+    main_router = MainRouter(indexer, store, espn)
+    auth_router = AuthRouter(indexer)
+    yahoo_router = YahooRouter(indexer)
+    espn_router = EspnRouter(indexer, espn)
+    access = SessionAccess(YahooLeagueRepository, store, EspnLeagueRepository)
     chat_router = ChatRouter(chat_service(), access)
-    document_router = DocumentRouter(document_indexer(), access)
-    draft_router = DraftRouter(manual_store, espn=espn_service, indexer=document_indexer())
-    season_router = SeasonRouter(manual_store, espn=espn_service, indexer=document_indexer())
+    document_router = DocumentRouter(indexer, access)
+    draft_router = DraftRouter(store, token_store(), espn, drafts=draft_service(), indexer=indexer)
+    season_router = SeasonRouter(store, brief_store(), llm_factory, schedule(), espn, indexer=indexer)
 
     # Register blueprints
     app.register_blueprint(main_router.get_bp())

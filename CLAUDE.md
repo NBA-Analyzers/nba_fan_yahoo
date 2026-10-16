@@ -1,7 +1,7 @@
 # Fantasy Basketball Helper
 
 Flask app: AI chat, draft assistant and in-season analysis for Yahoo, ESPN and manual
-fantasy basketball leagues. Python 3.10 locally (Dockerfile uses 3.12). Deploys to Cloud Run.
+fantasy basketball leagues. Docker and CI use Python 3.12; develop on 3.12 too (3.10 still works). Deploys to Cloud Run.
 
 ## Commands
 - Unit tests (offline, no keys): `python -m pytest -q`. The full suite takes about 2 minutes,

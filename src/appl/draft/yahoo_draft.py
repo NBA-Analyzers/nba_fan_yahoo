@@ -75,6 +75,7 @@ class YahooDraftTracker:
         self.league = league
         self.league_id = league.league_id
         self._info_key = (self.league_id, user)
+        self.cache_key = f"yahoo:{self.league_id}:{user}"
         self._names = _player_names.setdefault(self.league_id, {})
 
     # --- static league info -------------------------------------------------
