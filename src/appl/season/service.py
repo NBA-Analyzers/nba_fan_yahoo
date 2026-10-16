@@ -183,25 +183,38 @@ _league_locks: dict[str, threading.Lock] = {}
 _latest_request: dict[str, int] = {}
 
 
-def index_manual_league_async(indexer, league: dict) -> threading.Thread:
-    """Same as index_manual_league, in a background thread so the chat opens at once.
-    Quick edits start one thread each; they run in order and only the newest does the work."""
+def _reindex_in_order(league: dict):
+    """Take a place in line now; the returned function waits its turn, then indexes
+    unless a newer request for the same league came in meanwhile."""
     league_id = league["id"]
     with _index_lock:
         lock = _league_locks.setdefault(league_id, threading.Lock())
         number = _latest_request[league_id] = _latest_request.get(league_id, 0) + 1
 
-    def run():
+    def run(indexer) -> None:
         with lock:
             with _index_lock:
                 if _latest_request[league_id] != number:
-                    return  # a newer edit's thread will index the newer league
+                    return  # a newer request will index the newer league
             try:
                 index_manual_league(indexer, league)
                 logger.info(f"Manual league {league_id}: indexed for chat")
             except Exception as e:
                 logger.error(f"Manual league {league_id}: chat indexing failed: {e}", exc_info=True)
 
-    thread = threading.Thread(target=run, daemon=True)
+    return run
+
+
+def reindex_manual_league(indexer, league: dict) -> None:
+    """Index the league now, in the calling request. Used after an edit: Cloud Run gives a
+    background thread almost no CPU once the response is sent. Never raises."""
+    _reindex_in_order(league)(indexer)
+
+
+def index_manual_league_async(indexer, league: dict) -> threading.Thread:
+    """Same as index_manual_league, in a background thread so the chat opens at once.
+    Requests for one league run in order and only the newest does the work."""
+    run = _reindex_in_order(league)
+    thread = threading.Thread(target=run, args=(indexer,), daemon=True)
     thread.start()
     return thread

@@ -49,14 +49,15 @@ class SeasonRouter:
     # --- building blocks ----------------------------------------------------
 
     def _reindex(self, user_id: str, league_id: str) -> None:
-        """Refresh the chat's copy of a manual league in the background (it skips the work
-        when nothing changed). Never fails the request that changed the league."""
+        """Refresh the chat's copy of a manual league (it skips the work when nothing changed).
+        Runs in the request, since Cloud Run starves background threads of CPU. Never fails
+        the request that changed the league."""
         if self._indexer is None:
             return
         try:
-            service.index_manual_league_async(self._indexer, self._store.get(user_id, league_id))
+            service.reindex_manual_league(self._indexer, self._store.get(user_id, league_id))
         except Exception as e:
-            logger.warning(f"Could not start re-indexing manual league {league_id}: {e}")
+            logger.warning(f"Could not re-index manual league {league_id}: {e}")
 
     @staticmethod
     def _ranker(snap):

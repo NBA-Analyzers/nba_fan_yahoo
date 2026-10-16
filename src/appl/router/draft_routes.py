@@ -407,12 +407,13 @@ class DraftRouter:
     def _reindex(self, user_id: str, league_id: str) -> None:
         if self._indexer is None:
             return
+        # In the request, not a background thread: Cloud Run starves those of CPU
         try:
-            from ..season.service import index_manual_league_async
+            from ..season.service import reindex_manual_league
 
-            index_manual_league_async(self._indexer, self._store.get(user_id, league_id))
+            reindex_manual_league(self._indexer, self._store.get(user_id, league_id))
         except Exception as e:
-            logger.warning(f"Could not start re-indexing manual league {league_id}: {e}")
+            logger.warning(f"Could not re-index manual league {league_id}: {e}")
 
     def get_manual_bp(self):
         return self._manual_blueprint

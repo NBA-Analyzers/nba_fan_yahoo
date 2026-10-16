@@ -41,11 +41,10 @@ def unsupported_categories(league) -> list[str]:
 
 
 # ESPN lineup slot ids (espn_api.basketball.constant.POSITION_MAP) -> the slot names the app
-# uses. The combo slots (SG/SF, G/F, PF/C, F/C) have no match and count as flex; bench (12) and
-# injured (13) spots don't start.
+# uses; bench (12) and injured (13) spots don't start
 ESPN_SLOT_NAMES = {
     0: "PG", 1: "SG", 2: "SF", 3: "PF", 4: "C", 5: "G", 6: "F",
-    7: "Util", 8: "Util", 9: "Util", 10: "Util", 11: "Util",
+    7: "SG/SF", 8: "G/F", 9: "PF/C", 10: "F/C", 11: "Util",
 }
 
 

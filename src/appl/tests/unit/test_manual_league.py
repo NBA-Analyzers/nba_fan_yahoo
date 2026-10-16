@@ -154,6 +154,10 @@ def test_tracker_auction_state_tracks_budgets(store):
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
+    return _client(tmp_path, monkeypatch)
+
+
+def _client(tmp_path, monkeypatch, indexer=None):
     routes = importlib.import_module("appl.router.draft_routes")
     from appl.draft import jev_chooser
 
@@ -171,7 +175,7 @@ def client(tmp_path, monkeypatch):
     home.add_url_rule("/", "homepage", lambda: "home")  # the target of the login redirect
     app.register_blueprint(home)
     tokens = ApiTokenStore(FileTokenBackend(tmp_path / "tokens.json"))
-    app.register_blueprint(routes.DraftRouter(ManualLeagueStore(tmp_path), tokens, espn=object()).get_manual_bp())
+    app.register_blueprint(routes.DraftRouter(ManualLeagueStore(tmp_path), tokens, espn=object(), indexer=indexer).get_manual_bp())
     test_client = app.test_client()
     with test_client.session_transaction() as session:
         session["user_id"] = USER
@@ -219,6 +223,37 @@ def test_notes_and_status_round_trip(client):
     state = client.get(f"/manual/{league_id}/state").get_json()
     assert state["manual"]["notes"][0]["text"] == "Rival is punting FT"
     assert state["draft_status"] == "finished"
+
+
+class RecordingIndexer:
+    def __init__(self, fail=False):
+        self.notes, self.fail = [], fail
+
+    def update_league_files(self, chat_id, files):
+        if self.fail:
+            raise RuntimeError("embedding API down")
+        self.notes.append([n["text"] for n in files["league_notes"]])
+
+
+def test_a_note_reaches_the_chat_before_the_response(tmp_path, monkeypatch):
+    """Cloud Run starves background threads of CPU, so the re-index runs in the request."""
+    from appl.season import service
+
+    monkeypatch.setattr(service, "index_manual_league_async", lambda *a: None)
+    indexer = RecordingIndexer()
+    client = _client(tmp_path, monkeypatch, indexer)
+    league_id = _create(client)
+    client.post(f"/manual/{league_id}/notes", json={"text": "Rival is punting FT"})
+    assert indexer.notes[-1] == ["Rival is punting FT"]
+    note_id = client.get(f"/manual/{league_id}/state").get_json()["manual"]["notes"][0]["id"]
+    client.delete(f"/manual/{league_id}/notes/{note_id}")
+    assert indexer.notes[-1] == []
+
+
+def test_a_failed_reindex_never_fails_the_note(tmp_path, monkeypatch):
+    client = _client(tmp_path, monkeypatch, RecordingIndexer(fail=True))
+    league_id = _create(client)
+    assert client.post(f"/manual/{league_id}/notes", json={"text": "x"}).status_code == 200
 
 
 def test_changing_categories_rebuilds_the_ranking(client):
