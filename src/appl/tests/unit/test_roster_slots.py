@@ -260,3 +260,15 @@ def test_blended_players_keep_the_newest_position_that_exists():
     newest, older = {1: {**line, "pos": None}}, {1: {**line, "pos": "F"}}
     assert blend_seasons([(newest, 0.7), (older, 0.3)])[0]["pos"] == "F"
     assert blend_seasons([({1: {**line, "pos": "C"}}, 0.7), (older, 0.3)])[0]["pos"] == "C"
+
+
+def test_combo_slots_take_either_position():
+    from appl.draft.positions import assign, eligible_from_listed_position as listed
+
+    # ESPN's G/F, SG/SF, PF/C and F/C spots
+    assert assign([listed("PG")], {"G/F": 1})[0] == 1
+    assert assign([listed("C")], {"G/F": 1})[0] == 0
+    assert assign([listed("SF")], {"SG/SF": 1})[0] == 1
+    assert assign([listed("PG")], {"SG/SF": 1})[0] == 0
+    assert assign([listed("C")], {"PF/C": 1, "F/C": 1})[0] == 1
+    assert assign([listed("PF"), listed("C")], {"PF/C": 1, "F/C": 1})[0] == 2
