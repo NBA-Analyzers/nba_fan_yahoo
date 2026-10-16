@@ -1,5 +1,4 @@
 import requests
-import yahoo_fantasy_api as yfa
 from yahoo_oauth import OAuth2
 
 

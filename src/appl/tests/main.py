@@ -212,12 +212,9 @@ def test_yahoo_league():
     # print(get_best_player_overall_in_categories(find_current_year(),'Util',['FGM','FGA','FTM','FTA','FG3M','PTS','AST', 'REB', 'STL','BLK', 'TOV']))
     print('a')
 
-from multiprocessing.spawn import import_main_path
 
 from yahoo_oauth import OAuth2
 import yahoo_fantasy_api as yfa
-import yahoo_fantasy_api as yfa
-from yahoo_oauth import OAuth2
 
 
 
@@ -410,7 +407,7 @@ if __name__ == '__main__':
 
 # Yahoo Fantasy OAuth Multi-User Flow (Flask + Authlib)
 
-from flask import Flask, redirect, request, session, url_for
+from flask import Flask, redirect, session
 from authlib.integrations.flask_client import OAuth
 import os
 import time
@@ -470,7 +467,7 @@ def leagues():
 
     token_data = token_store[user_guid]
     resp = yahoo.get(
-        f"fantasy/v2/users;use_login=1/games;game_keys=nba/leagues",
+        "fantasy/v2/users;use_login=1/games;game_keys=nba/leagues",
         token=token_data['access_token']
     )
     return resp.text

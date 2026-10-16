@@ -115,7 +115,6 @@ class MainRouter:
 
             @require_login
             def chat_content():
-                user_info = current_profile()
                 user_guid = session.get("user")
 
                 # Verify Yahoo authentication

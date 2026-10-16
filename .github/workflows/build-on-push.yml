@@ -30,6 +30,9 @@ jobs:
       - name: Python Syntax Check
         run: find src -name "*.py" -exec python -m py_compile {} +
 
+      - name: Lint (ruff)
+        run: ruff check src
+
       # Unit tests only (pytest.ini skips -m integration, which needs real Firestore)
       - name: Unit tests
         run: python -m pytest -q

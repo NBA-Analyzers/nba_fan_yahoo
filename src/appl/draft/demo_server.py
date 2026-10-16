@@ -9,7 +9,6 @@ Run from src/:
 then open http://localhost:5055/demo        (or /demo?auction=1 for an auction league)
 """
 
-import os
 
 from pathlib import Path  # noqa: E402
 
@@ -93,7 +92,8 @@ class FakeYahooTracker:
 
 
 def create_app() -> Flask:
-    app = Flask(__name__, static_folder=str(Path(draft_routes.__file__).parents[1] / "static"))
+    static = str(Path(draft_routes.__file__).parents[1] / "static")
+    app = Flask(__name__, static_folder=static, template_folder=static)
     app.secret_key = "demo"
 
     def get_tracker(self, league_id):

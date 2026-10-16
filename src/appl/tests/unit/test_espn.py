@@ -290,7 +290,7 @@ class FakeRouteService:
 
 
 def route_client(service):
-    from flask import Blueprint, render_template_string
+    from flask import Blueprint
     from pathlib import Path
     static = str(Path(__file__).resolve().parents[2] / "static")
     app = Flask(__name__, template_folder=static)

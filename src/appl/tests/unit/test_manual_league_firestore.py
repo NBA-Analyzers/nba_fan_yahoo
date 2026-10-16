@@ -7,7 +7,6 @@ import uuid
 
 import pytest
 
-from appl.draft import manual_league
 from appl.draft.manual_league import (
     FileBackend,
     FirestoreBackend,
