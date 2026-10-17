@@ -304,6 +304,22 @@ class DraftRanker:
         }
 
 
+    def market_at_each_pick(self, picks: list[tuple[str, int | None]], league_budget_total: int) -> list:
+        """The market price each player had when he sold, replaying the auction in
+        order: the players left, priced with the money and spots left at that moment.
+        `picks` are (name, cost); None for names not in the pool."""
+        left = {p["key"]: self._value(p) for p in self.players}
+        money, spots = league_budget_total, self.num_teams * self.roster_size
+        prices = []
+        for name, cost in picks:
+            key = self.resolve_key(name)
+            prices.append(_price_table(left, money, max(spots, 1))[key] if key in left else None)
+            left.pop(key, None)
+            money -= cost or 0
+            spots -= 1
+        return prices
+
+
 def _price_table(measures: dict[str, float], money: float, spots: int) -> dict[str, int]:
     """Dollar price per player: $1 each, with the rest of `money` split by value
     above the last player who still makes a roster. Everyone else costs $1."""

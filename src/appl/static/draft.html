@@ -520,6 +520,12 @@ function renderNominee(d) {
     const richest = c.richest_rivals.map((r) => `${r.name} ($${r.max_bid})`).join(", ");
     card.append(el("div", `${c.rivals_who_can_pay_market} of ${total} rivals can afford about $${c.market}. Most money: ${richest}.`, "line hint"));
   }
+  (c.rival_habits || []).forEach((r) => {
+    const how = `${r.name} has paid ${Math.abs(r.premium_pct)}% ${r.premium_pct > 0 ? "over" : "under"} market for ${r.group} (${r.buys} buys)`;
+    card.append(r.premium_pct > 0
+      ? el("div", `${how}. They may go to $${r.may_pay}.`, "line notice info")
+      : el("div", `${how}. They probably won't push the price up.`, "line hint"));
+  });
 
   if (mock) {
     const btns = el("div", undefined, "mini-btns");
@@ -565,11 +571,15 @@ function renderMoney(d) {
     const table = (rows) => {
       const t = el("table", undefined, "rivals");
       const head = el("tr");
-      ["Team", "Left", "Max bid", "Spots"].forEach((h) => head.append(el("th", h)));
+      ["Team", "Left", "Max bid", "Spots", "Paid vs market"].forEach((h) => head.append(el("th", h)));
       t.append(head);
       rows.forEach((r) => {
         const row = el("tr");
-        row.append(el("td", r.name), el("td", `$${r.budget_left}`), el("td", `$${r.max_bid}`), el("td", r.spots_left));
+        const paid = r.premium_pct == null ? "–" : `${r.premium_pct > 0 ? "+" : ""}${r.premium_pct}%`;
+        const habits = (r.habits || []).map((h) => `${h.premium_pct > 0 ? "+" : ""}${h.premium_pct}% on ${h.group}`).join(", ");
+        const paidCell = el("td", paid);
+        if (habits) paidCell.title = habits;
+        row.append(el("td", r.name), el("td", `$${r.budget_left}`), el("td", `$${r.max_bid}`), el("td", r.spots_left), paidCell);
         t.append(row);
       });
       return t;

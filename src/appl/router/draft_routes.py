@@ -13,7 +13,7 @@ from flask import (
     session,
 )
 
-from ..draft import advice, jev_chooser, positions
+from ..draft import advice, jev_chooser, positions, rival_habits
 from ..draft.api_tokens import ApiTokenStore, default_token_store
 from ..draft.manual_league import (
     ManualDraftTracker,
@@ -127,6 +127,19 @@ def _bid_pace(state: dict, bid: int) -> dict:
     return pace
 
 
+def _add_spending_habits(state: dict, ranker, lookup) -> None:
+    """Each team's premium over market so far, and any position-group habits."""
+    picks = state.get("picks", [])
+    if not picks or not state.get("teams"):
+        return
+    market = ranker.market_at_each_pick(
+        [(p["player_name"], p["cost"]) for p in picks], state["league_budget_total"]
+    )
+    habits = rival_habits.team_habits(picks, market, lookup)
+    for team in state["teams"]:
+        team.update(habits.get(team["team_key"], {}))
+
+
 def _nominee_card(nominee, lookup, ranker, info, state, plan, punts, taken, mine) -> dict | None:
     """Everything the manager needs while a player is on the block."""
     if not nominee or not state["is_auction"]:
@@ -177,6 +190,7 @@ def _nominee_card(nominee, lookup, ranker, info, state, plan, punts, taken, mine
             {"name": t["name"], "max_bid": t["max_bid"]}
             for t in sorted(teams, key=lambda t: t["max_bid"], reverse=True)[:3]
         ],
+        rival_habits=rival_habits.habits_for(lookup(name), market, teams),
     )
 
     slots = info.get("slots")
@@ -306,6 +320,7 @@ class DraftRouter:
                     "max_bid": plan["max_bid"],
                 }
                 state["cash_advice"] = advice.cash_advice(plan, state)
+                _add_spending_habits(state, ranker, lookup)
 
             roster_profile = ranker.roster_profile(mine)
             decision = jev_chooser.decide(

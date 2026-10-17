@@ -280,6 +280,28 @@ def test_position_report_flags_empty_slots_and_nominee_fit(env):
     assert "C" in data["nominee_card"]["eligible"]
 
 
+def test_rivals_who_overpay_for_a_position_are_flagged_on_the_card(env):
+    env.monkeypatch.setattr(env.tracker, "auction", True)
+    recs = env.client.get("/draft/L1/state").get_json()["recommendations"]
+    (a, b, nominee), center = recs[:3], recs[3]["name"]
+    env.tracker.eligibility[center] = {"C", "Util"}
+    # Team 3 pays double for two guards; Team 4 buys one center at market
+    env.monkeypatch.setattr(env.tracker, "picks", [
+        (a["name"], 3, a["market"] * 2), (b["name"], 3, b["market"] * 2), (center, 4, recs[3]["market"]),
+    ])
+    data = env.client.get(f"/draft/L1/state?nominee={nominee['name']}").get_json()
+    teams = {t["name"]: t for t in data["teams"]}
+    assert teams["Team 3"]["premium_pct"] >= 80
+    assert [h["group"] for h in teams["Team 3"]["habits"]] == ["guards"]
+    assert teams["Team 4"]["habits"] == [] and "premium_pct" not in teams["Team 5"]
+    card = data["nominee_card"]
+    assert [r["name"] for r in card["rival_habits"]] == ["Team 3"]
+    rival = card["rival_habits"][0]
+    # Their habit price, but never more than they can still bid
+    expected = round(card["market"] * (1 + rival["premium_pct"] / 100))
+    assert rival["may_pay"] == min(expected, teams["Team 3"]["max_bid"])
+
+
 def test_mock_auction_tracks_typed_prices(env):
     env.monkeypatch.setattr(env.tracker, "auction", True)
     first = _top_names(env, 1)[0]
