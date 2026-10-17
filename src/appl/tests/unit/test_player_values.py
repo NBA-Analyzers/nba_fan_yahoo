@@ -38,6 +38,7 @@ def test_a_perfect_projection_scores_perfectly():
     assert result["top_n_overlap"] == 1.0
     assert result["missing_from_top_n"] == 0
     assert all(error == 0 for error in result["stat_mae"].values())
+    assert result["games_mae"] == 0
 
 
 def test_players_the_projection_lacks_are_reported_as_missing():
@@ -236,7 +237,6 @@ def test_a_renamed_player_isnt_duplicated_when_this_seasons_stats_arrive():
     assert len(pool) == 1
 
 
-@pytest.mark.xfail(strict=True, reason="availability is multiplied onto negative scores too")
 def test_missing_games_never_improves_a_below_average_player():
     ranker = DraftRanker(_veterans())
     worst = min(ranker.players, key=lambda p: sum(p["z"].values()))
@@ -245,3 +245,134 @@ def test_missing_games_never_improves_a_below_average_player():
     healthy = ranker._fit({**worst, "GP": 70}, weights)
     injured = ranker._fit({**worst, "GP": 15}, weights)
     assert injured <= healthy
+
+
+# --- per-case blend: last season > ESPN projection > the season before ---------
+
+def _lines(**by_name):
+    """{id: line} from name=(gp, pts) pairs, ids in order."""
+    return {i: {**_line(gp, pts), "name": name} for i, (name, (gp, pts)) in
+            enumerate(by_name.items(), start=1)}
+
+
+def _blend(last=None, prior=None, projections=None):
+    pool = player_pool.blend_sources(last or {}, prior or {}, projections or {})
+    return {p["name"]: p for p in pool}
+
+
+def _proj(name, pts, gp=70.0, pid=500):
+    return {pid: _projection(name, pts=pts, gp=gp)}
+
+
+def test_both_seasons_with_a_projection_are_weighted_50_35_15():
+    pool = _blend(_lines(Vet=(70, 20.0)), _lines(Vet=(60, 10.0)), _proj("Vet", 30.0))
+    vet = pool["Vet"]
+    assert vet["PTS"] == pytest.approx(0.5 * 20 + 0.35 * 30 + 0.15 * 10)
+    assert vet["basis"] == "two_seasons"
+
+
+def test_both_seasons_without_a_projection_rescale_to_last_and_prior():
+    vet = _blend(_lines(Vet=(70, 20.0)), _lines(Vet=(60, 10.0)))["Vet"]
+    assert vet["PTS"] == pytest.approx((0.5 * 20 + 0.15 * 10) / 0.65, abs=1e-3)
+
+
+def test_only_last_season_with_a_projection_is_weighted_60_40():
+    # A 25-game older season is too small a sample to use for stats
+    pool = _blend(_lines(Soph=(65, 20.0)), _lines(Soph=(25, 50.0)), _proj("Soph", 10.0))
+    assert pool["Soph"]["PTS"] == pytest.approx(0.6 * 20 + 0.4 * 10)
+    assert pool["Soph"]["basis"] == "last_season"
+
+
+def test_only_last_season_without_a_projection_is_last_season():
+    assert _blend(_lines(Soph=(65, 20.0)))["Soph"]["PTS"] == pytest.approx(20.0)
+
+
+def test_a_player_hurt_last_season_leans_on_the_projection_then_the_older_season():
+    pool = _blend(_lines(Hurt=(9, 40.0)), _lines(Hurt=(70, 20.0)), _proj("Hurt", 30.0))
+    assert pool["Hurt"]["PTS"] == pytest.approx(0.65 * 30 + 0.35 * 20)
+    assert pool["Hurt"]["basis"] == "prior_season"
+    without = _blend(_lines(Hurt=(9, 40.0)), _lines(Hurt=(70, 20.0)))["Hurt"]
+    assert without["PTS"] == pytest.approx(20.0)
+
+
+def test_small_samples_with_a_projection_use_the_projection():
+    pool = _blend(_lines(Young=(20, 30.0)), _lines(Young=(10, 30.0)), _proj("Young", 12.0))
+    assert pool["Young"]["PTS"] == pytest.approx(12.0)
+    assert pool["Young"]["basis"] == "projection" and pool["Young"]["projected"] is True
+
+
+def test_small_samples_without_a_projection_are_pooled_or_left_out():
+    pool = _blend(_lines(Pooled=(20, 10.0), Tiny=(10, 30.0)),
+                  _lines(Pooled=(15, 24.0), Tiny=(5, 30.0)))
+    assert pool["Pooled"]["PTS"] == pytest.approx((20 * 10 + 15 * 24) / 35)
+    assert pool["Pooled"]["basis"] == "pooled"
+    assert "Tiny" not in pool
+
+
+def test_a_rookie_comes_from_his_projection():
+    pool = _blend(_lines(Vet=(70, 20.0)), {}, _proj("Rookie", 18.0, gp=72.0))
+    assert pool["Rookie"]["PTS"] == 18.0 and pool["Rookie"]["GP"] == 72.0
+    assert pool["Rookie"]["basis"] == "projection"
+
+
+def test_a_projection_is_matched_to_history_by_name_when_ids_differ():
+    pool = player_pool.blend_sources(_lines(**{"Kelly Oubre Jr.": (70, 20.0)}), {},
+                                     {999: _projection("Kelly Oubre", pts=10.0)})
+    assert len(pool) == 1
+    assert pool[0]["PTS"] == pytest.approx(0.6 * 20 + 0.4 * 10)
+
+
+def test_projected_games_weigh_last_season_projection_and_the_season_before():
+    pool = _blend(_lines(Vet=(60, 20.0)), _lines(Vet=(40, 20.0)), _proj("Vet", 20.0, gp=70.0))
+    assert pool["Vet"]["GP"] == pytest.approx(0.5 * 60 + 0.35 * 70 + 0.15 * 40)
+    assert pool["Vet"]["GP_history"] == {"last": 60, "projection": 70.0, "prior": 40}
+
+
+def test_a_short_season_is_ignored_for_stats_but_still_lowers_projected_games():
+    pool = _blend(_lines(Hurt=(10, 40.0)), _lines(Hurt=(70, 20.0)))
+    assert pool["Hurt"]["PTS"] == pytest.approx(20.0)
+    assert pool["Hurt"]["GP"] == pytest.approx((0.5 * 10 + 0.15 * 70) / 0.65, abs=0.05)
+
+
+def test_a_missed_season_counts_as_zero_games_but_seasons_before_a_debut_dont():
+    pool = _blend(_lines(Vet=(70, 20.0), Soph=(50, 20.0)), {**_lines(Vet=(70, 20.0)),
+                  9: {**_line(60, 20.0), "name": "Sat Out"}})
+    assert pool["Sat Out"]["GP"] == pytest.approx(0.15 * 60 / 0.65, abs=0.05)
+    assert pool["Soph"]["GP"] == pytest.approx(50)
+
+
+def test_the_pool_build_blends_projections_into_veterans(monkeypatch, tmp_path):
+    lines = _season_lines(_veterans(10))
+    vet = next(iter(lines.values()))
+    monkeypatch.setattr(player_pool, "_store", lambda: player_pool.LocalDatasetStore(tmp_path))
+    monkeypatch.setattr(player_pool, "_fetch_season", lambda season: lines)
+    monkeypatch.setattr(player_pool, "_fetch_projections",
+                        lambda season: {777: _projection(vet["name"], pts=99.0)})
+    built = {p["name"]: p for p in player_pool.build_player_pool()}
+    assert built[vet["name"]]["PTS"] == pytest.approx(0.65 * vet["PTS"] + 0.35 * 99.0, abs=1e-3)
+
+
+# --- health: projected games scale a player's value -------------------------------
+
+def test_a_half_season_player_is_worth_about_seventy_percent_of_a_full_one():
+    ranker = DraftRanker(_veterans())
+    best = max(ranker.players, key=lambda p: sum(p["z"].values()))
+    weights = {c: 1.0 for c in CATEGORIES}
+    full = ranker._fit({**best, "GP": 82}, weights)
+    half = ranker._fit({**best, "GP": 41}, weights)
+    assert half == pytest.approx(full * 0.5 ** 0.5)
+
+
+def test_auction_prices_count_projected_games():
+    players = _veterans()
+    twin = {**players[0], "name": "Fragile Twin", "nba_id": 99999, "GP": 20}
+    healthy = {**players[0], "GP": 82}
+    ranker = DraftRanker([healthy, twin] + players[1:])
+    prices = ranker.auction_values(budget=200 * 12)
+    assert prices[healthy["name"]] > prices.get("Fragile Twin", 1)
+
+
+def test_recommendations_say_where_the_numbers_come_from():
+    pool = [{**p, "basis": "two_seasons"} for p in _veterans()]
+    rec = DraftRanker(pool).rank(limit=1)[0]
+    assert rec["basis"] == "two_seasons" and rec["projected_games"] == rec["games_played"]

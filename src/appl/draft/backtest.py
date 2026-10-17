@@ -21,12 +21,12 @@ from statistics import mean
 from typing import Callable
 
 from ..ingest.season import previous_season
-from .player_pool import add_projections, blend_seasons
+from .player_pool import blend_seasons, blend_sources
 from .ranker import DraftRanker
 
 logger = logging.getLogger(__name__)
 
-# Same weights the live pool uses today (draft/player_pool.py SOURCE_SEASONS)
+# The old history-only blend (draft/player_pool.py SOURCE_SEASONS)
 BASELINE_WEIGHTS = [0.7, 0.3]
 HISTORY_SEASONS = 4
 MIN_ACTUAL_GAMES = 30  # only judge players who played enough for the target to mean something
@@ -42,8 +42,9 @@ def baseline_model(history: list[dict], projections: dict[int, dict]) -> list[di
 
 
 def projections_model(history: list[dict], projections: dict[int, dict]) -> list[dict]:
-    """The pool as it is built today: the baseline plus projected players it lacks."""
-    return add_projections(baseline_model(history, projections), projections)
+    """The pool as it is built today: last season, the projection and the season before,
+    weighted per history case (player_pool.CASE_WEIGHTS)."""
+    return blend_sources(history[0], history[1], projections)
 
 
 MODELS: dict[str, Model] = {"baseline": baseline_model, "projections": projections_model}
@@ -114,6 +115,9 @@ def evaluate(predicted: list[dict], actual: list[dict], *, top_n: int = TOP_N,
         "missing_from_top_n": len(missing),
         "missing_names": missing,
         "stat_mae": stat_mae,
+        # How far off the projected games were (the health factor's input)
+        "games_mae": round(mean(abs(pred[k][1]["GP"] - act[k][1]["GP"]) for k in both), 1)
+        if both else 0.0,
     }
 
 
@@ -153,10 +157,10 @@ def run_backtest(target: str, fetch: Callable[[str], dict[int, dict]],
 
 def format_report(target: str, results: dict[str, dict]) -> str:
     lines = [f"Backtest {target}  (top {next(iter(results.values()))['top_n']} by actual value)",
-             f"{'model':<14}{'spearman':>10}{'top-N overlap':>15}{'missing':>9}"]
+             f"{'model':<14}{'spearman':>10}{'top-N overlap':>15}{'missing':>9}{'games MAE':>11}"]
     for name, r in results.items():
         lines.append(f"{name:<14}{r['spearman']:>10.3f}{r['top_n_overlap']:>15.1%}"
-                     f"{r['missing_from_top_n']:>9}")
+                     f"{r['missing_from_top_n']:>9}{r['games_mae']:>11.1f}")
     for name, r in results.items():
         if r["missing_names"]:
             lines.append(f"\n{name}: top players with no projection: "

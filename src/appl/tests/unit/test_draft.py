@@ -404,6 +404,22 @@ def test_my_price_follows_my_punts_while_the_market_does_not(ranker):
     assert punting["mine"][worst_ft["name"]] >= plain["mine"][worst_ft["name"]]
 
 
+def test_with_no_punts_or_roster_my_price_is_the_market_price(ranker):
+    # Both sides must discount missed games the same way, or injured players look
+    # "overpriced" to every build for reasons that have nothing to do with fit
+    plan = _plan(ranker)
+    assert plan["mine"] == plan["market"]
+
+
+def test_market_price_discounts_missed_games(pool):
+    healthy = dict(_player("Healthy Star", True, 5000, gp=82),
+                   PTS=32, REB=13, AST=8, STL=1.8, BLK=2.5, FG3M=2, TOV=2)
+    hurt = dict(healthy, name="Hurt Star", nba_id=5001, GP=41)
+    ranker = DraftRanker(pool + [healthy, hurt], num_teams=12, roster_size=13)
+    market = _plan(ranker)["market"]
+    assert market["Hurt Star"] < market["Healthy Star"]
+
+
 def test_prices_rise_when_stars_sell_below_value(ranker):
     stars = [r["name"] for r in ranker.rank(limit=3)]
     after = _plan(ranker, taken_names=stars, league_budget_left=2400 - 3, league_spots_left=153)

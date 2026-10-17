@@ -11,7 +11,7 @@ Decisions made with the user:
 - **Interface:** a live draft page that polls Yahoo, not a chat feature.
 - **Punts:** the manager ticks categories to punt; the assistant also suggests punts from the roster so far.
 - **Ranking:** 9-category z-scores with punted categories removed, plus a boost for categories the roster is weak in.
-- **Stats:** 2025-26 weighted 70% and 2024-25 weighted 30%, because the draft is before the 2026-27 season.
+- **Stats:** 2025-26 weighted 70% and 2024-25 weighted 30%, because the draft is before the 2026-27 season. (Since replaced by per-case weights over last season, ESPN's projection and the season before, plus a health factor; see `PLAYER_PROJECTIONS.md`.)
 - **Yahoo data:** preseason rank and ADP shown as context, not blended into the score.
 - **Scope:** snake turn tracking, auction bid values, mock mode and a dashboard link.
 

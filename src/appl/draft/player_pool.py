@@ -1,6 +1,7 @@
 """
-Draft player pool: blended per-game averages from the last two NBA seasons, plus ESPN
-fantasy projections for players those seasons don't cover (rookies, a lost season).
+Draft player pool: per-game lines blended from last season, ESPN's fantasy projection for
+the coming season and the season before, in that order of trust (see CASE_WEIGHTS), plus
+the games each player is expected to play.
 
 Per-game stats come from ESPN's public stats feed (a few paged requests for
 all players), falling back to nba_api if ESPN fails. stats.nba.com blocks some
@@ -33,10 +34,26 @@ POOL_DIR = Path(__file__).resolve().parent.parent / "data" / "draft"
 
 # The season being drafted / played; rolls over every July
 DRAFT_SEASON = current_season()
-# (season, weight) - most recent season counts most
-SOURCE_SEASONS = [(previous_season(DRAFT_SEASON, 1), 0.7), (previous_season(DRAFT_SEASON, 2), 0.3)]
-# A season's weight is scaled down when it has fewer games than this
+LAST_SEASON = previous_season(DRAFT_SEASON, 1)
+PRIOR_SEASON = previous_season(DRAFT_SEASON, 2)
+# (season, weight) of the old history-only blend, kept as the backtest baseline
+SOURCE_SEASONS = [(LAST_SEASON, 0.7), (PRIOR_SEASON, 0.3)]
+# A season's weight is scaled down when it has fewer games than this (old blend)
 FULL_SAMPLE_GAMES = 50
+
+# A season with fewer games is too small a sample to use for per-game stats
+MIN_SAMPLE_GAMES = 30
+MAX_GAMES = 82
+# Weights of (last season, ESPN projection, the season before) per history case. A
+# source the player lacks is dropped and the rest are rescaled to sum to 1.
+CASE_WEIGHTS = {
+    "two_seasons": (0.50, 0.35, 0.15),   # both seasons have a real sample
+    "last_season": (0.60, 0.40, 0.0),    # only last season does (sophomores, short years)
+    "prior_season": (0.0, 0.65, 0.35),   # only the season before (hurt or away last year)
+    "projection": (0.0, 1.0, 0.0),       # neither (rookies, small samples)
+}
+# Same order for projected games; every season counts here, even a short one
+GAMES_WEIGHTS = (0.50, 0.35, 0.15)
 
 _SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
 
@@ -70,7 +87,8 @@ def _fetch_season_nba_api(season: str) -> dict[int, dict]:
 
 
 def blend_seasons(seasons: list[tuple[dict[int, dict], float]]) -> list[dict]:
-    """Blend per-game stats across seasons, weighting each season by its
+    """The old history-only blend, kept as the backtest baseline (the pool now uses
+    blend_sources). Blends per-game stats across seasons, weighting each season by its
     configured weight and by how many games the player actually played.
 
     Games played (the durability factor) blend with the plain season weights, from
@@ -132,6 +150,87 @@ def add_projections(pool: list[dict], projections: dict[int, dict]) -> list[dict
     return pool + added
 
 
+def _weighted(values: list[tuple[float | None, float]]) -> float | None:
+    """Weighted mean over the values that exist, weights rescaled to sum to 1."""
+    present = [(v, w) for v, w in values if v is not None and w]
+    total = sum(w for _, w in present)
+    return sum(v * w for v, w in present) / total if total else None
+
+
+def blend_player(pid: int, last: dict | None, prior: dict | None,
+                 projection: dict | None) -> dict | None:
+    """One pool row from a player's last season, the season before and ESPN's
+    projection (any may be None). Stats only use seasons with MIN_SAMPLE_GAMES; games
+    use everything. None when there is nothing usable to rank him on."""
+    last, prior, projection = (line if line and line["GP"] > 0 else None
+                               for line in (last, prior, projection))
+    usable = [line is not None and line["GP"] >= MIN_SAMPLE_GAMES for line in (last, prior)]
+    basis = ("two_seasons" if all(usable) else "last_season" if usable[0]
+             else "prior_season" if usable[1] else "projection")
+    sources = [(line, w) for line, w in zip((last, projection, prior), CASE_WEIGHTS[basis])
+               if line is not None and w]
+    if not sources:
+        # Small samples and no projection: pool the seasons if together they're enough
+        short = [line for line in (last, prior) if line]
+        if sum(line["GP"] for line in short) < MIN_SAMPLE_GAMES:
+            return None
+        basis, sources = "pooled", [(line, line["GP"]) for line in short]
+
+    # A season missed after his debut counts as 0 games; seasons before it don't count
+    last_games = last["GP"] if last else (0 if prior else None)
+    games = _weighted(list(zip(
+        (last_games, projection and projection["GP"], prior and prior["GP"]), GAMES_WEIGHTS)))
+    newest = last or prior or projection
+    row = {
+        "nba_id": pid,
+        "name": newest["name"],
+        "team": newest.get("team"),
+        "pos": next((line.get("pos") for line in (last, prior, projection)
+                     if line and line.get("pos")), None),
+        "GP": round(min(games, MAX_GAMES), 1),
+        "GP_history": {"last": last_games, "projection": projection and projection["GP"],
+                       "prior": prior and prior["GP"]},
+        "basis": basis,
+    }
+    for field in STAT_FIELDS:
+        row[field] = round(_weighted([(line[field], w) for line, w in sources]), 3)
+    if basis == "projection":
+        row["projected"] = True
+    return row
+
+
+def blend_sources(last: dict[int, dict], prior: dict[int, dict],
+                  projections: dict[int, dict] | None = None) -> list[dict]:
+    """The draft pool from {id: per-game line} for last season, the season before and
+    ESPN's projections for the coming one. Projections are matched to history by id,
+    then by name (ESPN and NBA ids can differ)."""
+    projections = projections or {}
+    projection_by_name = {normalize_name(line["name"]): pid for pid, line in projections.items()}
+    pool, matched, names = [], set(), set()
+    for pid in last.keys() | prior.keys():
+        name = normalize_name((last.get(pid) or prior[pid])["name"])
+        names.add(name)
+        proj_id = pid if pid in projections else projection_by_name.get(name)
+        matched.add(proj_id)
+        row = blend_player(pid, last.get(pid), prior.get(pid), projections.get(proj_id))
+        if row:
+            pool.append(row)
+
+    rookies = 0
+    for pid, line in projections.items():
+        name = normalize_name(line["name"])
+        if pid in matched or name in names:
+            continue
+        names.add(name)
+        row = blend_player(pid, None, None, line)
+        if row:
+            pool.append(row)
+            rookies += 1
+    if rookies:
+        logger.info(f"Added {rookies} players from projections alone")
+    return pool
+
+
 def _fetch_projections(season: str) -> dict[int, dict]:
     return EspnSource().projections(season)
 
@@ -150,16 +249,16 @@ _preseason: dict[str, tuple[float, list[dict]]] = {}
 
 
 def build_player_pool() -> list[dict]:
-    """Fetch and blend the source seasons, and store the result (the ingest job's step)."""
-    logger.info(f"Building draft player pool from {SOURCE_SEASONS}")
-    pool = blend_seasons(
-        [(_fetch_season(season), weight) for season, weight in SOURCE_SEASONS]
-    )
+    """Fetch and blend the sources, and store the result (the ingest job's step)."""
+    logger.info(f"Building draft player pool from {LAST_SEASON}, {DRAFT_SEASON} projections "
+                f"and {PRIOR_SEASON}")
     try:
-        pool = add_projections(pool, _fetch_projections(DRAFT_SEASON))
+        projections = _fetch_projections(DRAFT_SEASON)
     except Exception as e:
         logger.warning(f"{DRAFT_SEASON}: ESPN projections unavailable ({e}); "
-                       "the pool has no rookies")
+                       "using history only, and the pool has no rookies")
+        projections = {}
+    pool = blend_sources(_fetch_season(LAST_SEASON), _fetch_season(PRIOR_SEASON), projections)
     _store().put(f"player_pool_{DRAFT_SEASON}", pool)
     _preseason[DRAFT_SEASON] = (time.monotonic(), pool)
     return pool
