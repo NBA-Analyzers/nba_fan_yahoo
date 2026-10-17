@@ -171,3 +171,72 @@ def test_manual_snapshot_has_a_calendar_week_and_no_live_stats(tmp_path):
     assert snap.week.live == {} and snap.week.number is None
     assert snap.week.start.weekday() == 0
     assert (snap.week.end - snap.week.start).days == 6
+
+
+# ---------- finished weeks (for the luck index) ----------
+def test_yahoo_snapshot_reads_each_finished_week_once():
+    calls = []
+
+    class Counting(MatchupLeague):
+        def matchups(self, week=None):
+            calls.append(week)
+            return super().matchups(week)
+
+    snapshots._yahoo_cache.clear()
+    snapshots._week_cache.clear()
+    snap = snapshots.from_yahoo(Counting(), "wk-h1", user="u")
+    calls.clear()  # building the snapshot reads this week's matchup; history waits until asked
+    weeks = snap.history()
+    assert [w.number for w in weeks] == [1, 2]  # week 3 is still being played
+    assert weeks[0].pairs == [(0, 1)] and weeks[0].lines == {0: {"PTS": 100.0, "REB": 40.0}, 1: {"PTS": 90.0}}
+    snap.history()
+    assert calls == [1, 2]  # finished weeks are kept
+
+
+def test_a_week_that_fails_is_skipped_and_tried_again():
+    attempts = {"n": 0}
+
+    def read(number):
+        attempts["n"] += 1
+        if number == 1 and attempts["n"] == 1:
+            raise RuntimeError("timeout")
+        return snapshots.PastWeek(number, {0: {"PTS": 1.0}, 1: {"PTS": 2.0}}, [(0, 1)])
+
+    snapshots._week_cache.clear()
+    load = snapshots.past_weeks("k", 3, read)
+    assert [w.number for w in load()] == [2]
+    assert [w.number for w in load()] == [1, 2]
+
+
+def test_no_history_before_the_first_week_is_over():
+    snapshots._week_cache.clear()
+    assert snapshots.past_weeks("k", 1, lambda n: None)() == []
+    assert snapshots.past_weeks("k", None, lambda n: None)() == []
+
+
+def test_espn_snapshot_reads_finished_weeks_and_skips_byes():
+    from appl.tests.unit.test_espn import SWID, rich_league
+
+    league = rich_league()
+    a, b = league.teams
+
+    def scoreboard(week):
+        return [NS(home_team=a, away_team=b, home_team_cats={"PTS": {"score": 300.0 + week}},
+                   away_team_cats={"PTS": {"score": 250.0}}),
+                NS(home_team=a, away_team=0, home_team_cats={}, away_team_cats={})]  # a bye
+
+    league.scoreboard = scoreboard
+    snapshots._espn_cache.clear()
+    snapshots._week_cache.clear()
+    snap = snapshots.from_espn(league, "wk-h2", swid=SWID, user="u1")
+    weeks = snap.history()
+    assert [w.number for w in weeks] == [1]  # the current period is 2
+    assert weeks[0].pairs == [(0, 1)] and weeks[0].lines == {0: {"PTS": 301.0}, 1: {"PTS": 250.0}}
+
+
+def test_manual_snapshots_have_no_history(tmp_path):
+    from appl.draft.manual_league import ManualLeagueStore
+
+    store = ManualLeagueStore(tmp_path)
+    league = store.create("u", {"name": "Friends", "num_teams": 4, "roster_size": 3, "my_slot": 1})
+    assert snapshots.from_manual(store.get("u", league["id"])).history is None

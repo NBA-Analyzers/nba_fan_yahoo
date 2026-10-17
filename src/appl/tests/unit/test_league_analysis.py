@@ -291,7 +291,97 @@ def test_playoff_weeks_already_played_are_left_out():
     assert [w["start"] for w in weeks] == ["2027-03-29", "2027-04-05"]
 
 
+# ---------- the luck index ----------
+def line(strength):
+    """A week's raw stats, every counting category `strength` times a base, shooting fixed."""
+    base = {"PTS": 400, "REB": 150, "AST": 90, "STL": 25, "BLK": 15, "FG3M": 40}
+    out = {k: v * strength for k, v in base.items()}
+    out.update(FGM=150, FGA=320, FTM=60, FTA=80, TOV=50)
+    return out
+
+
+def h2h(weeks, teams=4):
+    """A head-to-head league whose finished weeks are `weeks`: [(pairs, {team: strength})]."""
+    a = build(teams=teams, size=6)
+    a.h2h, a.scoring = True, "h2h"
+    past = [snapshots.PastWeek(n, {t: line(s) for t, s in strengths.items()}, pairs)
+            for n, (pairs, strengths) in enumerate(weeks, 1)]
+    a.snapshot.history = lambda: past
+    return a
+
+
+def by_team(luck):
+    return {r["index"]: r for r in luck["teams"]}
+
+
+def test_the_second_best_team_losing_to_the_best_every_week_is_unlucky():
+    # Team 0 is second best but always plays team 3, the best; team 1 is worst and plays team 2
+    strengths = {0: 3, 1: 1, 2: 2, 3: 4}
+    a = h2h([([(0, 3), (1, 2)], strengths)] * 3)
+    luck = LeagueAnalysis(a, None).luck()
+    assert luck["available"] is True and luck["weeks"] == 3
+    me, worst = by_team(luck)[0], by_team(luck)[1]
+    assert me["record"] == {"wins": 0, "losses": 3, "ties": 0}
+    assert me["all_play"] == {"wins": 6, "losses": 3, "ties": 0}  # beats two of three every week
+    assert me["expected_wins"] == 2.0 and me["luck"] == -2.0 and me["label"] == "unlucky"
+    assert worst["luck"] == 0.0 and worst["label"] == "fair"
+    assert by_team(luck)[2]["luck"] == pytest.approx(2.0)  # the third best beat the worst every week
+    assert luck["teams"][0]["luck"] >= luck["teams"][-1]["luck"]
+
+
+def test_your_weeks_show_the_result_and_how_many_teams_you_would_have_beaten():
+    a = h2h([([(0, 3), (1, 2)], {0: 3, 1: 1, 2: 2, 3: 4}), ([(0, 1), (2, 3)], {0: 3, 1: 1, 2: 2, 3: 4})])
+    weeks = LeagueAnalysis(a, None).luck()["my_weeks"]
+    assert [(w["week"], w["opponent"], w["result"]) for w in weeks] == [(1, "T3", "loss"), (2, "T1", "win")]
+    assert weeks[0]["would_beat"] == 2 and weeks[0]["teams"] == 3
+    assert weeks[0]["categories"] == {"wins": 0, "losses": 6, "ties": 3}  # FG%, FT% and TO are level
+
+
+def test_a_tied_matchup_counts_half():
+    a = h2h([([(0, 1), (2, 3)], {0: 2, 1: 2, 2: 1, 3: 3})])
+    me = by_team(LeagueAnalysis(a, None).luck())[0]
+    assert me["record"] == {"wins": 0, "losses": 0, "ties": 1}
+    assert me["expected_wins"] == 0.5 and me["luck"] == 0.0  # ties 1, beats 2, loses to 3
+
+
+def test_categories_a_team_has_no_stats_for_are_not_counted():
+    a = h2h([([(0, 1), (2, 3)], {0: 3, 1: 1, 2: 2, 3: 4})])
+    week = a.snapshot.history()[0]
+    week.lines[1] = {"PTS": 999.0}  # only points reported for team 1
+    mine = LeagueAnalysis(a, None).luck()["my_weeks"][0]
+    assert mine["categories"] == {"wins": 1, "losses": 0, "ties": 0} and mine["result"] == "win"
+
+
+def test_teams_without_any_stats_that_week_are_left_out():
+    a = h2h([([(0, 1), (2, 3)], {0: 3, 1: 1, 2: 2})])  # team 3 never reported
+    luck = LeagueAnalysis(a, None).luck()
+    assert by_team(luck)[3]["record"] == {"wins": 0, "losses": 0, "ties": 0}
+    assert by_team(luck)[0]["all_play"] == {"wins": 2, "losses": 0, "ties": 0}
+
+
+def test_no_luck_index_for_roto_manual_or_before_a_week_is_over():
+    roto = build()
+    roto.snapshot.history = lambda: [snapshots.PastWeek(1, {0: line(1), 1: line(2)}, [(0, 1)])]
+    assert LeagueAnalysis(roto, None).luck()["available"] is False
+    assert "head-to-head" in LeagueAnalysis(roto, None).luck()["reason"]
+    manual = build()
+    manual.h2h = True
+    assert LeagueAnalysis(manual, None).luck()["available"] is False  # no history loader
+    early = h2h([])
+    assert "after the first week" in LeagueAnalysis(early, None).luck()["reason"]
+
+
+def test_a_history_that_fails_to_load_is_unavailable_not_an_error():
+    a = h2h([])
+
+    def broken():
+        raise RuntimeError("yahoo down")
+
+    a.snapshot.history = broken
+    assert LeagueAnalysis(a, None).luck()["available"] is False
+
+
 # ---------- the whole report ----------
 def test_the_report_has_every_section():
     report = LeagueAnalysis(build(), None).report()
-    assert set(report) == {"power_rankings", "buy_sell", "trade_ideas", "playoffs"}
+    assert set(report) == {"power_rankings", "buy_sell", "trade_ideas", "playoffs", "luck"}

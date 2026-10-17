@@ -6,7 +6,7 @@ import pytest
 
 from appl.tests.unit.test_matchup_routes import make_client
 
-SECTIONS = {"power_rankings", "buy_sell", "trade_ideas", "playoffs",
+SECTIONS = {"power_rankings", "buy_sell", "trade_ideas", "playoffs", "luck",
             "league_name", "scoring", "my_team", "teams", "categories", "punts", "warnings"}
 
 
@@ -21,6 +21,7 @@ def test_the_page_renders_with_its_tab_selected(client):
     assert response.status_code == 200
     assert f'href="/season/manual/{client.id}/analysis" class="active"' in html
     assert 'id="panel_trade"' in html and 'id="panel_power"' in html and 'id="panel_playoffs"' in html
+    assert 'id="luck"' in html
 
 
 def test_every_league_page_links_to_the_analysis(client):
@@ -45,6 +46,7 @@ def test_the_report_has_every_section(client):
     assert set(data) == SECTIONS
     assert len(data["power_rankings"]) == 4 and data["my_team"]["index"] == 0
     assert data["buy_sell"]["available"] is False  # the fake datasets have no recent form
+    assert data["luck"]["available"] is False  # manual leagues have no weekly results
 
 
 def test_the_report_honors_punts(client):

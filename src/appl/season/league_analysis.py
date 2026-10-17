@@ -13,15 +13,22 @@ The whole league, for trades and the long run. Pure, no I/O.
                      deal looks fair on recent form and helps you on season form
   playoff_schedule - games per player in the fantasy playoff weeks, taken to be the last
                      full Monday-to-Sunday weeks of the NBA regular season
+  luck             - head-to-head only: each finished week, every team's stats against
+                     every other team's (all-play). The share it would have beaten is its
+                     expected win that week; luck is actual wins minus expected wins
 """
 
+import logging
 from datetime import date, timedelta
 from statistics import mean, median
 
 from ..draft.player_pool import normalize_name
 from ..draft.ranker import PERCENT_STATS
-from .analyzer import EPS, FAIR_MARGIN, FREE_AGENT_POOL, _ranks
+from .analyzer import EPS, FAIR_MARGIN, FREE_AGENT_POOL, _better, _ranks, category_value
+from .matchup_planner import _needed, _tuple
 from .schedule import team_code
+
+logger = logging.getLogger(__name__)
 
 WINDOWS = (("last_14_days", "last 14 days"), ("last_30_days", "last 30 days"))
 MIN_RECENT_GAMES = 4  # fewer games than this in a window is noise
@@ -35,6 +42,8 @@ MAX_ROWS = 8
 MAX_TRADE_IDEAS = 5
 MOVED_CATEGORIES = 3
 PLAYOFF_WEEKS = 3
+LUCKY = 1.0  # wins above (or below) expected that make a team lucky (or unlucky)
+_TALLY = {"win": "wins", "loss": "losses", "tie": "ties"}
 MAX_PLAYOFF_FREE_AGENTS = 8
 
 _COUNTING_KEYS = {"PTS": "pts", "REB": "reb", "AST": "ast", "STL": "stl", "BLK": "blk",
@@ -355,10 +364,101 @@ class LeagueAnalysis:
             "assumption": f"Playoffs taken to be the last {PLAYOFF_WEEKS} full weeks of the NBA regular season.",
         }
 
+    # --- the luck index -------------------------------------------------------
+
+    @staticmethod
+    def _duel(categories: list[str], mine: dict, theirs: dict) -> tuple[int, int, int]:
+        """Categories won, lost and tied by `mine` against `theirs` in one week, over the
+        categories both teams have stats for."""
+        a, b = _tuple(mine), _tuple(theirs)
+        won = lost = tied = 0
+        for c in categories:
+            if not all(s in mine and s in theirs for s in _needed(c)):
+                continue
+            x, y = category_value(a, c), category_value(b, c)
+            if _better(c, x, y):
+                won += 1
+            elif _better(c, y, x):
+                lost += 1
+            else:
+                tied += 1
+        return won, lost, tied
+
+    @staticmethod
+    def _outcome(won: int, lost: int) -> str:
+        return "win" if won > lost else "loss" if lost > won else "tie"
+
+    def luck(self) -> dict:
+        a = self.a
+        loader = getattr(a.snapshot, "history", None)
+        if not a.h2h:
+            return {"available": False, "reason": "The luck index is for head-to-head leagues."}
+        if loader is None:
+            return {"available": False, "reason": "Weekly results come from Yahoo or ESPN, so there are none for this league."}
+        try:
+            weeks = loader()
+        except Exception as e:
+            logger.warning(f"{a.snapshot.key}: weekly results unavailable: {e}")
+            return {"available": False, "reason": "Couldn't read the weekly results, please try again later."}
+        weeks = [w for w in weeks if w.pairs]
+        if not weeks:
+            return {"available": False, "reason": "The luck index starts after the first week is over."}
+
+        cats = a.categories  # every category counts in a real matchup, whatever you punt
+        empty = {"wins": 0, "losses": 0, "ties": 0}
+        teams = [{"record": dict(empty), "all_play": dict(empty), "expected": 0.0, "weeks": 0} for _ in range(self.n)]
+        mine = []
+        for week in weeks:
+            played = {t for t, line in week.lines.items() if line and 0 <= t < self.n}
+            outcomes = {}  # (team, other) -> (won, lost, tied)
+            for t in played:
+                for o in played - {t}:
+                    outcomes[(t, o)] = self._duel(cats, week.lines[t], week.lines[o])
+            for t in played:
+                rivals = [self._outcome(*outcomes[(t, o)][:2]) for o in played - {t}]
+                if not rivals:
+                    continue
+                for r in rivals:
+                    teams[t]["all_play"][_TALLY[r]] += 1
+                teams[t]["expected"] += (rivals.count("win") + 0.5 * rivals.count("tie")) / len(rivals)
+                teams[t]["weeks"] += 1
+            for x, y in week.pairs:
+                if x not in played or y not in played:
+                    continue
+                for t, o in ((x, y), (y, x)):
+                    won, lost, tied = outcomes[(t, o)]
+                    result = self._outcome(won, lost)
+                    teams[t]["record"][_TALLY[result]] += 1
+                    if t == a.me:
+                        beaten = sum(self._outcome(*outcomes[(t, r)][:2]) == "win" for r in played - {t})
+                        mine.append({"week": week.number, "opponent": a._team_name(o), "result": result,
+                                     "categories": {"wins": won, "losses": lost, "ties": tied},
+                                     "would_beat": beaten, "teams": len(played) - 1})
+
+        rows = []
+        for t, team in enumerate(teams):
+            record = team["record"]
+            actual = record["wins"] + 0.5 * record["ties"]
+            luck = round(actual - team["expected"], 2)
+            rows.append({
+                "index": t,
+                "name": a._team_name(t),
+                "is_mine": t == a.me,
+                "record": record,
+                "all_play": team["all_play"],
+                "expected_wins": round(team["expected"], 2),
+                "luck": luck,
+                "label": "lucky" if luck >= LUCKY else "unlucky" if luck <= -LUCKY else "fair",
+            })
+        rows.sort(key=lambda r: r["luck"], reverse=True)
+        return {"available": True, "weeks": len(weeks), "teams": rows,
+                "my_weeks": sorted(mine, key=lambda w: w["week"])}
+
     def report(self) -> dict:
         return {
             "power_rankings": self.power_rankings(),
             "buy_sell": self.buy_sell(),
             "trade_ideas": self.trade_ideas(),
             "playoffs": self.playoff_schedule(),
+            "luck": self.luck(),
         }

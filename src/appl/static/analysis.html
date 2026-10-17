@@ -129,6 +129,19 @@
       <div class="hint">From season numbers with injured players discounted. Every category counts here, since you can't see rivals' punts. Form compares a roster's last two weeks with its season.</div>
     </section>
     <section class="card table-card">
+      <h2>Luck index <small>actual wins against the wins your stats earned against every team, each week</small></h2>
+      <div class="hint" id="luck_none"></div>
+      <div id="luck_body">
+        <table>
+          <thead><tr><th>Team</th><th class="c">Record</th><th class="c">All-play</th><th class="c">Expected wins</th><th class="c">Luck</th><th></th></tr></thead>
+          <tbody id="luck"></tbody>
+        </table>
+        <div class="hint">All-play is the record if a team had played everyone each week. An unlucky strong team is a good trade partner: its manager may be ready to shake things up.</div>
+        <h2 style="margin-top:18px">Your weeks</h2>
+        <ul id="my_weeks"></ul>
+      </div>
+    </section>
+    <section class="card table-card">
       <h2>Category ranks <small>1 is best in the league</small></h2>
       <table>
         <thead id="ranks_head"></thead>
@@ -342,6 +355,37 @@ function renderPower(d) {
   });
 }
 
+// --- luck -----------------------------------------------------------------------
+
+const wlt = (r) => `${r.wins}-${r.losses}${r.ties ? "-" + r.ties : ""}`;
+
+function renderLuck(d) {
+  const l = d.luck;
+  $("luck_none").textContent = l.available ? "" : l.reason;
+  $("luck_none").style.display = l.available ? "none" : "block";
+  $("luck_body").style.display = l.available ? "" : "none";
+  if (!l.available) return;
+  const body = $("luck");
+  body.textContent = "";
+  l.teams.forEach((t) => {
+    const tr = el("tr", undefined, t.is_mine ? "mine" : "");
+    const tag = el("td");
+    if (t.label !== "fair") tag.append(el("span", t.label, "chip " + (t.label === "lucky" ? "good" : "bad")));
+    tr.append(el("td", t.name), el("td", wlt(t.record), "c"), el("td", wlt(t.all_play), "c"),
+      el("td", String(t.expected_wins), "c"), el("td", signed(t.luck), "c"), tag);
+    body.append(tr);
+  });
+  const weeks = $("my_weeks");
+  weeks.textContent = "";
+  l.my_weeks.forEach((w) => {
+    const li = el("li");
+    li.append(el("b", `Week ${w.week}: `), `${w.result} against ${w.opponent}, ${wlt(w.categories)}. `,
+      el("span", `Your stats would have beaten ${w.would_beat} of ${w.teams} teams.`, "meta"));
+    weeks.append(li);
+  });
+  if (!l.my_weeks.length) weeks.append(el("li", "No finished matchups for you yet.", "empty"));
+}
+
 // --- playoffs -------------------------------------------------------------------
 
 function renderPlayoffs(d) {
@@ -391,6 +435,7 @@ function render(d) {
   renderPunts(d.categories);
   renderTrade(d);
   renderPower(d);
+  renderLuck(d);
   renderPlayoffs(d);
   const warn = d.warnings || [];
   $("warn").textContent = warn.join(" ");

@@ -7,6 +7,7 @@ Yahoo and ESPN leagues are read live (the platform is the source of truth), cach
 
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from datetime import date, timedelta
 
@@ -21,6 +22,8 @@ YAHOO_CACHE_SECONDS = 15 * 60
 # (league_id, user) -> snapshot. Per user: `my_team` depends on who is looking.
 _yahoo_cache: dict[tuple[str, str | None], tuple[float, "LeagueSnapshot"]] = {}
 _espn_cache: dict[tuple[str, str | None], tuple[float, "LeagueSnapshot"]] = {}
+# (snapshot key, week number) -> a finished week's results. Finished weeks don't change.
+_week_cache: dict[tuple[str, int], "PastWeek"] = {}
 
 
 @dataclass
@@ -32,6 +35,15 @@ class MatchWeek:
     start: date
     end: date
     live: dict[int, dict[str, float]] = field(default_factory=dict)
+
+
+@dataclass
+class PastWeek:
+    """A finished head-to-head week: each team's raw stats (as in `MatchWeek.live`) and
+    who played whom, as pairs of team indexes."""
+    number: int
+    lines: dict[int, dict[str, float]]
+    pairs: list[tuple[int, int]]
 
 
 def week_around(day: date) -> MatchWeek:
@@ -101,6 +113,9 @@ class LeagueSnapshot:
     scoring: str = "roto"  # "roto", "h2h" (head-to-head categories) or "points" (not analyzable)
     week: MatchWeek | None = None  # this week's dates and live scores, when the platform says
     warnings: list[str] = field(default_factory=list)  # things the analysis can't honor, for the user
+    # Reads the finished weeks from the platform on first use: it costs a call per week,
+    # and only the league analysis needs it. None when there are none to read (manual).
+    history: Callable[[], list[PastWeek]] | None = field(default=None, repr=False, compare=False)
 
     @property
     def num_teams(self) -> int:
@@ -123,6 +138,56 @@ class LeagueSnapshot:
             if normalize_name(name) not in known:
                 merged[name] = level
         return replace(self, injuries=merged)
+
+
+def past_weeks(key: str, current: int | None, read_week) -> Callable[[], list[PastWeek]]:
+    """A loader for weeks 1 to `current - 1`. `read_week(number)` returns a PastWeek or
+    None; a week that fails is left out and tried again next time, one that worked is
+    kept for good."""
+    def load() -> list[PastWeek]:
+        weeks = []
+        for number in range(1, int(current or 1)):
+            cached = _week_cache.get((key, number))
+            if cached is None:
+                try:
+                    cached = read_week(number)
+                except Exception as e:
+                    logger.info(f"{key}: week {number} results unavailable: {e}")
+                if cached is None:
+                    continue
+                _week_cache[(key, number)] = cached
+            weeks.append(cached)
+        return weeks
+
+    return load
+
+
+def _yahoo_past_week(league, keys: list, number: int) -> PastWeek | None:
+    from ..fantasy_integrations.yahoo.sync_league.sync_yahoo_league import parse_matchups
+
+    raw = league.matchups(number)
+    scoreboard = raw["fantasy_content"]["league"][1]["scoreboard"]["0"]["matchups"]
+    lines, pairs = {}, []
+    for m in parse_matchups(scoreboard):
+        a, b = m["team_1"]["team_key"], m["team_2"]["team_key"]
+        if a not in keys or b not in keys:
+            continue
+        pairs.append((keys.index(a), keys.index(b)))
+        for side in ("team_1", "team_2"):
+            lines[keys.index(m[side]["team_key"])] = yahoo_live_line(m[side].get("stats"))
+    return PastWeek(number, lines, pairs) if pairs else None
+
+
+def _espn_past_week(league, teams: list, number: int) -> PastWeek | None:
+    lines, pairs = {}, []
+    for m in league.scoreboard(number):
+        if m.home_team not in teams or m.away_team not in teams:  # a bye
+            continue
+        pairs.append((teams.index(m.home_team), teams.index(m.away_team)))
+        for team, cats in ((m.home_team, getattr(m, "home_team_cats", None)),
+                           (m.away_team, getattr(m, "away_team_cats", None))):
+            lines[teams.index(team)] = espn_live_line(cats)
+    return PastWeek(number, lines, pairs) if pairs else None
 
 
 def scoring_from_text(text) -> str:
@@ -258,6 +323,11 @@ def from_yahoo(league, league_id: str, user: str | None = None,
         logger.info(f"League {league_id}: roster slots unavailable: {e}")
         slots = {}
     opponent, week = _current_matchup(league, league_id, keys, my_key)
+    try:
+        current = league.current_week()
+    except Exception as e:
+        logger.info(f"League {league_id}: current week unknown: {e}")
+        current = None
     snapshot = LeagueSnapshot(
         key=f"yahoo:{league_id}",
         name=settings.get("name", league_id),
@@ -271,6 +341,7 @@ def from_yahoo(league, league_id: str, user: str | None = None,
         week=week,
         scoring=scoring,
         warnings=_scoring_warnings(scoring, unsupported_categories(stat_categories)),
+        history=past_weeks(f"yahoo:{league_id}", current, lambda n: _yahoo_past_week(league, keys, n)),
     )
     _yahoo_cache[cache_key] = (now(), snapshot)
     return snapshot
@@ -344,6 +415,8 @@ def from_espn(league, league_id: str, swid: str | None = None, user: str | None 
         week=week,
         scoring=scoring,
         warnings=_scoring_warnings(scoring, info.unsupported_categories(league)),
+        history=past_weeks(f"espn:{league_id}", getattr(league, "currentMatchupPeriod", None),
+                           lambda n: _espn_past_week(league, teams, n)),
     )
     _espn_cache[cache_key] = (now(), snapshot)
     return snapshot
