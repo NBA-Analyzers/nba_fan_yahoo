@@ -73,12 +73,21 @@ def _values(players: list[dict], category: str, league_pcts: dict) -> list[float
     return [p[made] - league_pcts[category] * p[attempts] for p in players]
 
 
-def _zscores(players: list[dict], baseline: list[dict], categories: list[str]):
+def _scales(baseline: list[dict], categories: list[str]) -> tuple[dict, dict]:
+    """League shooting percentages, and each category's (mean, spread) over `baseline`."""
     league_pcts = _league_pcts(baseline)
-    result = [{} for _ in players]
+    scales = {}
     for category in categories:
         base = _values(baseline, category, league_pcts)
-        mu, sigma = mean(base), pstdev(base) or 1.0
+        scales[category] = (mean(base), pstdev(base) or 1.0)
+    return league_pcts, scales
+
+
+def _zscores(players: list[dict], baseline: list[dict], categories: list[str], scales=None):
+    league_pcts, scales = scales or _scales(baseline, categories)
+    result = [{} for _ in players]
+    for category in categories:
+        mu, sigma = scales[category]
         for i, value in enumerate(_values(players, category, league_pcts)):
             z = (value - mu) / sigma
             result[i][category] = -z if category in NEGATIVE_CATEGORIES else z
@@ -107,7 +116,8 @@ class DraftRanker:
         )
         # Z-scores are measured against the players who will actually be drafted
         draftable = [p for p, _ in ranked[: num_teams * roster_size]] or eligible
-        zscores = _zscores(eligible, draftable, self.categories)
+        self._scales = _scales(draftable, self.categories)
+        zscores = _zscores(eligible, draftable, self.categories, self._scales)
 
         self.players = [
             {
@@ -127,6 +137,12 @@ class DraftRanker:
                 sorted(self.players, key=self._value, reverse=True)
             )
         }
+
+    def z_for(self, line: dict) -> dict[str, float]:
+        """Z-scores of any per-game line (say, a player's last two weeks) on the same scale
+        as the pool's season lines."""
+        z = _zscores([line], [], self.categories, self._scales)[0]
+        return {c: round(v, 2) for c, v in z.items()}
 
     def resolve_key(self, name: str) -> str | None:
         """Pool key for a Yahoo/NBA spelling: exact after normalizing, else a

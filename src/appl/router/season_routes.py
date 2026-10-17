@@ -12,9 +12,12 @@ from ..fantasy_integrations.espn.espn_service import EspnError, EspnService
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import get_yahoo_sdk
 from ..middleware.auth_decorators import require_login
 from ..identity.session import current_user_id
-from ..season import jev_advisor, report_writer, service, snapshot as snapshots
+from ..season import jev_advisor, player_status, report_writer, service, snapshot as snapshots
 from ..season.analyzer import SeasonAnalyzer
+from ..season.league_analysis import LeagueAnalysis
+from ..season.matchup_planner import MatchupPlanner
 from ..season.schedule import Schedule
+from ..season.team_profile import TeamProfile
 
 logger = logging.getLogger(__name__)
 
@@ -39,13 +42,14 @@ def _flag(name: str) -> bool:
 
 class SeasonRouter:
     def __init__(self, store: ManualLeagueStore | None = None, briefs=None, llm_factory=None, schedule=None,
-                 espn: EspnService | None = None, indexer=None):
+                 espn: EspnService | None = None, indexer=None, player_data=None):
         self._indexer = indexer  # re-indexes a manual league for the chat after its moves change
         self._store = store or default_store()
         self._espn = espn or EspnService(None)
         self._briefs = briefs or report_writer.BriefStore()
         self._llm_factory = llm_factory or LiteLLMClient.from_env
         self._schedule = schedule if schedule is not None else Schedule.load()
+        self._player_data = player_data or player_status.load  # the nightly injury and form feeds
         self._blueprint = self._create_blueprint()
 
     # --- building blocks ----------------------------------------------------
@@ -101,6 +105,65 @@ class SeasonRouter:
             return jsonify({**cached, "cached": True})
         text = report_writer.write_brief(self._llm_factory(), report, recommendation)
         return jsonify({**self._briefs.put(user, snap.key, digest, text), "cached": False})
+
+    # --- matchup prep -------------------------------------------------------
+
+    def _data(self):
+        try:
+            return self._player_data()
+        except Exception as e:
+            logger.warning(f"Player data unavailable for the matchup page: {e}")
+            return player_status.PlayerData.empty()
+
+    def _analyzer(self, snap):
+        """The analyzer for a league page, with the nightly datasets it reads."""
+        data = self._data()
+        if snap.key.startswith("manual:"):  # Yahoo and ESPN list every injured player themselves
+            snap = snap.with_injuries(data.injury_levels())
+        analyzer = SeasonAnalyzer(self._ranker(snap), snap, _punts(), schedule=self._schedule, opponent=_opponent())
+        return analyzer, data
+
+    @staticmethod
+    def _header(analyzer) -> dict:
+        snap = analyzer.snapshot
+        names = [n or f"Team {i + 1}" for i, n in enumerate(snap.team_names)]
+        return {
+            "league_name": snap.name,
+            "scoring": snap.scoring,
+            "my_team": {"index": analyzer.me, "name": names[analyzer.me]},
+            "teams": [{"index": i, "name": names[i], "is_mine": i == analyzer.me} for i in range(len(names))],
+            "categories": analyzer.categories,
+            "punts": analyzer.punts,
+        }
+
+    def _matchup_report(self, snap) -> dict:
+        analyzer, data = self._analyzer(snap)
+        return {
+            **self._header(analyzer),
+            **MatchupPlanner(analyzer).report(),
+            **TeamProfile(analyzer, data).report(),
+            "warnings": analyzer.warnings(),
+        }
+
+    def _analysis_report(self, snap) -> dict:
+        analyzer, data = self._analyzer(snap)
+        return {
+            **self._header(analyzer),
+            **LeagueAnalysis(analyzer, data).report(),
+            "warnings": analyzer.warnings(),
+        }
+
+    def _matchup_brief_response(self, user: str, snap):
+        report = self._matchup_report(snap)
+        if not report["available"]:
+            return jsonify({"error": "Pick this week's opponent first"}), 400
+        digest = report_writer.matchup_hash(report)
+        key = f"{snap.key}:matchup"
+        cached = self._briefs.get(user, key)
+        if cached and cached.get("hash") == digest and not _flag("refresh"):
+            return jsonify({**cached, "cached": True})
+        text = report_writer.write_matchup_brief(self._llm_factory(), report)
+        return jsonify({**self._briefs.put(user, key, digest, text), "cached": False})
 
     # --- routes -------------------------------------------------------------
 
@@ -221,7 +284,7 @@ class SeasonRouter:
         @bp.route("/yahoo/<league_id>")
         @require_login
         def yahoo_page(league_id):
-            return render_template("season.html", league_id=league_id, active_tab="season")
+            return render_template("season.html", league_id=league_id, active_tab="season", league_kind="yahoo")
 
         def yahoo(league_id, action):
             def run():
@@ -260,7 +323,7 @@ class SeasonRouter:
         def espn_page(league_id):
             if not self._espn.league_repo.league_exist_for_user(league_id, user()):
                 return redirect("/dashboard")
-            return render_template("season.html", league_id=league_id, active_tab="season")
+            return render_template("season.html", league_id=league_id, active_tab="season", league_kind="espn")
 
         @bp.route("/espn/<league_id>/report", methods=["GET", "POST"])
         @require_login
@@ -271,6 +334,60 @@ class SeasonRouter:
         @require_login
         def espn_brief(league_id):
             return espn(league_id, lambda snap: self._brief_response(user(), snap))
+
+        # --- matchup prep (the same page and data for every kind of league) ---
+
+        def with_snapshot(kind, league_id, action):
+            if kind == "manual":
+                return errors(lambda: action(snapshots.from_manual(manual_league(league_id))))
+            if kind == "yahoo":
+                return yahoo(league_id, action)
+            if kind == "espn":
+                return espn(league_id, action)
+            return jsonify({"error": "League not found"}), 404
+
+        def league_page(kind, league_id, template):
+            """A page shared by every kind of league, or a redirect when it isn't the user's."""
+            chat_id = league_id
+            if kind == "manual":
+                try:
+                    manual_league(league_id)
+                except KeyError:
+                    return redirect("/manual")
+                chat_id = service.manual_chat_id(league_id)
+            elif kind == "espn":
+                if not self._espn.league_repo.league_exist_for_user(league_id, user()):
+                    return redirect("/dashboard")
+            elif kind != "yahoo":
+                return redirect("/dashboard")
+            return render_template(template, league_id=chat_id, league_kind=kind)
+
+        @bp.route("/<kind>/<league_id>/matchup")
+        @require_login
+        def matchup_page(kind, league_id):
+            return league_page(kind, league_id, "matchup.html")
+
+        @bp.route("/<kind>/<league_id>/matchup/report", methods=["GET", "POST"])
+        @require_login
+        def matchup_report(kind, league_id):
+            return with_snapshot(kind, league_id, lambda snap: jsonify(self._matchup_report(snap)))
+
+        @bp.route("/<kind>/<league_id>/matchup/brief", methods=["POST"])
+        @require_login
+        def matchup_brief(kind, league_id):
+            return with_snapshot(kind, league_id, lambda snap: self._matchup_brief_response(user(), snap))
+
+        # --- league analysis: buy low / sell high, power rankings, playoffs ---
+
+        @bp.route("/<kind>/<league_id>/analysis")
+        @require_login
+        def analysis_page(kind, league_id):
+            return league_page(kind, league_id, "analysis.html")
+
+        @bp.route("/<kind>/<league_id>/analysis/report", methods=["GET", "POST"])
+        @require_login
+        def analysis_report(kind, league_id):
+            return with_snapshot(kind, league_id, lambda snap: jsonify(self._analysis_report(snap)))
 
         return bp
 

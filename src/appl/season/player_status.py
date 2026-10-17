@@ -20,6 +20,8 @@ _WINDOW_KEYS = {
     "Games Played": "games", "Average Minutes": "min", "Points": "pts", "Rebounds": "reb",
     "Assists": "ast", "Steals": "stl", "Blocks": "blk", "Turnovers": "tov", "3PT Made": "3pm",
     "Field Goal Percentage": "fg_pct", "Free Throw Percentage": "ft_pct",
+    "Field Goals Made": "fgm", "Field Goals Attempted": "fga",
+    "Free Throws Made": "ftm", "Free Throws Attempted": "fta",
 }
 WINDOWS = ("last_7_days", "last_14_days", "last_30_days")
 

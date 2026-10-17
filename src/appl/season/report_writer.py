@@ -58,6 +58,47 @@ def write_brief(llm, report: dict, recommendation: dict | None = None) -> str:
     return llm.complete(messages).strip()
 
 
+MATCHUP_PROMPT = (
+    "You are a fantasy basketball coach preparing one manager for this week's head-to-head "
+    "category matchup. You are given a JSON analysis: each category's projected result and win "
+    "chance, the days left with open slots and bench conflicts, streaming candidates and a list of "
+    "planned actions. Use only those numbers and names; never invent stats, injuries or news. "
+    "Write at most about 180 words in three short sections with these headings: 'Where you stand', "
+    "'Win these', 'Moves by day'. Say which categories to protect, which to chase and which to give "
+    "up, and name the days and players for each move. Plain language, no tables."
+)
+MATCHUP_STREAMERS = 3
+
+
+def _compact_matchup(report: dict) -> dict:
+    """The matchup plan without the bulk (per-player z-scores, the league grid)."""
+    return {
+        "week": report["week"],
+        "summary": report["summary"],
+        "categories": [
+            {k: r[k] for k in ("category", "mine", "theirs", "win_prob", "verdict", "stance", "known")}
+            for r in report["scoreboard"]
+        ],
+        "days": [{k: d[k] for k in ("day", "mine", "theirs", "open_slots", "sit")} for d in report["days"]],
+        "streamers": [{k: s[k] for k in ("name", "days", "helps", "hurts")}
+                      for s in report["streamers"][:MATCHUP_STREAMERS]],
+        "planned_actions": [t["text"] for t in report["plan"]],
+        "my_profile": [{"category": r["category"], "label": r["label"]} for r in report["profile"]],
+    }
+
+
+def matchup_hash(report: dict) -> str:
+    return hashlib.sha1(json.dumps(_compact_matchup(report), sort_keys=True, default=str).encode()).hexdigest()
+
+
+def write_matchup_brief(llm, report: dict) -> str:
+    messages = [
+        {"role": "system", "content": MATCHUP_PROMPT},
+        {"role": "user", "content": json.dumps(_compact_matchup(report), default=str)},
+    ]
+    return llm.complete(messages).strip()
+
+
 class BriefStore:
     """Cached briefs per user and league: {"hash", "text", "ts"}."""
 
