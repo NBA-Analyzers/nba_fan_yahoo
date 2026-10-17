@@ -96,7 +96,7 @@ def test_null_storage_accepts_everything_and_stores_nothing():
 
 # ---------- factory ----------
 def test_defaults_to_null_when_nothing_is_configured(monkeypatch):
-    for v in ("BLOB_STORAGE", "GCS_BUCKET", "AZURE_STORAGE_CONNECTION_STRING"):
+    for v in ("BLOB_STORAGE", "GCS_BUCKET"):
         monkeypatch.delenv(v, raising=False)
     assert isinstance(build_blob_storage("fantasy1"), NullBlobStorage)
 
@@ -109,7 +109,6 @@ def test_explicit_none(monkeypatch):
 
 def test_gcs_selected_when_bucket_is_set(monkeypatch):
     monkeypatch.delenv("BLOB_STORAGE", raising=False)
-    monkeypatch.delenv("AZURE_STORAGE_CONNECTION_STRING", raising=False)
     monkeypatch.setenv("GCS_BUCKET", "my-bucket")
     made = {}
 
@@ -130,12 +129,17 @@ def test_gcs_requested_without_bucket_is_an_error(monkeypatch):
         build_blob_storage("c")
 
 
-def test_azure_is_still_supported_when_configured(monkeypatch):
+def test_azure_is_no_longer_a_backend(monkeypatch):
+    monkeypatch.setenv("BLOB_STORAGE", "azure")
+    with pytest.raises(ValueError, match="azure"):
+        build_blob_storage("c")
+
+
+def test_a_leftover_azure_connection_string_is_ignored(monkeypatch):
     monkeypatch.delenv("BLOB_STORAGE", raising=False)
     monkeypatch.delenv("GCS_BUCKET", raising=False)
     monkeypatch.setenv("AZURE_STORAGE_CONNECTION_STRING", "conn")
-    sentinel = object()
-    assert build_blob_storage("c", azure_factory=lambda c: sentinel) is sentinel
+    assert isinstance(build_blob_storage("c"), NullBlobStorage)
 
 
 def test_unknown_backend_is_an_error(monkeypatch):

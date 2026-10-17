@@ -91,6 +91,13 @@ src/appl/data/draft/player_pool_inseason*.json
 # Ingest job output when no DATASET_BUCKET is set (python -m appl.ingest)
 src/appl/data/datasets/
 
-# Node (firebase client deps)
+# Node (not used by the app; the Firebase client loads from a CDN)
 node_modules/
+
+# Local tooling
+.claude/settings.local.json
 .claude/scheduled_tasks.lock
+.playwright-mcp/
+
+# Screenshots and screen recordings
+images/

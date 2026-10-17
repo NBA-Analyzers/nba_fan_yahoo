@@ -36,13 +36,6 @@ def create_app():
     # Apply ProxyFix middleware to handle ngrok headers properly
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1, x_prefix=1)
 
-    # Middleware to handle ngrok proxy headers
-    @app.before_request
-    def before_request():
-        # Check if we're behind ngrok and force HTTPS
-        if request.headers.get("X-Forwarded-Proto") == "https":
-            request.environ["wsgi.url_scheme"] = "https"
-
     @app.before_request
     def restore_yahoo_connection():
         # Bring back the saved Yahoo connection after a logout or in a new browser,

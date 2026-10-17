@@ -1,3 +1,5 @@
+import logging
+
 from ..ai.document_indexer import DocumentIndexer
 from ..fantasy_integrations.yahoo.sync_league.yahoo_service import (
     YahooService,
@@ -5,6 +7,8 @@ from ..fantasy_integrations.yahoo.sync_league.yahoo_service import (
 )
 from flask import Blueprint, redirect, render_template, request, session, url_for
 from ..middleware.auth_decorators import require_login
+
+logger = logging.getLogger(__name__)
 
 
 def _problem(title, text):
@@ -49,7 +53,8 @@ class YahooRouter:
                     league = yahoo_game.to_league(league_id)
                     league_settings = league.settings()
                     league_name = league_settings.get("name", "Unknown League")
-                except Exception:
+                except Exception as e:
+                    logger.warning(f"Could not read the name of league {league_id}: {e}")
                     league_name = "Unknown League"
 
                 return render_template(
@@ -57,7 +62,7 @@ class YahooRouter:
                 )
 
             except Exception as e:
-                print(f"❌ Error during league selection: {e}")
+                logger.error(f"Error during league selection: {e}", exc_info=True)
                 return _problem("We couldn't sync that league", "Something went wrong. Please try again in a moment.")
 
 

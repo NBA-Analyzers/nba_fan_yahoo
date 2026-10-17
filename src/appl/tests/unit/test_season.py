@@ -336,6 +336,16 @@ def test_brief_is_cached_until_the_league_changes(client):
     assert refreshed["cached"] is False and len(client.llm.calls) == 2
 
 
+def test_season_errors_do_not_leak_the_cause(client, monkeypatch):
+    def boom(*args, **kwargs):
+        raise RuntimeError("firestore says key=abc123secret")
+
+    monkeypatch.setattr(service, "load_inseason_pool", boom)
+    monkeypatch.setattr(service, "_rankers", {})
+    response = client.http.get(f"/season/manual/{client.id}/report")
+    assert response.status_code == 500 and "abc123secret" not in response.get_data(as_text=True)
+
+
 def test_yahoo_report_needs_a_yahoo_login(client):
     assert client.http.get("/season/yahoo/123.l.456/report").status_code == 401
 
@@ -462,6 +472,19 @@ def test_chat_access_for_manual_leagues(store):
     assert not access.can_access_league(owner, "manual-aaaaaaaaaaaa")
     assert not access.can_access_league(owner, "manual-../../x")
     assert not SessionAccess(NoYahoo).can_access_league(owner, f"manual-{league['id']}")
+
+
+def test_the_chat_page_needs_a_sign_in(store):
+    main_routes = importlib.import_module("appl.router.main_routes")
+    static = str(Path(main_routes.__file__).parents[1] / "static")
+    app = Flask(__name__, static_folder=static, template_folder=static)
+    app.secret_key = "test"
+    app.register_blueprint(main_routes.MainRouter(FakeIndexer(), store).get_bp())
+    http = app.test_client()
+    assert http.get("/agent", headers={"Accept": "text/html"}).status_code == 302
+    with http.session_transaction() as session:
+        session["user_id"] = USER
+    assert http.get("/agent").status_code == 200
 
 
 def test_opening_the_manual_chat_indexes_and_redirects(store, pool, monkeypatch):

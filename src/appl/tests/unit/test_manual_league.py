@@ -363,7 +363,7 @@ def test_bad_or_revoked_tokens_are_refused_and_tokens_cant_make_tokens(client):
     with client.session_transaction() as session:
         session.clear()
     auth = {"Authorization": f"Bearer {token}"}
-    assert client.post("/manual/api/tokens", json={}, headers=auth).status_code == 302  # browser login only
+    assert client.post("/manual/api/tokens", json={}, headers=auth).status_code == 401  # browser login only
 
     with client.session_transaction() as session:
         session["user_id"] = "someone-else"

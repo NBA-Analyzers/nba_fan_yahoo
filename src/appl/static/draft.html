@@ -608,7 +608,7 @@ function renderTable(d) {
     }
     tr.append(el("td", i + 1));
     const name = el("td", r.name, "name");
-    const sub = el("small", `${r.team || "FA"} · ${r.games_played} GP · ${r.minutes} min`);
+    const sub = el("small", `${r.team || "FA"} · ${r.games_played} games projected · ${r.minutes} min${r.basis === "projection" ? " · ESPN projection" : ""}`);
     if (r.value) sub.append(" ", el("span", "value", "badge"));
     name.append(sub);
     tr.append(name, el("td", r.score.toFixed(1)));

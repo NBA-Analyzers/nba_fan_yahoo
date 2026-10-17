@@ -124,7 +124,8 @@ def test_the_state_includes_cash_advice_in_auctions_only(env):  # noqa: F811
 
 
 def _two_players(env):  # noqa: F811
-    first, second = _top_names(env, 2)
+    # Two bigs share clear weak spots (FT%, threes), so a skip idea always exists
+    first, second = [n for n in _top_names(env, 40) if n.startswith("Big")][:2]
     env.monkeypatch.setattr(env.tracker, "picks", [(first, 0, 30), (second, 0, 20)])
     return first, second
 

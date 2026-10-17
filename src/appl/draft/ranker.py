@@ -4,7 +4,8 @@ Category-based (z-score) draft rankings with punt support.
 Pure functions / no I/O. Percentage categories are volume-weighted (a 60%
 shooter on 2 attempts matters less than on 15). Punted categories are
 dropped from the score, and once the manager has a few players, categories
-the roster is weak in get a boost.
+the roster is weak in get a boost. A player's value is scaled by the games he is
+expected to play (the pool's GP), so a fragile star costs something.
 """
 
 from difflib import get_close_matches
@@ -28,7 +29,8 @@ PERCENT_STATS = {"FG%": ("FGM", "FGA"), "FT%": ("FTM", "FTA")}
 NEGATIVE_CATEGORIES = {"TO"}
 
 MIN_GAMES = 15
-FULL_SEASON_GAMES = 70
+FULL_SEASON_GAMES = 82
+HEALTH_EXPONENT = 0.5  # value x (games / 82)^this: 41 games keeps ~71% of a full season
 NEED_MIN_ROSTER = 3
 NEED_SWING = 0.5  # need weights range 1 +/- this (tuned in mock drafts: 0.5 beat 0.25, 1.0 and 1.5)
 FUZZY_NAME_CUTOFF = 0.88  # similarity needed to treat two spellings as one player
@@ -122,7 +124,7 @@ class DraftRanker:
         self._base_rank = {
             p["key"]: i + 1
             for i, p in enumerate(
-                sorted(self.players, key=lambda p: sum(p["z"].values()), reverse=True)
+                sorted(self.players, key=self._value, reverse=True)
             )
         }
 
@@ -186,11 +188,17 @@ class DraftRanker:
 
     @staticmethod
     def _availability(player: dict) -> float:
-        return 0.85 + 0.15 * min(player["GP"] / FULL_SEASON_GAMES, 1.0)
+        return (min(player["GP"], FULL_SEASON_GAMES) / FULL_SEASON_GAMES) ** HEALTH_EXPONENT
 
     def _fit(self, player: dict, weights: dict) -> float:
-        """A player's worth to this build: weighted z over counted categories."""
-        return sum(player["z"][c] * w for c, w in weights.items()) * self._availability(player)
+        """A player's worth to this build: weighted z over counted categories, scaled by
+        the games he'll play. Missing games never make a below-average player better."""
+        score = sum(player["z"][c] * w for c, w in weights.items())
+        return score * self._availability(player) if score > 0 else score
+
+    def _value(self, player: dict) -> float:
+        """Generic worth: every category counts the same, scaled by games."""
+        return self._fit(player, {c: 1.0 for c in self.categories})
 
     def rank(
         self,
@@ -215,6 +223,8 @@ class DraftRanker:
                     "name": player["name"],
                     "team": player["team"],
                     "games_played": int(player["GP"]),
+                    "projected_games": int(player["GP"]),
+                    "basis": player.get("basis"),
                     "minutes": round(player["MIN"], 1),
                     "score": round(self._fit(player, weights), 2),
                     "punt_value": round(punt_value, 2),
@@ -242,9 +252,7 @@ class DraftRanker:
         the money left in the league."""
         taken = self._taken_keys(taken_names)
         spots = spots or self.num_teams * self.roster_size
-        measures = {
-            p["name"]: sum(p["z"].values()) for p in self.players if p["key"] not in taken
-        }
+        measures = {p["name"]: self._value(p) for p in self.players if p["key"] not in taken}
         prices = _price_table(measures, budget, spots)
         drafted = sorted(measures, key=measures.get, reverse=True)[:spots]
         return {name: prices[name] for name in drafted}
@@ -275,14 +283,14 @@ class DraftRanker:
         remaining = [p for p in self.players if p["key"] not in taken]
         spots = max(league_spots_left, 1)
 
-        generic = {p["name"]: sum(p["z"].values()) for p in remaining}
+        generic = {p["name"]: self._value(p) for p in remaining}
         market = _price_table(generic, league_budget_left, spots)
         mine = _price_table(
             {p["name"]: self._fit(p, weights) for p in remaining}, league_budget_left, spots
         )
 
         # Inflation: today's price of the players still in play vs their pre-draft price
-        everyone = {p["name"]: sum(p["z"].values()) for p in self.players}
+        everyone = {p["name"]: self._value(p) for p in self.players}
         base = _price_table(everyone, league_budget_total, self.num_teams * self.roster_size)
         in_play = sorted(generic, key=generic.get, reverse=True)[:spots]
         base_sum = sum(base[n] for n in in_play)

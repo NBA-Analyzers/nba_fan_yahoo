@@ -119,7 +119,7 @@ GOOGLE_CLOUD_PROJECT=<project id from Step 3>
 
 # --- Optional: archive copy of synced league JSON ---
 # Leave all of these out and no archive is kept (the AI index in Firestore is what the chat uses).
-# BLOB_STORAGE=gcs            # gcs | azure | none  (auto: gcs if GCS_BUCKET set, azure if AZURE_STORAGE_CONNECTION_STRING set)
+# BLOB_STORAGE=gcs            # gcs | none  (auto: gcs if GCS_BUCKET set)
 # GCS_BUCKET=<bucket name>    # see 'Optional: Cloud Storage bucket' below
 # LLM_FALLBACK_MODEL=gemini/gemini-3.7-flash
 

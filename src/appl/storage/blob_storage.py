@@ -74,27 +74,14 @@ def _default_bucket(name: str):
     return storage.Client().bucket(name)
 
 
-def _default_azure(container: str):
-    from ..repository.azure.azure_blob_storage import AzureBlobStorage
-
-    return AzureBlobStorage(container_name=container)
-
-
 def build_blob_storage(
     container: str,
     bucket_factory: Callable[[str], Any] = _default_bucket,
-    azure_factory: Callable[[str], Any] = _default_azure,
 ) -> BlobStorage:
-    """BLOB_STORAGE=gcs|azure|none. If unset: gcs when GCS_BUCKET is set, azure when
-    AZURE_STORAGE_CONNECTION_STRING is set, otherwise none."""
+    """BLOB_STORAGE=gcs|none. If unset: gcs when GCS_BUCKET is set, otherwise none."""
     choice = (os.environ.get("BLOB_STORAGE") or "").strip().lower()
     if not choice:
-        if os.environ.get("GCS_BUCKET"):
-            choice = "gcs"
-        elif os.environ.get("AZURE_STORAGE_CONNECTION_STRING"):
-            choice = "azure"
-        else:
-            choice = "none"
+        choice = "gcs" if os.environ.get("GCS_BUCKET") else "none"
 
     if choice == "none":
         return NullBlobStorage()
@@ -103,6 +90,4 @@ def build_blob_storage(
         if not bucket_name:
             raise ValueError("BLOB_STORAGE=gcs requires GCS_BUCKET")
         return GcsBlobStorage(bucket_factory(bucket_name), prefix=container)
-    if choice == "azure":
-        return azure_factory(container)
-    raise ValueError(f"Unknown BLOB_STORAGE '{choice}' (use gcs, azure or none)")
+    raise ValueError(f"Unknown BLOB_STORAGE '{choice}' (use gcs or none)")
